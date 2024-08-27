@@ -1,7 +1,7 @@
 import { reactive } from 'vue'
 import { cstore } from '../specific/store.js';
 export const store = reactive({
-    version: "0.1.",  
+    version: "0.2.",  
     isOnline: null,
     EU: null,
     users: [],
