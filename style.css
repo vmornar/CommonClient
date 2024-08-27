@@ -1,0 +1,159 @@
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/fonts/OpenDyslexicMono-Regular.otf");
+  font-style: normal;
+  font-weight: normal;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+}
+
+.nopy {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.nomy {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.nompy {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.nopx {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.nomx {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.nomp {
+  padding: 0px;
+  margin: 0px;
+}
+
+.text-body3 {
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1rem;
+  letter-spacing: 0.012em;
+}
+
+.text-red-t {
+  color: #ff0000;
+}
+
+.bg-red-t {
+  background: rgba(255, 0, 0, 0.2) !important;
+}
+
+.max-width {
+  max-width: none !important;
+}
+
+.background {
+  background: var(--q-background);
+}
+
+.q-tooltip--style {
+  background: var(--q-tooltip);
+}
+
+.required-icon {
+  position: relative;
+  top: -0.5em; /* Adjust this value as needed to position the icon correctly */
+  font-size: 0.8em; /* Ensure the icon is smaller */
+  color: red;
+}
+
+.result {
+  font-weight: bold;
+}
+
+.summary-top {
+  font-weight: bold;
+  /*
+  border-top: 1px solid darkgray;
+  padding-top: 2px;
+  margin-top: 5px;
+  */
+}
+
+.summary-bottom {
+  font-weight: bold;
+  /*
+  border-bottom: 1px solid darkgray;
+  padding-bottom: 2px;
+  margin-bottom: 5px;
+  */
+}
+
+.q-menu {
+  z-index: 20000 !important;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.ghost {
+  opacity: 0.5;
+  background-color: var(--q-primary);
+}
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left {
+  text-align: left;
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+
+/* .q-checkbox {
+  translate: -15px;
+}
+
+.q-radio {
+  translate: -10px;
+} */
+
+hr {
+  border: 1px solid rgb(227, 227, 227);
+}
+
+.tranR {
+  display: inline-block;
+  transform: translate(-10px, 0);
+}
+
+.tranC {
+  display: inline-block;
+  transform: translate(-15px, 0);
+}
