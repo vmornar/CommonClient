@@ -83,7 +83,7 @@
     <help-dialog @keydown.f9="translate" />
     <task-progress v-if="$store.progress.show" />
     <div v-for="popup in $store.additionalPopups" :key="popup.name">
-      <popup v-if="$store.popups[popup.name].show" :name="popup.name"
+      <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"
         :canCloseIfFormChanged="popup.canCloseIfFormChanged" />
     </div>
   </div>
