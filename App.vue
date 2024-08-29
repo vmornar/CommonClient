@@ -43,7 +43,7 @@
                 <q-icon name="search"></q-icon>
               </template>
             </q-input>
-            <q-btn flat dense icon="refresh" @click="getRoutes" />
+            <q-btn flat dense icon="refresh" @click="refresh" />
           </div>
           <q-tree ref="tree" class="primary text-body2" :nodes="tree" node-key="path" no-connectors :filter="treeFilter"
             :default-expand-all="treeFilter.length > 0" v-model:selected="selected" v-if="tree.length > 0"
@@ -230,8 +230,6 @@ export default {
       if (this.$store.hasNews) {
         // to avoid double loading of news
         this.$store.news = await this.get(`CommonAnon/GetNews/${this.$store.news.length}/10`, null, true);
-        console.log("news", this.$store.news);
-
       }
 
       if (this.$keycloak.authenticated) {
@@ -333,6 +331,14 @@ export default {
     emulatedUserChanged() {
       this.getRoutes();
       this.activateRoute(this.$store.routes.find((item) => item.path == this.$route.path));
+    },
+
+    /**
+     * Refreshes the tree.
+     */
+    refresh() {
+      this.post("Dev/ClearCache");
+      this.getRoutes();
     },
 
     onDragStart(event, props) {
