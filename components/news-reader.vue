@@ -2,13 +2,7 @@
     <q-card v-for="item in $store.news" :key="item.id">
         <q-card-section>
             <div class="text-subtitle1 text-bold">{{ item.title }}
-                <span class="text-body2" v-if="item.hasExtendedText" style="float:right;cursor:pointer;"
-                    @click="item.expanded = !item.expanded">
-                    <span class="text-body2" v-if="!item.expanded">{{ $t('More...') }}<q-icon size="24px"
-                            name="expand_more" /></span>
-                    <span v-else>{{ $t('Less...') }}<q-icon size="24px" name="expand_less" />
-                    </span>
-                </span>
+
             </div>
             <hr>
 
@@ -18,10 +12,21 @@
                 <div v-html="replaceIcons(item.extended_text)" />
             </div>
             <div class="text-body3">
-                <span>{{ $t("Created") }} {{ formatDate(item.time_created) }}</span>
-
-                <span v-if="item.time_modified" style="float:right">
-                    {{ $t("Updated") }} {{ formatDate(item.time_modified) }}
+                <span class="text-body2" v-if="hasExtendedText(item)" style="cursor:pointer;"
+                    @click="item.expanded = !item.expanded">
+                    <span class="text-body2" v-if="!item.expanded">{{ $t('More...') }}
+                        <q-icon class="q-pa-none" dense size="24px" name="expand_more" />
+                    </span>
+                    <span v-else>{{ $t('Less...') }}
+                        <q-icon class="q-pa-none" dense size="24px" name="expand_less" />
+                    </span>
+                </span>
+                <span style="float:right">
+                    <span>{{ $t("Created") }} {{ formatDate(item.time_created)
+                        }}</span>
+                    <span v-if="item.time_modified" style="margin-left: 10px;">
+                        {{ $t("Updated") }} {{ formatDate(item.time_modified) }}
+                    </span>
                 </span>
             </div>
 
@@ -58,6 +63,14 @@ export default {
      * Methods for the NewsReader component.
      */
     methods: {
+
+        /**
+         * 
+         */
+        hasExtendedText(item) {
+            return item.extended_text && item.extended_text.trim() > '';
+        },
+
         /**
          * Reloads the news articles by making an API request.
          * Appends the new articles to the existing ones in the store.

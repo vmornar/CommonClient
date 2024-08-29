@@ -181,8 +181,6 @@ export default {
   */
   async created() {
 
-    console.log("App mounted", this.$store);
-
     if (this.$store.noInterfaceComponent) { // can be invoked with no interface
       for (let nip of this.$store.noInterfaceParams) { // ist here a param to invoke with no iterface?
         if (this.$route.params[nip]) {
@@ -196,7 +194,7 @@ export default {
     }
 
     if (!this.noInterface) {
-      this.init();
+      await this.init();
     }
 
     if ('serviceWorker' in navigator) {
@@ -227,10 +225,13 @@ export default {
 
       this.$store.localeOptions = await this.get("CommonAnon/GetLocaleOptions", null, true);
       if (this.$store.hasCatalogs) {
-        this.$store.catalogs = await this.get("Anon/GetCatalogs", null, true);
+        this.$store.catalogs = await this.get("CommonAnon/GetCatalogs", null, true);
       }
       if (this.$store.hasNews) {
+        // to avoid double loading of news
         this.$store.news = await this.get(`CommonAnon/GetNews/${this.$store.news.length}/10`, null, true);
+        console.log("news", this.$store.news);
+
       }
 
       if (this.$keycloak.authenticated) {
@@ -240,7 +241,6 @@ export default {
         }
         let ret = await this.get('Auth/GetUser' + ref);
         if (ret) {
-          console.log("ret", ret);
           if (ret.agreement) {
             if (await this.confirmDialog(ret.agreement, this.$t('You have to accept the terms and conditions to continue:'),
             this.$t('Accept'), this.$t('Decline'))) {
