@@ -300,7 +300,6 @@ export default {
          */
         height() {
             //await this.$nextTick();
-            console.log('height', this.$q.screen.height);
             if (!this.parent && !this.asPopup) {
                 //if (!this.$refs.preheader || !this.$refs.header) return 0;            
                 return this.$q.screen.height - this.$refs.header.offsetHeight - 40 - this.$refs.preheader.offsetHeight - 5;
@@ -315,7 +314,6 @@ export default {
          * @returns {string} The style for the table.
          */
         tableStyle() {
-            console.log('tableStyle', `height: ${this.height}px; width: ${this.$store.screenWidth - 5}px;`);
             return `height: ${this.height}px; width: ${this.$store.screenWidth - 5}px;`;
         },
 
@@ -443,7 +441,6 @@ export default {
          * @param {*} details 
          */
         async scroll(details) {
-            console.log('scroll');
             this.from = details.from + 1;
             this.to = details.to + 1;
             this.closeAllOverlays();

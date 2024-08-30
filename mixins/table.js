@@ -5,6 +5,7 @@
 import { exportFile } from 'quasar';
 import { TableExportMixin } from '@/specific/mixins/table-export.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
+
 export const TableMixin = {
     props: {
         options: null,
@@ -93,11 +94,11 @@ export const TableMixin = {
                 this.params = {};
                 for (let cv of this.contextValuesLocal) {
                     this.params[cv.name] = cv.value;
+                    this.$q.localStorage.setItem("context_value_" + cv.name, cv.value);
                     this.$store.contextValues[cv.name] = cv.value;
                 }
             }
 
-                            console.log(1);
             if (this.dbFunction) {
                 this.data = await this.get("Table/GetTable", {
                     dbFunction: this.dbFunction,
@@ -106,8 +107,6 @@ export const TableMixin = {
                     pars: JSON.stringify(this.params) ?? "{}",
                     preprocess: this.preprocess ?? null
                 }, offline);
-
-
             } else if (this.restAPI) {
                 let api = this.restAPI;
                 for (let key in this.params) {
@@ -122,13 +121,13 @@ export const TableMixin = {
                     this.data = await this.get("Table/" + this.tableAPI);
                 }
             } 
-                console.log(2);
 
             if (!this.data) {
                 this.rows = [];
                 this.columns = [];
                 return;
             }
+            
             // set up the tableAPI 
             let attributes = [];
             if (this.frugal) { 
@@ -244,7 +243,6 @@ export const TableMixin = {
          */
         async init() {        
             if (this.$store.state[this.$route.path]) {
-                console.log("init from store");
                 this.copyObject(this.$store.state[this.$route.path], this, true);
                 return;
             }
@@ -317,12 +315,15 @@ export const TableMixin = {
 
             if (this.contextValuesLocal) {
                 for (let cv of this.contextValuesLocal) {
+                    if (this.$q.localStorage.has("context_value_" + cv.name)) {
+                        cv.value = this.$q.localStorage.getItem("context_value_" + cv.name);
+                    }
                     cv.options = await this.get("Table/GetParamLookup/" + cv.lookup);
                     if (cv.options && cv.options.length > 0) {
                         // get first key in first row
                         cv.optionValue = Object.keys(cv.options[0])[0];
                         cv.optionLabel = Object.keys(cv.options[0])[1];
-                        cv.value = cv.options[0][cv.optionValue];
+                        if (cv.value == null) cv.value = cv.options[0][cv.optionValue];
                     }
                 };
             }
@@ -663,7 +664,6 @@ export const TableMixin = {
             }
             if (rowsToChart) {
                 if (action.chart.preprocess) {
-                    console.log("rowtochart", this.frugal, rowsToChart);
                     this.$store.popups.chart.props.data = this[action.chart.preprocess].call(this, rowsToChart);
                 } else if (this.frugal && !actionRetrievesData || actionRetrievesData && action.chart.frugal) {
                     this.$store.popups.chart.props.data = rowsToChart.map(row => this.rowToObject(row));

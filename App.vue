@@ -337,7 +337,7 @@ export default {
      * Refreshes the tree.
      */
     refresh() {
-      this.post("Dev/ClearCache");
+      this.delete("Dev/ClearCache");
       this.getRoutes();
     },
 

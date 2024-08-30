@@ -103,6 +103,7 @@ export const TableEditMixin = {
             if (!this.lookupsLoaded) {
                 for (let col of this.columns) {
                     if (col.lookup) {
+                        console.log("col.lookup", col.lookup, this.lookups);
                         if (!this.lookups[col.lookup.name] || !this.lookups[col.lookup.name].loaded) {
                             let options;
                             if (col.lookup.options) {
