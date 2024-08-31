@@ -372,9 +372,10 @@ export default {
          * @returns {any} - The converted value.
          */
         realValue(col, val) {
+            console.log(col.type, val);
             if (col.type == "timestamp with time zone") {
                 return this.toLocalISOString(new Date(val));
-            } else if (col.type == "text" || col.type == "character varying") {
+            } else if (col.type == "string" || col.type == "text" || col.type == "character varying") {
                 return val?.toLowerCase();
             } else {
                 return val;
