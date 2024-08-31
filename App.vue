@@ -50,7 +50,7 @@
             @update:selected="selectionUpdated">
             <template v-slot:default-header="props">
               <div>
-                <span class="drop-zone" :class="{ visible: draggedItem }" @drop="onDrop($event, props, 'before')"
+                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'before')"
                   @dragover.prevent>
                 </span>
                 <span :draggable="$store.userData && $store.userData.is_admin" @dragstart="onDragStart($event, props)"
@@ -59,7 +59,7 @@
                     :color="props.node.iconColor" />
                   <span v-html="props.node.label"></span>
                 </span>
-                <span class="drop-zone" :class="{ visible: draggedItem }" @drop="onDrop($event, props, 'after')"
+                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')"
                   @dragover.prevent>
                 </span>
               </div>
@@ -343,9 +343,11 @@ export default {
 
     onDragStart(event, props) {
       //event.dataTransfer.setData('text/plain', props.node.id)
-      this.draggedItem = props.node;
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.dropEffect = 'move';
+      setTimeout(() => {
+        this.draggedItem = props.node;
+      }, 10);
     },
 
     onDragEnd(event) {
@@ -355,6 +357,7 @@ export default {
     async onDrop(event, props, where) {
       await this.post(`Dev/ReorderMenu/${this.draggedItem.id}/${props.node.id}/${where}`);
       this.draggedItem = null;
+      await this.delete("Dev/ClearCache");
       await this.getRoutes();
     },
   }
@@ -362,13 +365,14 @@ export default {
 </script>
 
 <style scoped>
-.drop-zone {
+/* .drop-zone {
   height: 0;
   opacity: 0;
   transition: all 0.2s ease;
 }
 
-.drop-zone.visible {
+.drop-zone.visible { */
+.drop-zone {
   display: inline-block;
   height: 15px;
   width: 15px;
