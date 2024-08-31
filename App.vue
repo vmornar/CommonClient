@@ -280,6 +280,7 @@ export default {
       }
       if (this.$store.formChanged) return;
       let route = this.$store.routes.find((item) => item.path == id);
+      console.log("sele", id)
       if (route.component > "") {
         this.$store.state = {};
         this.$store.level = 0;
