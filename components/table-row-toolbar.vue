@@ -11,7 +11,7 @@
         @click="parent.openDetails(props.row)"><q-tooltip>{{ $t("Detail tables")
             }}</q-tooltip></q-btn>
     <span v-for="action of rowActions">
-        <q-btn v-if="!action.condition || rowActionVisible(action, props.row)" class="nompy" :size="parent.btnSize"
+        <q-btn v-if="!action.condition || rowActionVisible(action, props.row)" class="nompy" :size="parent.btnSize" :label="$t(action.label ?? '')" no-caps
             dense flat :icon="action.icon" :color="action.iconColor ?? 'primary'"
             @click="parent.runRowAction(action, props.row)" :disable="rowActionDisabled(action, props.row)">
             <q-tooltip v-if="action.tooltip">{{ $t(action.tooltip) }}</q-tooltip>
