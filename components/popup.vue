@@ -31,8 +31,6 @@
  */
 
 import { markRaw } from 'vue';
-import { getComponent } from '@/common/component-loader';
-import { componentPath } from '@/common/component-loader';
 import { loadComponent } from '@/common/component-loader';
 
 export default {
@@ -41,7 +39,6 @@ export default {
         name: {
             type: String,
             default: 'default',
-
         },
         canCloseIfFormChanged: { type: Boolean, default: false }
     },

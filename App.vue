@@ -181,6 +181,14 @@ export default {
   */
   async created() {
 
+    if (!this.$store.isOnline && !this.$store.pwa) {
+      await this.showError(this.$t('The server is offline. Please try again later.'));
+      return;
+    }
+    
+    let test = await this.get("CommonAnon/Ping", null, true);
+    console.log("test", test); 
+
     if (this.$store.noInterfaceComponent) { // can be invoked with no interface
       for (let nip of this.$store.noInterfaceParams) { // ist here a param to invoke with no iterface?
         if (this.$route.params[nip]) {
@@ -256,7 +264,8 @@ export default {
             }
           }
         } else {
-          this.$logout();
+          await this.showError("this.$t('User not found')");
+          this.$logout(false);
         }
       }
       await this.waitForRefs(["langSwitcher"]);

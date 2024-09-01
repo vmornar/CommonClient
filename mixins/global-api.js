@@ -18,7 +18,7 @@ export const GlobalApiMixin = {
             this.$store.working = true;
             // let response;
             
-            // if ((!this.$store.isOnline || this.$store.serverDown) && cache) {
+            // if ((!this.$store.isOnline) && cache) {
             //     response = this.$q.localStorage.getItem(url);
             // } else {
             //     response = await axios(url, options);
@@ -40,8 +40,7 @@ export const GlobalApiMixin = {
              // Parsiranje URL-a da se dobije ime tablice i ključ            
             let path = url.split('/');
           
-
-            if ((!this.$store.isOnline || this.$store.serverDown) && cache) {
+            if (!this.$store.isOnline && cache && this.$store.pwa) {
                 // if(path[0] == 'User' && path[1] == 'GetCustomGeometryProps'){
                     
                 // } else 
@@ -70,11 +69,11 @@ export const GlobalApiMixin = {
                     data = this.$q.localStorage.getItem(url);
                 }
             } else {
-                data = (await axios(url, options)).data;
+                let ret = await axios(url, options);
+                data = ret.data;
                 if (cache) {
                     if(path[0] != 'Table'){
                         this.$q.localStorage.set(url, data);
-                    // } else if (path[1] != 'GetTable'){
                     } else {
                         let table = ''
                         if(path[1] == 'GetTable'){
@@ -91,10 +90,9 @@ export const GlobalApiMixin = {
                     }
                 }
             }
-
-
             return data;
         },
+
         /**
          * Fetches data from an API and stores it in the store if it is not already present.
          * @param {string} name - The name of the store property to store the data.
@@ -110,6 +108,7 @@ export const GlobalApiMixin = {
                 this.$store[name].push(...r); // to keep references to orig array
             }
         },
+
         /**
          * Fetches data from an API and stores it in the store if it doesn't already exist.
          * @param {string} name - The name of the store property to store the fetched data.
@@ -240,7 +239,11 @@ export const GlobalApiMixin = {
          * @returns {Promise} - A promise that resolves to the response data.
          */
         async get(url, options, cache) {
-            return await this.api(this.axios.API.get, url, { params: options }, cache);
+            if (options) {
+                return await this.api(this.axios.API.get, url, { params: options }, cache);
+            } else {
+                return await this.api(this.axios.API.get, url, null, cache);
+            }   
         },
         /**
          * Sends a POST request to the specified URL.

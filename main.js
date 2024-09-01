@@ -63,13 +63,13 @@ const i18n = createI18n({
  * Logs out the user by removing the token from local storage and clearing user data.
  * If Keycloak is available, it also performs a Keycloak logout.
  */
-async function logout() {
+async function logout(pushHome = true) {
   app.config.globalProperties.$q.localStorage.remove("token");
   store.userData = null;
   app.config.globalProperties.$q.localStorage.remove('userData');
   if (app.config.globalProperties.$keycloak)
     app.config.globalProperties.$keycloak.logout(); 
-  router.push({ name: "Home" });
+  if (pushHome) router.push({ name: "Home" });
 }
 
 /**
@@ -100,10 +100,12 @@ function handleAxiosResponse(response) {
   }
   return response;
 }
+
 function handleAxiosError(error) {
   store.working = false;
   let reason = "";
   let expired = false;
+  console.log("Error", error);
   if (error.response) {
     let response = error.response;
     reason = error.message;
@@ -129,7 +131,7 @@ function handleAxiosError(error) {
   } else if (error.request) {
     if (error.request.status == 0) {
       reason = i18n.global.t("No response from server");
-      store.serverDown = true;
+      store.isOnline = true;
     } else {
       reason = i18n.global.t("Session expired. Please login again.");
       expired = true;
@@ -177,7 +179,7 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    if (app.config.globalProperties.$keycloak.token) {
+    if (app.config.globalProperties.$keycloak && app.config.globalProperties.$keycloak.token) {
       config.headers['Authorization'] = 'Bearer ' + app.config.globalProperties.$keycloak.token;
     }
     config.headers['LangId'] = store.langId;
@@ -196,7 +198,6 @@ const app = createApp(App);
 
 app.config.globalProperties.axios = {
   API: axiosInstance,
-  //APIAuth: axiosInstanceAuthorized,
   APIGen: axiosInstanceGeneric
 };
 
@@ -248,7 +249,7 @@ app.component('CustomDialog', CustomDialog);
 store.app = app;
 store.q = app.config.globalProperties.$q;
 
-function checkOnlineStatusSync() {
+async function checkOnlineStatusSync() {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', import.meta.env.VITE_ROOT_API + 'CommonAnon/Ping', false); // false za synchronous
   try {
@@ -262,7 +263,7 @@ function checkOnlineStatusSync() {
 }
 
 if(navigator.onLine){
-  store.isOnline = checkOnlineStatusSync();
+  store.isOnline = await checkOnlineStatusSync();
 }
 
 console.log(`Main: navigator.onLine: ${navigator.onLine}`);
@@ -380,13 +381,7 @@ function initKeycloak() {
         isAppInitialized = true;
       }
     // }
-  }
-  
-  // if(!isAppInitialized){
-  //   app.mount("#app");
-  //   app.config.globalProperties.$keycloak = keycloak;
-  //   isAppInitialized = true;
-  // }
+  } 
 }
 
 console.log("main isOnline: " + store.isOnline);

@@ -16,7 +16,6 @@ export const store = reactive({
     lastRenderTime: 0,
     tileLayers: null,
     userData: null,
-    serverDown: false,
     drawerWidth: 200,
     drawer: false,
     app: null,
