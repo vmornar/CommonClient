@@ -132,6 +132,10 @@ a {
   text-align: center;
 }
 
+.vcenter {
+  align-items: center;
+}
+
 .right {
   text-align: right;
 }
