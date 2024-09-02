@@ -249,7 +249,7 @@ app.component('CustomDialog', CustomDialog);
 store.app = app;
 store.q = app.config.globalProperties.$q;
 
-async function checkOnlineStatusSync() {
+function checkOnlineStatusSync() {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', import.meta.env.VITE_ROOT_API + 'CommonAnon/Ping', false); // false za synchronous
   try {
@@ -263,7 +263,7 @@ async function checkOnlineStatusSync() {
 }
 
 if(navigator.onLine){
-  store.isOnline = await checkOnlineStatusSync();
+  store.isOnline = checkOnlineStatusSync();
 }
 
 console.log(`Main: navigator.onLine: ${navigator.onLine}`);
