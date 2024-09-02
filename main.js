@@ -63,13 +63,13 @@ const i18n = createI18n({
  * Logs out the user by removing the token from local storage and clearing user data.
  * If Keycloak is available, it also performs a Keycloak logout.
  */
-async function logout(pushHome = true) {
+async function logout() {
   app.config.globalProperties.$q.localStorage.remove("token");
   store.userData = null;
   app.config.globalProperties.$q.localStorage.remove('userData');
   if (app.config.globalProperties.$keycloak)
     app.config.globalProperties.$keycloak.logout(); 
-  if (pushHome) router.push({ name: "Home" });
+  //if (pushHome) router.push({ name: "Home" });
 }
 
 /**
@@ -77,11 +77,11 @@ async function logout(pushHome = true) {
  * @param {object} response - The response object from Axios.
  * @returns {object} - The modified response object.
  */
-function handleAxiosResponse(response) {
+async function handleAxiosResponse(response) {
   store.working = false;
   if (response.data) {
     if (response.data.error) {
-          app.config.globalProperties.$q.dialog({component: CustomDialog,
+          await app.config.globalProperties.$q.dialog({component: CustomDialog,
             componentProps: {
               error: true, title: i18n.global.t("Error"),
               message: response.data.error, type: 'Ok'
@@ -89,7 +89,7 @@ function handleAxiosResponse(response) {
           });
           return { data: null };
       } else if (response.data.message) {
-          app.config.globalProperties.$q.dialog({component: CustomDialog,
+          await app.config.globalProperties.$q.dialog({component: CustomDialog,
             componentProps: {
               error: true, title: i18n.global.t("Message"),
               message: response.data.message, type: 'Ok',
@@ -101,7 +101,7 @@ function handleAxiosResponse(response) {
   return response;
 }
 
-function handleAxiosError(error) {
+async function handleAxiosError(error) {
   store.working = false;
   let reason = "";
   let expired = false;
@@ -137,13 +137,13 @@ function handleAxiosError(error) {
       expired = true;
     }
   } 
-  app.config.globalProperties.$q.dialog({component: CustomDialog,
+  await app.config.globalProperties.$q.dialog({component: CustomDialog,
     componentProps: {
       error: true, title: i18n.global.t("Error"),
       message: reason, type: 'Ok'
     }
-    }).onDismiss(() => {
-      if (expired) logout();
+    // }).onDismiss(() => {
+    //   if (expired) logout();
   });
   return { data: null };
 }    

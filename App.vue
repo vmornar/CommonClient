@@ -50,8 +50,7 @@
             @update:selected="selectionUpdated">
             <template v-slot:default-header="props">
               <div>
-                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'before')"
-                  @dragover.prevent>
+                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'before')" @dragover.prevent>
                 </span>
                 <span :draggable="$store.userData && $store.userData.is_admin" @dragstart="onDragStart($event, props)"
                   @dragend="onDragEnd" @drop="onDrop($event, props, 'on')" @dragover.prevent>
@@ -59,8 +58,7 @@
                     :color="props.node.iconColor" />
                   <span v-html="props.node.label"></span>
                 </span>
-                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')"
-                  @dragover.prevent>
+                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
                 </span>
               </div>
             </template>
@@ -265,7 +263,7 @@ export default {
           }
         } else {
           await this.showError("this.$t('User not found')");
-          this.$logout(false);
+          this.$logout();
         }
       }
       await this.waitForRefs(["langSwitcher"]);

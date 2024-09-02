@@ -142,6 +142,13 @@
                                     <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
                                         :disable="!allowEdit || col.disabled || noInlineEditing"
                                         @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
+                                    <span v-else-if="col.type == 'rating'">
+                                        <q-rating v-model="props.row[col.index]" :max="col.max" :color="col.color"
+                                            :color-selected="col.colorSelected" :size="col.size"
+                                            :disable="!allowEdit || col.disabled || noInlineEditing"
+                                            @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
+                                        {{ props.row[col.index] }}
+                                    </span>
                                     <span v-else :ref="props.key + '-' + col.index"
                                         v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                                         :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
@@ -168,6 +175,13 @@
                         <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
                             :disable="!allowEdit || col.disabled || noInlineEditing"
                             @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
+                        <span v-else-if="col.type == 'rating'">
+                            <q-rating v-model="props.row[col.index]" :max="col.max" :color="col.color"
+                                :color-selected="col.colorSelected" :size="col.size"
+                                :disable="!allowEdit || col.disabled || noInlineEditing"
+                                @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
+                            {{ props.row[col.index] }}
+                        </span>
                         <span v-else v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                             :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
                     </q-td>
@@ -330,7 +344,7 @@ export default {
                     || this.filter[col.name] != ''
                     || this.filter2[col.name] != '')) {
 
-                    //                    console.log(col.name, col.type, this.filterExp[col.name], this.filter[col.name], this.filter2[col.name], row[col.index]);
+                    //console.log(col.name, col.type, this.filterExp[col.name], this.filter[col.name], this.filter2[col.name], row[col.index]);
 
                     if (this.filterExp[col.name] == 'set') {
                         if (row[col.index] == null) return false;
@@ -339,9 +353,9 @@ export default {
                     } else if (col.type == "boolean") {
                         if (this.filter[col.name] != row[col.index]) return false;
                     } else if (this.filterExp[col.name] == 'contains') {
-                        if (!this.realValue(col, row[col.index]).includes(this.filter[col.name].toLowerCase())) return false;
+                        if (!this.realValue(col, row[col.index]).toString().includes(this.filter[col.name].toLowerCase())) return false;
                     } else if (this.filterExp[col.name] == '!contains') {
-                        if (this.realValue(col, row[col.index]).includes(this.filter[col.name].toLowerCase())) return false;
+                        if (this.realValue(col, row[col.index]).toString().includes(this.filter[col.name].toLowerCase())) return false;
                     } else if (this.filterExp[col.name] == '=') {
                         if (this.realValue(col, row[col.index]) != this.filter[col.name]) return false;
                     } else if (this.filterExp[col.name] == '!=') {
@@ -372,10 +386,12 @@ export default {
          * @returns {any} - The converted value.
          */
         realValue(col, val) {
-             if (col.type == "timestamp with time zone") {
+            if (col.type == "timestamp with time zone") {
                 return this.toLocalISOString(new Date(val));
             } else if (col.type == "string" || col.type == "text" || col.type == "character varying") {
                 return val?.toLowerCase();
+            } else if (val == null) {
+                return '';
             } else {
                 return val;
             }
@@ -418,12 +434,13 @@ export default {
                 this.filter[col.name] = ''; this.filter2[col.name] = '';
                 if (col.type == "timestamp with time zone") {
                     this.filterExp[col.name] = 'between';
-                } else if (col.type == "integer" || col.type == "numeric" || col.type == "float" || col.type == "double precision" || col.type == "boolean") {
+                } else if (col.type == "integer" || col.type == "numeric" || col.type == "float" || col.type == "double precision" || col.type == "boolean" || col.type == "rating") {
                     this.filterExp[col.name] = '=';
                 } else {
                     this.filterExp[col.name] = 'contains';
                 }
             }
+            console.log("filterexp", this.filterExp);
         },
         async calculateColumnWidths() {
             await this.$nextTick();
