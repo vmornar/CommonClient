@@ -84,8 +84,6 @@ export const TableMixin = {
     methods: {
         async reload() {
             
-            this.loaded = false;
-
             let routerRoute = this.$store.routes.filter((item) => item.path == this.$route.path)[0];
             let offline = false;
 
