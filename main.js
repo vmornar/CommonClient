@@ -20,6 +20,7 @@ import '@quasar/extras/material-icons/material-icons.css'
 
 import 'quasar/src/css/index.sass'
 import './style.css'
+import '../specific/style.css'
 import { store } from "./store.js"
 import { GlobalMixin } from "./mixins/global.js"
 import { GlobalApiMixin } from "./mixins/global-api.js"

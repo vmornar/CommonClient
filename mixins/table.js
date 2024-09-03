@@ -49,7 +49,7 @@ export const TableMixin = {
             format: {
                 "date": val => this.formatDate(val),
                 "timestamp with time zone": val => this.formatDate(val),
-                "numeric": val => val != null ? val.toFixed(2) : null,
+                "numeric": val => val != null ? val.toFixed(2) : null
             },
             changedRows: {},    
             colWidths: {
@@ -83,6 +83,9 @@ export const TableMixin = {
     },
     methods: {
         async reload() {
+            
+            this.loaded = false;
+
             let routerRoute = this.$store.routes.filter((item) => item.path == this.$route.path)[0];
             let offline = false;
 
@@ -208,6 +211,17 @@ export const TableMixin = {
                     }
                     if (col.rules) {
                         col.rules = this.$store.rules[col.rules];
+                    }
+                    if (col.type == 'rating') {
+                        if (this.frugal) {
+                            this.data.data.forEach(row => {
+                                row[col.index] = row[col.index] ?? 0;
+                            });
+                        } else {
+                            this.data.forEach(row => {
+                                row[col.name] = row[col.name] ?? 0;
+                            });
+                        }
                     }
                 }
 

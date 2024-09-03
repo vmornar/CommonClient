@@ -121,11 +121,12 @@
                 </q-tr>
             </template>
 
-            <!-- grid rows -->
+            <!-- grid -->
             <template v-slot:item="props">
                 <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition">
                     <!-- :style="props.selected ? 'transform: scale(0.95);' : ''"> -->
                     <q-card flat>
+                        <q-separator></q-separator>
                         <!-- :class="props.selected ? 'bg-grey-2' : ''"> -->
                         <q-card-section v-if="selection != 'none' || hasRowToolbar">
                             <q-checkbox v-if="selection != 'none'" dense v-model="props.selected"
@@ -133,7 +134,6 @@
                             <table-row-toolbar :parent="this" :props="props" :columns="columns"
                                 :rowActions="rowActions" />
                         </q-card-section>
-                        <q-separator></q-separator>
                         <q-list dense>
                             <q-item v-for="col  in  props.cols" :key="col.name">
                                 <span class="label">{{ col.label }}</span>&nbsp;<q-space />
