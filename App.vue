@@ -28,7 +28,7 @@
           <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
           </q-btn>
           <accessibility />
-          <lang-switcher ref="langSwitcher" />
+          <lang-switcher v-if="$store.hasLangSwitcher" ref="langSwitcher" />
           <q-btn class="nomy" flat @click="toggleFullscreen" dense
             :icon="(fullscreen ? 'fullscreen_exit' : 'fullscreen')" />
         </q-toolbar>
