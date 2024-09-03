@@ -132,13 +132,18 @@ export const GlobalMixin = {
          * @returns {Promise<void>} - A promise that resolves when the error dialog is closed.
          */
         async showError(err) {
-            await this.$q.dialog({
-                component: CustomDialog,
-                componentProps: {
-                    title: this.$t("Error"),
-                    error:true,
-                    message: err, type: 'Ok', persistent: true
-                }
+            return new Promise((resolve, reject) => {
+                this.$q.dialog({
+                    component: CustomDialog,
+                    componentProps: {
+                        title: this.$t("Error"),
+                        error: true,
+                        message: err,
+                        persistent: true
+                    }
+                }).onOk(() => {
+                    resolve(true);
+                });
             });
         },
 

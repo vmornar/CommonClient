@@ -185,7 +185,6 @@ export default {
     }
     
     let test = await this.get("CommonAnon/Ping", null, true);
-    console.log("test", test); 
 
     if (this.$store.noInterfaceComponent) { // can be invoked with no interface
       for (let nip of this.$store.noInterfaceParams) { // ist here a param to invoke with no iterface?
@@ -244,6 +243,7 @@ export default {
           ref = "/" + this.$route.query.ref;
         }
         let ret = await this.get('Auth/GetUser' + ref);
+        console.log("ret", ret);
         if (ret) {
           if (ret.agreement) {
             if (await this.confirmDialog(ret.agreement, this.$t('You have to accept the terms and conditions to continue:'),
@@ -262,8 +262,8 @@ export default {
             }
           }
         } else {
-          await this.showError("this.$t('User not found')");
-          this.$logout();
+          //await this.showError(this.$t('User not found'));
+          setTimeout(this.$logout, 3000);
         }
       }
       await this.waitForRefs(["langSwitcher"]);
