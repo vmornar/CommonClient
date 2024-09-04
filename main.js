@@ -132,21 +132,22 @@ async function handleAxiosError(error) {
   } else if (error.request) {
     if (error.request.status == 0) {
       reason = i18n.global.t("No response from server");
-      store.isOnline = true;
+      store.isOnline = false;
     } else {
       reason = i18n.global.t("Session expired. Please login again.");
       expired = true;
     }
   } 
-  await app.config.globalProperties.$q.dialog({component: CustomDialog,
+  await app.config.globalProperties.$q.dialog({
+    component: CustomDialog,
     componentProps: {
-      error: true, title: i18n.global.t("Error"),
-      message: reason, type: 'Ok'
+      error: true, title: i18n.global.t("Error" ),
+      message: reason +  " " + JSON.stringify(error), type: 'Ok'
     }
-    // }).onDismiss(() => {
-    //   if (expired) logout();
+  }).onDismiss(() => {
+    if (expired) logout();
+    return { data: null };
   });
-  return { data: null };
 }    
         
 console.dir(import.meta.env);
