@@ -1,5 +1,5 @@
 <template>
-    <iframe id="iframe" title="Dokument" style="width: 100%; height: 50em" :src="document"></iframe>
+    <iframe id="iframe" title="Dokument" :style="iframeStyle" :src="document"></iframe>
 </template>
 
 <script>
@@ -10,22 +10,37 @@ export default {
     },
     data: function () {
         return {
-            document: null
+            document: null,
+            API: null
+
         };
     },
-    mounted() {
+    computed: {
+        iframeStyle() {
+            return {
+                width: "100%",
+                height: (this.$q.screen.height - 46) + "px",
+            }
+        }
+    },
+    async mounted() {
+        console.log("mounted");
         this.copyObject(this.$store.popups.default.props, this, true);
-        this.getDocument();
+        this.document = await this.getDocument();
+        console.log("document", this.iframeStyle);
     },
     methods: {
         async getDocument() {
-            let response = await this.api(this.axios.API.get, restAPI,
+            console.log("getDocument", this.API);
+            let response = await this.api(this.axios.API.get, this.API,
                 {
                     responseType: "blob",
                 }
             );
+            console.log("ret", response);
             if (response && response.size) {
                 let ret = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
+
                 return ret;
             } else {
                 return null;
