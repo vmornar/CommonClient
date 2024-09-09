@@ -56,9 +56,11 @@
                   @dragend="onDragEnd" @drop="onDrop($event, props, 'on')" @dragover.prevent>
                   <q-icon v-if="props.node.icon" class="q-pr-xs" :name="props.node.icon"
                     :color="props.node.iconColor" />
-                  <span v-html="props.node.label"></span>
+                  <span v-html="props.node.label" />
+                  <ContextMenu v-if="$store.userData.is_admin" ref="clickMenu" :options="[
+    { label: $t('CRUD'), callback: crud, options: props.node }]" />
                 </span>
-                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
+                <span class=" drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
                 </span>
               </div>
             </template>
@@ -112,6 +114,7 @@ export default {
     ChartPopup: loadComponent("chart-popup"),
     TaskProgress: loadComponent("task-progress"),
     Autocomplete: loadComponent("autocomplete"),
+    ContextMenu: loadComponent("context-menu"),
   },
   data: () => ({
     selected: null,
@@ -152,23 +155,13 @@ export default {
         return false;
       });
     },
+
   /**
   * Retrieves the tree data.
   */
     tree() {
       let root = this.$store.routes.filter((item) => !item.parent && item.active);
-
-      let children = root.map(route => ({
-        label: this.$t(route.title),
-        name: route.name,
-        path: route.path,
-        icon: route.icon,
-        iconColor: route.iconColor ?? "primary",
-        offline: route.offline,
-        public: route.public,
-        id: route.id,
-        children: this.getChildRoutes(route.path),
-      }));
+      let children = root.map(route => this.routeAtts(route));
       children = children.filter(c => (this.$store.isOnline || c.offline));
       return children;
     },
@@ -243,7 +236,6 @@ export default {
           ref = "/" + this.$route.query.ref;
         }
         let ret = await this.get('Auth/GetUser' + ref);
-        console.log("ret", ret);
         if (ret) {
           if (ret.agreement) {
             if (await this.confirmDialog(ret.agreement, this.$t('You have to accept the terms and conditions to continue:'),
@@ -287,7 +279,6 @@ export default {
       }
       if (this.$store.formChanged) return;
       let route = this.$store.routes.find((item) => item.path == id);
-      console.log("sele", id)
       if (route.component > "") {
         this.$store.state = {};
         this.$store.level = 0;
@@ -299,28 +290,6 @@ export default {
       this.selected = null;
     },
 
-    /**
-    * Retrieves the child routes for a given parent route.
-    *
-    * @param {string} parentName - The name of the parent route.
-    * @returns {Array} - An array of child routes.
-    */
-    getChildRoutes(parentName) {
-    // Filter and return the child routes for the given parentName
-      let children = this.$store.routes.filter((route) => route.parent === parentName && route.active);
-
-      if (children.length === 0) return [];
-      return children.map(route => ({
-        label: route.title,
-        name: route.name,
-        path: route.path,
-        icon: route.icon,
-        iconColor: route.iconColor ?? "primary",
-        offline: route.offline,
-        id: route.id,
-        children: this.getChildRoutes(route.path),
-      }));
-    },
     /**
     * Toggles the fullscreen mode.
     */
@@ -368,6 +337,39 @@ export default {
       await this.delete("Dev/ClearCache");
       await this.getRoutes();
     },
+
+    async crud(options) {
+      await console.log("crud", options);
+      this.post("Dev/Crud", { schemaName : options.schema_name, tableName : options.table_name });
+    },
+
+    routeAtts (route) {
+      return {
+        label: route.title,
+        name: route.name,
+        path: route.path,
+        icon: route.icon,
+        iconColor: route.iconColor ?? "primary",
+        offline: route.offline,
+        id: route.id,
+        children: this.getChildRoutes(route.path),
+        schema_name: route.schema_name,
+        table_name: route.table_name
+      }
+    },
+
+    /**
+    * Retrieves the child routes for a given parent route.
+    *
+    * @param {string} parentName - The name of the parent route.
+    * @returns {Array} - An array of child routes.
+    */
+    getChildRoutes(parentName) {
+    // Filter and return the child routes for the given parentName
+      let children = this.$store.routes.filter((route) => route.parent === parentName && route.active);
+      if (children.length === 0) return [];
+      return children.map(route => this.routeAtts(route));
+    },   
   }
 }
 </script>
