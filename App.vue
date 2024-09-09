@@ -11,10 +11,10 @@
             }}
           </q-toolbar-title>
 
-          <autocomplete bg-color="primary" v-if="$store.userData && $store.userData.is_admin" v-model="$store.EU"
+          <!-- <autocomplete bg-color="primary" v-if="$store.userData && $store.userData.is_admin" v-model="$store.EU"
             style="width: 100px" clearable filled :options="$store.users" dense options-dense
             :display-value="$store.EU ? $store.EU.short_display_value : null"
-            @update:model-value="emulatedUserChanged" />
+            @update:model-value="emulatedUserChanged" /> -->
 
           <q-btn flat dense class="nomy" v-if="!$store.isOnline" icon="wifi_off" />
           {{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
@@ -28,7 +28,7 @@
           <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
           </q-btn>
           <accessibility />
-          <lang-switcher v-if="$store.hasLangSwitcher" ref="langSwitcher" />
+          <lang-switcher v-show="$store.hasLangSwitcher" ref="langSwitcher" />
           <q-btn class="nomy" flat @click="toggleFullscreen" dense
             :icon="(fullscreen ? 'fullscreen_exit' : 'fullscreen')" />
         </q-toolbar>
@@ -57,7 +57,7 @@
                   <q-icon v-if="props.node.icon" class="q-pr-xs" :name="props.node.icon"
                     :color="props.node.iconColor" />
                   <span v-html="props.node.label" />
-                  <ContextMenu v-if="$store.userData.is_admin" ref="clickMenu" :options="[
+                  <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
     { label: $t('CRUD'), callback: crud, options: props.node }]" />
                 </span>
                 <span class=" drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
@@ -216,7 +216,6 @@ export default {
     * @returns {Promise<void>} A promise that resolves when the initialization is complete.
     */
     async init() {
-
       setCssVar("tooltip-fontsize", "12px");
       this.$store.drawer = this.$q.screen.width >= this.breakpoint;
       this.$store.userData = this.$q.localStorage.getItem("userData");
@@ -229,7 +228,6 @@ export default {
         // to avoid double loading of news
         this.$store.news = await this.get(`CommonAnon/GetNews/${this.$store.news.length}/10`, null, true);
       }
-
       if (this.$keycloak.authenticated) {
         let ref = "";
         if (this.$route.query.ref) {
@@ -258,8 +256,13 @@ export default {
           setTimeout(this.$logout, 3000);
         }
       }
-      await this.waitForRefs(["langSwitcher"]);
-      this.$refs.langSwitcher.localeChanged();
+
+      //if (this.$store.hasLangSwitcher) {
+        await this.waitForRefs(["langSwitcher"]);
+        this.$refs.langSwitcher.localeChanged();
+      //} else {
+      //  this.getRoutes();
+      //}
     },
 
     /**

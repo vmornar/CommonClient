@@ -143,10 +143,10 @@
                                         :disable="!allowEdit || col.disabled || noInlineEditing"
                                         @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                                     <span v-else-if="col.type == 'rating'">
-                                        <q-rating v-model="props.row[col.index]" :max="col.max" :color="col.color"
-                                            :color-selected="col.colorSelected" :size="col.size"
-                                            :color-half="col.colorHalf" :icon="col.icon" :icon-half="col.iconHalf"
-                                            :icon-selected="col.iconSelected"
+                                        <q-rating v-model="props.row[col.index]" :max="col.max" :size="col.size"
+                                            :color="col.color" :color-selected="col.colorSelected"
+                                            :color-half="col.colorHalf" :icon="col.icon"
+                                            :icon-selected="col.iconSelected" :icon-half="col.iconHalf"
                                             :disable="!allowEdit || col.disabled || noInlineEditing"
                                             @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                                         {{ props.row[col.index] }}
@@ -179,7 +179,8 @@
                             @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                         <span v-else-if="col.type == 'rating'">
                             <q-rating v-model="props.row[col.index]" :max="col.max" :color="col.color"
-                                :color-selected="col.colorSelected" :size="col.size"
+                                :color-selected="col.colorSelected" :color-half="col.colorHalf" :icon="col.icon"
+                                :icon-selected="col.iconSelected" :icon-half="col.iconHalf" :size="col.size"
                                 :disable="!allowEdit || col.disabled || noInlineEditing"
                                 @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                             {{ props.row[col.index] }}
