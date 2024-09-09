@@ -23,7 +23,7 @@
               $store.userData.first_name.charAt(0)
               +
               $store.userData.last_name.charAt(0)) :
-          $t('Guest') }}
+            $t('Guest') }}
           <q-btn v-if="$keycloak.token" class="nomy" flat @click="$logout" dense icon="logout" />
           <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
           </q-btn>
