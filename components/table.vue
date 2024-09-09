@@ -145,6 +145,8 @@
                                     <span v-else-if="col.type == 'rating'">
                                         <q-rating v-model="props.row[col.index]" :max="col.max" :color="col.color"
                                             :color-selected="col.colorSelected" :size="col.size"
+                                            :color-half="col.colorHalf" :icon="col.icon" :icon-half="col.iconHalf"
+                                            :icon-selected="col.iconSelected"
                                             :disable="!allowEdit || col.disabled || noInlineEditing"
                                             @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                                         {{ props.row[col.index] }}
