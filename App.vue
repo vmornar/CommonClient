@@ -11,19 +11,19 @@
             }}
           </q-toolbar-title>
 
-          <!-- <autocomplete bg-color="primary" v-if="$store.userData && $store.userData.is_admin" v-model="$store.EU"
+          <autocomplete bg-color="primary" v-if="$store.userData && $store.userData.is_admin" v-model="$store.EU"
             style="width: 100px" clearable filled :options="$store.users" dense options-dense
             :display-value="$store.EU ? $store.EU.short_display_value : null"
-            @update:model-value="emulatedUserChanged" /> -->
+            @update:model-value="emulatedUserChanged" />
 
           <q-btn flat dense class="nomy" v-if="!$store.isOnline" icon="wifi_off" />
           {{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
-    (this.$q.screen.width
-      >= 1024 ? `${$store.userData.first_name} ${$store.userData.last_name}` :
-      $store.userData.first_name.charAt(0)
-      +
-      $store.userData.last_name.charAt(0)) :
-    $t('Guest') }}
+            (this.$q.screen.width
+              >= 1024 ? `${$store.userData.first_name} ${$store.userData.last_name}` :
+              $store.userData.first_name.charAt(0)
+              +
+              $store.userData.last_name.charAt(0)) :
+            $t('Guest') }}
           <q-btn v-if="$keycloak.token" class="nomy" flat @click="$logout" dense icon="logout" />
           <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
           </q-btn>
@@ -58,7 +58,7 @@
                     :color="props.node.iconColor" />
                   <span v-html="props.node.label" />
                   <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
-    { label: $t('CRUD'), callback: crud, options: props.node }]" />
+                    { label: $t('CRUD'), callback: crud, options: props.node }]" />
                 </span>
                 <span class=" drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
                 </span>
