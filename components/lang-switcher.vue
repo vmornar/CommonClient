@@ -54,13 +54,13 @@ export default {
          * If an error occurs, it reverts to the English locale and displays the error message.
          */
         async localeChanged() {
-            console.log('localeChanged');
             if (!this.$store.localeOptions || this.$store.localeOptions.length == 0) return;
             try {
                 let lang = this.$store.localeOptions.find((item) => item.value == this.$store.locale);
                 localStorage.setItem('locale', lang.value);
                 this.$i18n.locale = lang.value;
                 this.$store.langId = lang.id;
+
                 //this.axios.API.defaults.headers["LangId"] = lang.id;
                 //this.axios.APIAuth.defaults.headers["LangId"] = lang.id;
                 // let langI = await import('../localization/i18n/' + lang.value + '.js'/* @vite-ignore */);
