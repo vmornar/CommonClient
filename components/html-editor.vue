@@ -1,13 +1,18 @@
 <template>
     <div class="max-width" @keydown="handleSaveCancelKeydown">
 
-        <div class="row">
-            <div class="col-2" v-if="label"><span class="q-ml-md">{{ label }}</span></div>
-            <div class="col-5">
+        {{ showEmojiPicker }}
+        <div v-if="label">{{ label }}</div>
+        <div class="row" v-if="showEmojiPicker || showIconPicker || vars.length > 0">
+            <!-- <div class="col-4">
+                <EmojiPicker v-if="showEmojiPicker" native :hide-search="false" label="Emoji" @select="insertEmoji" />
+                <span v-else>&nbsp;</span>
+            </div> -->
+            <div class="col-4">
                 <icon-picker v-if="showIconPicker" label="Icon" @update:model-value="insertIcon" />
                 <span v-else>&nbsp;</span>
             </div>
-            <div class="col-5">
+            <div class="col-4">
                 <autocomplete v-if="vars.length > 0" label="Variable" outlined popup-content-class="text-subtitle2"
                     :options="vars" dense options-dense clearable searchable map-options emit-value
                     @update:model-value="insertVar">
@@ -59,15 +64,18 @@
  * @example
  * <HtmlEditor />
  */
-import iconPicker from './icon-picker.vue';
-import autocomplete from './autocomplete.vue';
+import { loadComponent } from '../component-loader';
 export default {
     name: "HtmlEditor",
     components: {
-        iconPicker,
-        autocomplete
+        iconPicker: loadComponent("icon-picker"),
+        autocomplete: loadComponent("autocomplete"),
     },
     props: {
+        showEmojiPicker: {
+            type: Boolean,
+            default: false
+        },
         showIconPicker: {
             type: Boolean,
             default: false
@@ -267,6 +275,17 @@ export default {
             this.$refs.editor.runCmd('insertHTML', value);
             this.$refs.editor.focus();
         },
+
+        /**
+         * Inserts an emoji into the editor, at cursor position.
+         * 
+         * @param {any} value - The value of the emoji to be inserted.
+         */
+        insertEmoji(value) {
+            this.$refs.editor.runCmd('insertHTML', value.i);
+            this.$refs.editor.focus();
+        },
+
         /**
          * Inserts an icon into the editor, at cursor position.
          * 
