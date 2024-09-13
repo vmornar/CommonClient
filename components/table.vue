@@ -28,7 +28,8 @@
             <div v-if="contextValuesLocal" class="row">
                 <Autocomplete v-for="cv of contextValuesLocal" :key="cv.name" v-model="cv.value" :label="cv.label"
                     :option-label="cv.optionLabel" :option-value="cv.optionValue" dense :options="cv.options"
-                    @update:model-value="reload" :style="{ width: cv.width ?? '100px' }" map-options emit-value />
+                    @update:model-value="reload" :style="{ width: cv.width ?? '100px' }" map-options emit-value
+                    :clearable="cv.clearable" />
             </div>
             <!-- Toolbar before the table -->
             <div class="header-container toolbar">
@@ -99,7 +100,7 @@
                     </q-th>
                     <q-th v-if="hasRowToolbar">
                     </q-th>
-                    <q-th v-for="(col, index) in  props.cols " :key="col.name" :props="props" :ref="'col-' + col.name">
+                    <q-th v-for="(col, index) in props.cols " :key="col.name" :props="props" :ref="'col-' + col.name">
                         <span class="text-bold" v-html="col.label" :style="{ display: 'inline-block' }"></span>
                     </q-th>
                 </q-tr>
@@ -108,7 +109,7 @@
                 <q-tr :props="props">
                     <q-td v-if="selection != 'none'" style="width:'15px'" />
                     <q-td v-if="hasRowToolbar" />
-                    <q-td v-for="  col   in   props.cols  " :key="col.name" :props="props" class="q-pa-none  q-ma-none">
+                    <q-td v-for="  col in props.cols  " :key="col.name" :props="props" class="q-pa-none  q-ma-none">
                         <q-checkbox v-if="col.type == 'boolean'" v-model="filter[col.name]" dense
                             toggle-indeterminate />
                         <q-input v-else type="search" placeholder="Search" placeholder-color="lightgray" clearable dense
@@ -135,7 +136,7 @@
                                 :rowActions="rowActions" />
                         </q-card-section>
                         <q-list dense>
-                            <q-item v-for="col  in  props.cols" :key="col.name">
+                            <q-item v-for="col in props.cols" :key="col.name">
                                 <span class="label">{{ col.label }}</span>&nbsp;<q-space />
                                 <!-- <span v-html="col.value"></span> -->
                                 <span @click="showOverlay(props.key + '-' + col.index, col, props)">
@@ -170,7 +171,7 @@
                     <q-td v-if="hasRowToolbar">
                         <table-row-toolbar :parent="this" :props="props" :columns="columns" :rowActions="rowActions" />
                     </q-td>
-                    <q-td v-for="   col    in    props.cols   " :key="col.name" :props="props"
+                    <q-td v-for="   col in props.cols   " :key="col.name" :props="props"
                         :ref="props.key + '-' + col.index"
                         :style="{ maxWidth: col.width + ' !important', verticalAlign: 'middle' }"
                         @click="showOverlay(props.key + '-' + col.index, col, props)" class="q-pa-none q-ma-none">
