@@ -256,12 +256,6 @@ export default {
             },
             immediate: true
         },
-        // filter: {
-        //     handler(val) {
-        //         this.filterSet = this.columns.find(col => this.filterExp[col.name] == "set" || this.filterExp[col.name] == "not set" || this.filter[col.name] != "" || this.filter2[col.name] != "");
-        //     },
-        //     deep: true
-        // }
     },
     data: () => ({
     }),
@@ -275,7 +269,7 @@ export default {
          * @returns {boolean} True if the filter is set for any column, otherwise false.
          */
         filterSet() {
-            return this.columns.find(col => this.filterExp[col.name] == "set" || this.filterExp[col.name] == "not set" || this.filter[col.name] != "" || this.filter2[col.name] != "");
+            return this.columns.find(col => this.filterExp[col.name] == "set" || this.filterExp[col.name] == "not set" || this.filter[col.name] != undefined || this.filter2[col.name] != undefined) != null;
         },
 
         /**
@@ -345,9 +339,10 @@ export default {
                 for (let col of this.columns.filter(col =>
                     this.filterExp[col.name] == 'set'
                     || this.filterExp[col.name] == 'not set'
-                    || this.filter[col.name] != ''
-                    || this.filter2[col.name] != '')) {
+                    || this.filter[col.name] != undefined
+                    || this.filter2[col.name] != undefined)) {
 
+                    console.log("col has filter", col.name, col.type, this.filter[col.name]);
                     //console.log(col.name, col.type, this.filterExp[col.name], this.filter[col.name], this.filter2[col.name], row[col.index]);
 
                     if (this.filterExp[col.name] == 'set') {
@@ -355,6 +350,7 @@ export default {
                     } else if (this.filterExp[col.name] == 'not set') {
                         if (row[col.index] != null) return false;
                     } else if (col.type == "boolean") {
+                        console.log("bulfilter", col.name, this.filter[col.name], row[col.index]);
                         if (this.filter[col.name] != row[col.index]) return false;
                     } else if (this.filterExp[col.name] == 'contains') {
                         if (!this.realValue(col, row[col.index]).toString().includes(this.filter[col.name].toLowerCase())) return false;
@@ -376,6 +372,7 @@ export default {
                         if (this.realValue(col, row[col.index]) < this.filter[col.name] || this.realValue(col, row[col.index]) > this.filter2[col.name]) return false;
                     }
                 }
+                console.log("row ", " passed");
                 return true;
             });
         },
@@ -435,7 +432,7 @@ export default {
          */
         clearFilter() {
             for (let col of this.columns) {
-                this.filter[col.name] = ''; this.filter2[col.name] = '';
+                this.filter[col.name] = undefined; this.filter2[col.name] = undefined;
                 if (col.type == "timestamp with time zone") {
                     this.filterExp[col.name] = 'between';
                 } else if (col.type == "integer" || col.type == "numeric" || col.type == "float" || col.type == "double precision" || col.type == "boolean" || col.type == "rating") {
@@ -444,7 +441,6 @@ export default {
                     this.filterExp[col.name] = 'contains';
                 }
             }
-            console.log("filterexp", this.filterExp);
         },
         async calculateColumnWidths() {
             await this.$nextTick();
