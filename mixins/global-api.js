@@ -16,23 +16,9 @@ export const GlobalApiMixin = {
          */
         async api(axios, url, options, cache) {
             this.$store.working = true;
-            // let response;
-            
-            // if ((!this.$store.isOnline) && cache) {
-            //     response = this.$q.localStorage.getItem(url);
-            // } else {
-            //     response = await axios(url, options);
-            //     if (cache) {
-            //         this.$q.localStorage.set(url, response);
-            //     }
-            // }
-            //testing
-            let data;
-            data = this.apiCache(axios, url, options, cache);
-            //
+            let data = await this.apiCache(axios, url, options, cache);
             this.$store.working = false;
             return data;
-            // return response.data;
         },
         async apiCache(axios, url, options, cache){
             let data;

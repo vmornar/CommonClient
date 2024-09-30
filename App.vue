@@ -177,7 +177,7 @@ export default {
       return;
     }
     
-    let test = await this.get("CommonAnon/Ping", null, true);
+    let test = await this.get("CommonAnon/Ping", null);
 
     if (this.$store.noInterfaceComponent) { // can be invoked with no interface
       for (let nip of this.$store.noInterfaceParams) { // ist here a param to invoke with no iterface?
