@@ -389,7 +389,7 @@ export default {
         realValue(col, val) {
             if (col.type == "timestamp with time zone") {
                 return this.toLocalISOString(new Date(val));
-            } else if (col.type == "string" || col.type == "text" || col.type == "character varying") {
+            } else if (col.type == "string" || col.type == "text" || col.type == "character varying" || col.type == "character") {
                 return val?.toLowerCase();
             } else if (val == null) {
                 return '';
