@@ -65,6 +65,7 @@ const i18n = createI18n({
  * If Keycloak is available, it also performs a Keycloak logout.
  */
 async function logout() {
+  console.log('Logging out');
   app.config.globalProperties.$q.localStorage.remove("token");
   store.userData = null;
   app.config.globalProperties.$q.localStorage.remove('userData');
@@ -129,25 +130,25 @@ async function handleAxiosError(error) {
         reason += '<br>' + Object.values(response.data.errors).join("<br>");
       }
     }
-  } else if (error.request) {
-    if (error.request.status == 0) {
-      reason = i18n.global.t("No response from server");
-      store.isOnline = false;
-    } else {
-      reason = i18n.global.t("Session expired. Please login again.");
-      expired = true;
-    }
+  } else if (error.request && !error.response) {
+    reason = i18n.global.t("No response from server");
+    store.isOnline = false;
+  } else {
+    reason = i18n.global.t("Session expired. Please login again.");
+    expired = true;
   } 
+
   await app.config.globalProperties.$q.dialog({
     component: CustomDialog,
     componentProps: {
-      error: true, title: i18n.global.t("Error" ),
-      message: reason +  " " + JSON.stringify(error), type: 'Ok'
+      error: true, title: i18n.global.t("Error" ), message: reason, type: 'Ok'
     }
   }).onDismiss(() => {
-    if (expired) logout();
-    return { data: null };
+    if (expired) {
+      logout();
+    }
   });
+  return { data: null };
 }    
         
 console.dir(import.meta.env);

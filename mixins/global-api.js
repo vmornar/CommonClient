@@ -20,6 +20,15 @@ export const GlobalApiMixin = {
             this.$store.working = false;
             return data;
         },
+
+         /**
+         * Makes an API request using Axios.
+         * @param {AxiosInstance} axios - The Axios instance to use for the request.
+         * @param {string} url - The URL to make the request to.
+         * @param {object} options - The options to pass to the Axios request.
+         * @param {boolean} cache - Indicates whether to cache the response.
+         * @returns {Promise<any>} - A promise that resolves to the response data.
+         */        
         async apiCache(axios, url, options, cache){
             let data;
 
@@ -57,7 +66,7 @@ export const GlobalApiMixin = {
             } else {
                 let ret = await axios(url, options);
                 data = ret.data;
-                if (cache) {
+                if (this.$store.pwa && cache) {
                     if(path[0] != 'Table'){
                         this.$q.localStorage.set(url, data);
                     } else {
@@ -69,7 +78,6 @@ export const GlobalApiMixin = {
                         }
                         initTable('ai4soilhealth', table, data.attributes);
                         if(axios == this.axios.API.get){
-
                             storeData('ai4soilhealth', table, data)
                             console.log('get');
                         }

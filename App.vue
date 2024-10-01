@@ -1,94 +1,98 @@
 <template>
-  <q-scroll-area v-if="noInterface" style="height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }">
-    <component :is="noInterfaceComponent" :props="noInterfaceProps" />
-  </q-scroll-area>
-  <div v-else id="q-app" style="min-height: 100vh;" class="nomy nopx nomx" @keydown.f9="translate">
-    <q-layout view="hHh Lpr fFf" container style="height: 100vh" class="nomy nopx nomx">
-      <q-header style="height: 40px;">
-        <q-toolbar class="nopx" style="min-height:40px;">
-          <q-btn flat @click="$store.drawer = !$store.drawer" dense icon="menu" />
-          <q-toolbar-title class="text-subtitle1 nomy">{{ $store.appName }} {{ $store.version
-            }}
-          </q-toolbar-title>
+  <div>
+    <q-scroll-area v-if="noInterface" style="height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }">
+      <component :is="noInterfaceComponent" :props="noInterfaceProps" />
+    </q-scroll-area>
+    <div v-else id="q-app" style="min-height: 100vh;" class="nomy nopx nomx" @keydown.f9="translate">
+      <q-layout view="hHh Lpr fFf" container style="height: 100vh" class="nomy nopx nomx">
+        <q-header style="height: 40px;">
+          <q-toolbar class="nopx" style="min-height:40px;">
+            <q-btn flat @click="$store.drawer = !$store.drawer" dense icon="menu" />
+            <q-toolbar-title class="text-subtitle1 nomy">{{ $store.appName }} {{ $store.version
+              }}
+            </q-toolbar-title>
 
-          <autocomplete bg-color="primary" v-if="$store.userData && $store.userData.is_admin" v-model="$store.EU"
-            style="width: 100px" clearable filled :options="$store.users" dense options-dense
-            :display-value="$store.EU ? $store.EU.short_display_value : null"
-            @update:model-value="emulatedUserChanged" />
+            <autocomplete bg-color="primary" v-if="$store.userData && $store.userData.is_admin" v-model="$store.EU"
+              style="width: 100px" clearable filled :options="$store.users" dense options-dense
+              :display-value="$store.EU ? $store.EU.short_display_value : null"
+              @update:model-value="emulatedUserChanged" />
 
-          <q-btn flat dense class="nomy" v-if="!$store.isOnline" icon="wifi_off" />
-          {{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
-            (this.$q.screen.width
-              >= 1024 ? `${$store.userData.first_name} ${$store.userData.last_name}` :
-              $store.userData.first_name.charAt(0)
-              +
-              $store.userData.last_name.charAt(0)) :
-            $t('Guest') }}
-          <q-btn v-if="$keycloak.token" class="nomy" flat @click="$logout" dense icon="logout" />
-          <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
-          </q-btn>
-          <accessibility />
-          <lang-switcher v-show="$store.hasLangSwitcher" ref="langSwitcher" />
-          <q-btn class="nomy" flat @click="toggleFullscreen" dense
-            :icon="(fullscreen ? 'fullscreen_exit' : 'fullscreen')" />
-        </q-toolbar>
-      </q-header>
+            <q-btn flat dense class="nomy" v-if="!$store.isOnline" icon="wifi_off" />
+            {{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
+              (this.$q.screen.width
+                >= 1024 ? `${$store.userData.first_name} ${$store.userData.last_name}` :
+                $store.userData.first_name.charAt(0)
+                +
+                $store.userData.last_name.charAt(0)) :
+              $t('Guest') }}
+            <q-btn v-if="$keycloak.token" class="nomy" flat @click="$logout" dense icon="logout" />
+            <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
+            </q-btn>
+            <accessibility />
+            <lang-switcher v-show="$store.hasLangSwitcher" ref="langSwitcher" />
+            <q-btn class="nomy" flat @click="toggleFullscreen" dense
+              :icon="(fullscreen ? 'fullscreen_exit' : 'fullscreen')" />
+          </q-toolbar>
+        </q-header>
 
-      <q-drawer style="top: 40px" v-model="$store.drawer" :width="$store.drawerWidth" bordered behavior="desktop"
-        :breakpoint="breakpoint" :overlay="false">
-        <q-scroll-area class="fit">
-          <div v-if="isAdmin" class="row">
-            <q-input v-model="treeFilter" dense style="width:160px">
-              <template v-slot:prepend>
-                <q-icon name="search"></q-icon>
+        <q-drawer style="top: 40px" v-model="$store.drawer" :width="$store.drawerWidth" bordered behavior="desktop"
+          :breakpoint="breakpoint" :overlay="false">
+          <q-scroll-area class="fit">
+            <div v-if="isAdmin" class="row">
+              <q-input v-model="treeFilter" dense style="width:160px">
+                <template v-slot:prepend>
+                  <q-icon name="search"></q-icon>
+                </template>
+              </q-input>
+              <q-btn flat dense icon="refresh" @click="refresh" />
+            </div>
+            <q-tree ref="tree" class="primary text-body2" :nodes="tree" node-key="path" no-connectors
+              :filter="treeFilter" :default-expand-all="treeFilter.length > 0" v-model:selected="selected"
+              v-if="tree.length > 0" @update:selected="selectionUpdated">
+              <template v-slot:default-header="props">
+                <div>
+                  <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'before')" @dragover.prevent>
+                  </span>
+                  <span :draggable="$store.userData && $store.userData.is_admin" @dragstart="onDragStart($event, props)"
+                    @dragend="onDragEnd" @drop="onDrop($event, props, 'on')" @dragover.prevent>
+                    <q-icon v-if="props.node.icon" class="q-pr-xs" :name="props.node.icon"
+                      :color="props.node.iconColor" />
+                    <span v-html="props.node.label" />
+                    <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
+                      { label: $t('CRUD'), callback: crud, options: props.node }]" />
+                  </span>
+                  <span class=" drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
+                  </span>
+                </div>
               </template>
-            </q-input>
-            <q-btn flat dense icon="refresh" @click="refresh" />
-          </div>
-          <q-tree ref="tree" class="primary text-body2" :nodes="tree" node-key="path" no-connectors :filter="treeFilter"
-            :default-expand-all="treeFilter.length > 0" v-model:selected="selected" v-if="tree.length > 0"
-            @update:selected="selectionUpdated">
-            <template v-slot:default-header="props">
-              <div>
-                <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'before')" @dragover.prevent>
-                </span>
-                <span :draggable="$store.userData && $store.userData.is_admin" @dragstart="onDragStart($event, props)"
-                  @dragend="onDragEnd" @drop="onDrop($event, props, 'on')" @dragover.prevent>
-                  <q-icon v-if="props.node.icon" class="q-pr-xs" :name="props.node.icon"
-                    :color="props.node.iconColor" />
-                  <span v-html="props.node.label" />
-                  <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
-                    { label: $t('CRUD'), callback: crud, options: props.node }]" />
-                </span>
-                <span class=" drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
-                </span>
-              </div>
-            </template>
-          </q-tree>
+            </q-tree>
+          </q-scroll-area>
+        </q-drawer>
+
+        <q-scroll-area style=" height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }"
+          :thumb-style="{ width: '0px' }">
+          <q-page-container class="q-pt-none">
+            <q-page>
+              <router-view />
+            </q-page>
+          </q-page-container>
         </q-scroll-area>
-      </q-drawer>
 
-      <q-scroll-area style=" height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }"
-        :thumb-style="{ width: '0px' }">
-        <q-page-container class="q-pt-none">
-          <q-page>
-            <router-view />
-          </q-page>
-        </q-page-container>
-      </q-scroll-area>
-
-    </q-layout>
-    <popup v-if="$store.popups.default.show" name="default" @keydown.f9="translate" />
-    <chart-popup v-if="$store.popups.chart.show" />
-    <help-dialog @keydown.f9="translate" />
-    <task-progress v-if="$store.progress.show" />
-    <div v-for="popup in $store.additionalPopups" :key="popup.name">
-      <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"
-        :canCloseIfFormChanged="popup.canCloseIfFormChanged" />
+      </q-layout>
+      <popup v-if="$store.popups.default.show" name="default" @keydown.f9="translate" />
+      <chart-popup v-if="$store.popups.chart.show" />
+      <help-dialog @keydown.f9="translate" />
+      <task-progress v-if="$store.progress.show" />
+      <div v-for="popup in $store.additionalPopups" :key="popup.name">
+        <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"
+          :canCloseIfFormChanged="popup.canCloseIfFormChanged" />
+      </div>
     </div>
   </div>
 </template>
-<script lang=" js">
+
+<script>
+
 import { setCssVar } from 'quasar';
 import { loadComponent } from '@/common/component-loader';
 import { markRaw } from 'vue';
@@ -128,19 +132,19 @@ export default {
     noInterface: false,
     noInterfaceComponent: null,
     noInterfaceProps: {},
-    }),
-    watch: {
-      treeFilter(val) {
-        if (val.length > 0) {
-          this.$refs.tree.expandAll();
-        }
+  }),
+  watch: {
+    treeFilter(val) {
+      if (val.length > 0) {
+        this.$refs.tree.expandAll();
+      }
     }
   },
   computed: {
-  /**
-  * Filters the tree based on the provided filter text.
-  * @returns {Array} The filtered tree items.
-  */
+    /**
+    * Filters the tree based on the provided filter text.
+    * @returns {Array} The filtered tree items.
+    */
     treeFiltered() {
       // Filter the tree based on the treeFilter, recusively filtering the children
       return this.tree.filter((item) => {
@@ -156,9 +160,9 @@ export default {
       });
     },
 
-  /**
-  * Retrieves the tree data.
-  */
+    /**
+    * Retrieves the tree data.
+    */
     tree() {
       let root = this.$store.routes.filter((item) => !item.parent && item.active);
       let children = root.map(route => this.routeAtts(route));
@@ -176,8 +180,8 @@ export default {
       await this.showError(this.$t('The server is offline. Please try again later.'));
       return;
     }
-    
-    let test = await this.get("CommonAnon/Ping", null);
+
+    //let test = await this.get("CommonAnon/Ping", null);
 
     if (this.$store.noInterfaceComponent) { // can be invoked with no interface
       for (let nip of this.$store.noInterfaceParams) { // ist here a param to invoke with no iterface?
@@ -237,7 +241,7 @@ export default {
         if (ret) {
           if (ret.agreement) {
             if (await this.confirmDialog(ret.agreement, this.$t('You have to accept the terms and conditions to continue:'),
-            this.$t('Accept'), this.$t('Decline'))) {
+              this.$t('Accept'), this.$t('Decline'))) {
               await this.post('Auth/AcceptAgreement');
               this.$store.userData = ret;
               this.$q.localStorage.set('userData', this.$store.userData);
@@ -258,8 +262,8 @@ export default {
       }
 
       //if (this.$store.hasLangSwitcher) {
-        await this.waitForRefs(["langSwitcher"]);
-        this.$refs.langSwitcher.localeChanged();
+      await this.waitForRefs(["langSwitcher"]);
+      this.$refs.langSwitcher.localeChanged();
       //} else {
       //  this.getRoutes();
       //}
@@ -343,10 +347,10 @@ export default {
 
     async crud(options) {
       await console.log("crud", options);
-      this.post("Dev/Crud", { schemaName : options.schema_name, tableName : options.table_name });
+      this.post("Dev/Crud", { schemaName: options.schema_name, tableName: options.table_name });
     },
 
-    routeAtts (route) {
+    routeAtts(route) {
       return {
         label: route.title,
         name: route.name,
@@ -368,11 +372,11 @@ export default {
     * @returns {Array} - An array of child routes.
     */
     getChildRoutes(parentName) {
-    // Filter and return the child routes for the given parentName
+      // Filter and return the child routes for the given parentName
       let children = this.$store.routes.filter((route) => route.parent === parentName && route.active);
       if (children.length === 0) return [];
       return children.map(route => this.routeAtts(route));
-    },   
+    },
   }
 }
 </script>
