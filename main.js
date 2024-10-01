@@ -113,7 +113,8 @@ async function handleAxiosError(error) {
     reason = error.message;
     if (response.status == 401) {
       // extract www-authenticate header from response
-      let header = response.headers.get("WWW-Authenticate");
+      //let header = response.headers.get("WWW-Authenticate");
+      let header = response.headers["www-authenticate"];
       if (header && header.indexOf("expired") > 0) {
         reason = i18n.global.t("Session expired - please login again");
         expired = true;
@@ -143,10 +144,10 @@ async function handleAxiosError(error) {
     componentProps: {
       error: true, title: i18n.global.t("Error" ), message: reason, type: 'Ok'
     }
-  }).onDismiss(() => {
-    if (expired) {
-      logout();
-    }
+  // }).onDismiss(() => {
+  //   if (expired) {
+  //     logout();
+  //   }
   });
   return { data: null };
 }    
