@@ -249,7 +249,6 @@ export default {
         TableDetails: loadComponent("table-details")
     },
     watch: {
-        //'$route.path': {
         '$route.query.timestamp': {
             handler(val) {
                 this.init();
@@ -312,12 +311,14 @@ export default {
          */
         height() {
             //await this.$nextTick();
-            if (!this.parent && !this.asPopup) {
-                //if (!this.$refs.preheader || !this.$refs.header) return 0;            
-                return this.$q.screen.height - this.$refs.header.offsetHeight - 40 - this.$refs.preheader.offsetHeight - 5;
-            } else {
-                //if (!this.$refs.preheader) return 0;
-                return this.$q.screen.height - 150 - this.$refs.preheader.offsetHeight;
+            if (this.$refs.header && this.$refs.preheader) {
+                if (!this.parent && !this.asPopup) {
+                    //if (!this.$refs.preheader || !this.$refs.header) return 0;            
+                    return this.$q.screen.height - this.$refs.header.offsetHeight - 40 - this.$refs.preheader.offsetHeight - 5;
+                } else {
+                    //if (!this.$refs.preheader) return 0;
+                    return this.$q.screen.height - 150 - this.$refs.preheader.offsetHeight;
+                }
             }
         },
 
