@@ -183,7 +183,6 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log('Request', config);
     if (app.config.globalProperties.$keycloak && app.config.globalProperties.$keycloak.token) {
       //console.log('Adding token to request', app.config.globalProperties.$keycloak.token);
       config.headers['Authorization'] = 'Bearer ' + app.config.globalProperties.$keycloak.token;

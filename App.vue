@@ -228,10 +228,21 @@ export default {
       if (this.$store.hasCatalogs) {
         this.$store.catalogs = await this.get("CommonAnon/GetCatalogs", null, true);
       }
+
       if (this.$store.hasNews) {
         // to avoid double loading of news
         this.$store.news = await this.get(`CommonAnon/GetNews/${this.$store.news.length}/10`, null, true);
       }
+
+      // set default context values
+      if (this.$store.defaultContextValues) {
+        for (let cv of this.$store.defaultContextValues) {
+          if (!this.$q.localStorage.has("context_value_" + cv.name)) {
+            this.$q.localStorage.setItem("context_value_" + cv.name, cv.value);
+          }
+        }
+      }
+
       if (this.$keycloak.authenticated) {
         let ref = "";
         if (this.$route.query.ref) {

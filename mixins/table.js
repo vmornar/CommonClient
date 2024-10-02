@@ -330,7 +330,9 @@ export const TableMixin = {
                     if (this.$q.localStorage.has("context_value_" + cv.name)) {
                         cv.value = this.$q.localStorage.getItem("context_value_" + cv.name);
                     }
-                    cv.options = await this.get("Table/GetParamLookup/" + cv.lookup);
+                    if (cv.lookup) {
+                        cv.options = await this.get("Table/GetParamLookup/" + cv.lookup);
+                    }
                     if (cv.options && cv.options.length > 0) {
                         // get first key in first row
                         cv.optionValue = Object.keys(cv.options[0])[0];
