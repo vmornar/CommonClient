@@ -84,7 +84,7 @@
         </div>
 
         <!-- The table -->
-        <q-table v-if="loaded" ref="table" class="my-sticky-header-table" @virtual-scroll="scroll"
+        <q-table square v-if="loaded" ref="table" class="my-sticky-header-table" @virtual-scroll="scroll"
             :table-style="tableStyle" dense flat bordered :rows="filterSet ? rowsFiltered : rows" :columns="columns"
             :visible-columns="visibleColumns" :row-key="key" virtual-scroll virtual-scroll-slice-size=1
             v-model:pagination="pagination" :rows-per-page-options="[0]" :selection="selection"
@@ -109,11 +109,11 @@
                 <q-tr :props="props">
                     <q-td v-if="selection != 'none'" style="width:'15px'" />
                     <q-td v-if="hasRowToolbar" />
-                    <q-td v-for="  col in props.cols  " :key="col.name" :props="props" class="q-pa-none  q-ma-none">
+                    <q-td v-for="col in props.cols" :key="col.name" :props="props" class="q-pa-none  q-ma-none">
                         <q-checkbox v-if="col.type == 'boolean'" v-model="filter[col.name]" dense
                             toggle-indeterminate />
-                        <q-input v-else type="search" placeholder="Search" placeholder-color="lightgray" clearable dense
-                            v-model="filter[col.name]" class="q-my-none q-py-none">
+                        <q-input v-else type="search" placeholder="Search" clearable dense v-model="filter[col.name]"
+                            class="q-my-none q-py-none">
                             <template v-slot:after>
                                 <q-icon size="xs" name="search"></q-icon>
                             </template>
@@ -164,7 +164,9 @@
 
             <!-- normal rows -->
             <template v-slot:body="props">
-                <q-tr :props="props" :class="{ 'background': (props.pageIndex % 2 == 0) }">
+                <!-- <q-tr :props="props" :class="{ 'background': (props.pageIndex % 2 == 0) }"> -->
+                <q-tr :props="props"
+                    :class="(props.pageIndex % 2 == 0) ? 'background' + (this.$q.dark.isActive ? '-dark' : '') : ''">
                     <q-td v-if="selection != 'none'">
                         <q-checkbox dense v-model="props.selected" />
                     </q-td>
@@ -546,7 +548,7 @@ export default {
 }
 
 .my-sticky-header-table {
-    background-color: white;
+    /* background-color: white; */
 }
 
 .my-sticky-header-table thead tr:first-child th {
@@ -570,7 +572,7 @@ export default {
     height: 32px;
     padding: 0px 2px 2px 2px;
     border-radius: 0px;
-    background-color: white;
+    /* background-color: white; */
 }
 
 :deep(.text-box .q-field__control),
@@ -578,11 +580,11 @@ export default {
     height: 100px;
     padding: 0px 2px 2px 2px;
     border-radius: 0px;
-    background-color: white;
+    /* background-color: white; */
 }
 
 .textarea {
     outline: 1px solid #ccc;
-    background-color: white;
+    /* background-color: white; */
 }
 </style>

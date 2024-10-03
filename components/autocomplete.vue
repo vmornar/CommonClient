@@ -3,7 +3,7 @@
         :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
         :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
         @focus="focus" :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html
-        @popup-show="startEditing" :disable="disable" :rules="rules">
+        @popup-show="startEditing" :disable="disable" :rules="rules" :square="square">
         <template v-slot:before-options v-if="searchable">
             <q-icon name="search" />
             <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0" @keydown="keyDown" />
@@ -33,9 +33,10 @@ export default {
         filled: { type: Boolean, default: true },
         dense: { type: Boolean, default: true },
         label: { type: String, default: undefined },
-        bgColor: { type: String, default: "white" },
+        bgColor: { type: String },
         modelValue: { type: [String, Number, Array, Object, Boolean], default: null },
         rules: { type: Array, default: () => [] },
+        square: { type: Boolean, default: true },
     },
     emits: ["update:modelValue"],
     data() {

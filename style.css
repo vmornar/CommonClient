@@ -67,6 +67,10 @@ a {
   background: var(--q-background);
 }
 
+.background-dark {
+  background: var(--q-background-dark);
+}
+
 .q-tooltip--style {
   background: var(--q-tooltip);
 }

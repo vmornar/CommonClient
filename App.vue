@@ -37,7 +37,8 @@
 
         <q-drawer style="top: 40px" v-model="$store.drawer" :width="$store.drawerWidth" bordered behavior="desktop"
           :breakpoint="breakpoint" :overlay="false">
-          <q-scroll-area class="fit">
+          <q-scroll-area :style="{ height: screenHeight }">
+            <!-- <q-scroll-area style="height: 100vh;" :bar-style="{ width: '10px' }"> -->
             <div v-if="isAdmin" class="row">
               <q-input v-model="treeFilter" dense style="width:160px">
                 <template v-slot:prepend>
@@ -61,7 +62,7 @@
                     <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
                       { label: $t('CRUD'), callback: crud, options: props.node }]" />
                   </span>
-                  <span class=" drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
+                  <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
                   </span>
                 </div>
               </template>
@@ -69,7 +70,7 @@
           </q-scroll-area>
         </q-drawer>
 
-        <q-scroll-area style=" height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }"
+        <q-scroll-area style="height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }"
           :thumb-style="{ width: '0px' }">
           <q-page-container class="q-pt-none">
             <q-page>
@@ -141,6 +142,9 @@ export default {
     }
   },
   computed: {
+    screenHeight() {
+      return (this.$q.screen.height - 40) + 'px';
+    },
     /**
     * Filters the tree based on the provided filter text.
     * @returns {Array} The filtered tree items.

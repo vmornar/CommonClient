@@ -1,7 +1,7 @@
 <template>
-    <div class="header-container q-my-none q-py-none background" :style="headerStyle">
+    <div :class="{ 'header-container': true, 'background': !$q.dark.isActive }" :style="headerStyle">
         <div class="text-subtitle1 text-bold q-pa-xs q-ma-none left">
-            <q-btn dense v-if="backButton" flat icon=" arrow_back" @click="goBack">
+            <q-btn dense v-if="backButton" flat icon="arrow_back" @click="goBack">
                 <q-tooltip>{{ $t("Back") }}</q-tooltip>
             </q-btn>
             {{ titleToShow }}

@@ -1,3 +1,5 @@
+import { computed } from "vue";
+
 /**
  * @desc A mixin object containing methods for table editing
  * @module TableEditMixin
@@ -17,10 +19,6 @@ export const TableEditMixin = {
             overlayText: false,
             overlayIcon: false
         },
-        overlayStyle: {
-            position: 'fixed',
-            zIndex: 1000,
-        },
         overlaySelectOptions: {
             options: [],
             optionLabel: '',
@@ -28,7 +26,15 @@ export const TableEditMixin = {
         },
         lookupName: null,
     }),
-    
+    computed: {
+        overlayStyle() {
+            return {
+                position: 'fixed',
+                zIndex: 1000,
+                backgroundColor: this.$q.dark.isActive ? 'black' : 'white',
+            }
+        },
+    },
     methods: {
 
         /**
