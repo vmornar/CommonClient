@@ -144,26 +144,8 @@ a {
   text-align: right;
 }
 
-/* .q-checkbox {
-  translate: -15px;
-}
-
-.q-radio {
-  translate: -10px;
-} */
-
 hr {
   border: 1px solid rgb(227, 227, 227);
-}
-
-.tranR {
-  display: inline-block;
-  transform: translate(-10px, 0);
-}
-
-.tranC {
-  display: inline-block;
-  transform: translate(-15px, 0);
 }
 
 .no-spinner ::-webkit-outer-spin-button,

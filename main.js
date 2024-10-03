@@ -131,13 +131,10 @@ async function handleAxiosError(error) {
         reason += '<br>' + Object.values(response.data.errors).join("<br>");
       }
     }
-  } else if (error.request && !error.response) {
+  } else if (error.request) {
     reason = i18n.global.t("No response from server");
     store.isOnline = false;
-    expired = true;
-  } else {
-    reason = i18n.global.t("Session expired. Please login again.");
-    expired = true;
+    //expired = true;
   } 
 
   await app.config.globalProperties.$q.dialog({
