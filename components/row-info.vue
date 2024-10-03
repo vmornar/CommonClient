@@ -1,16 +1,18 @@
 <template>
     <table class="q-ma-md">
-        <tr>
-            <th>Label</th>
-            <th>Field</th>
-            <th>Value</th>
-        </tr>
-        <tr v-for="(col, index) in columns" :key="col.name">
-            <td>{{ index }}</td>
-            <td>{{ col.label }}</td>
-            <td>{{ col.name }}</td>
-            <td>{{ rowToShow[col.name] }}</td>
-        </tr>
+        <tbody>
+            <tr>
+                <th>Label</th>
+                <th>Field</th>
+                <th>Value</th>
+            </tr>
+            <tr v-for="(col, index) in columns" :key="col.name">
+                <td>{{ index }}</td>
+                <td>{{ col.label }}</td>
+                <td>{{ col.name }}</td>
+                <td>{{ rowToShow[col.name] }}</td>
+            </tr>
+        </tbody>
     </table>
 
 </template>
