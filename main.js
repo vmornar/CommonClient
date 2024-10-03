@@ -134,6 +134,7 @@ async function handleAxiosError(error) {
   } else if (error.request && !error.response) {
     reason = i18n.global.t("No response from server");
     store.isOnline = false;
+    expired = true;
   } else {
     reason = i18n.global.t("Session expired. Please login again.");
     expired = true;
@@ -144,11 +145,12 @@ async function handleAxiosError(error) {
     componentProps: {
       error: true, title: i18n.global.t("Error" ), message: reason, type: 'Ok'
     }
-  // }).onDismiss(() => {
-  //   if (expired) {
-  //     logout();
-  //   }
   });
+
+  if (expired) {
+    logout();
+  }
+
   return { data: null };
 }    
         
