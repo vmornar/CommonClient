@@ -73,7 +73,6 @@ export default {
     }),
     async mounted() {
         this.copyObject(this.$store.popups.chart.props, this, true);
-        console.log("mounted", this.data);
         this.showChart();
     },
     methods: {
