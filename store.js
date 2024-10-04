@@ -22,6 +22,7 @@ export const store = reactive({
     app: null,
     q: null,
     get screenWidth() { return this.q.screen.width - (this.drawer ? this.drawerWidth : 0) },
+    get isWide() { return this.q.screen.width > 800 },
     contextValues: {},
     globalValues: {},
     catalogs: {},

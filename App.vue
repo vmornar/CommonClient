@@ -18,15 +18,16 @@
               @update:model-value="emulatedUserChanged" />
 
             <q-btn flat dense class="nomy" v-if="!$store.isOnline" icon="wifi_off" />
-            {{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
-              (this.$q.screen.width
-                >= 1024 ? `${$store.userData.first_name} ${$store.userData.last_name}` :
+            &nbsp;{{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
+              ($store.isWide ? `${$store.userData.first_name} ${$store.userData.last_name}` :
                 $store.userData.first_name.charAt(0)
                 +
                 $store.userData.last_name.charAt(0)) :
-              $t('Guest') }}
-            <q-btn v-if="$keycloak.token" class="nomy" flat @click="$logout" dense icon="logout" />
-            <q-btn v-else class="nomy" flat dense icon="login" @click="$keycloak.login()">
+              $t('Guest') }}&nbsp;
+            <q-btn v-if="$keycloak.token" class="nomy" flat @click="$logout" dense
+              :label="$store.isWide ? $t('Logout') : ''" icon-right="logout" no-caps />
+            <q-btn v-else class="nomy" flat dense :label="$store.isWide ? $t('Login') : ''" icon-right="login"
+              @click="$keycloak.login()" no-caps>
             </q-btn>
             <accessibility />
             <lang-switcher v-show="$store.hasLangSwitcher" ref="langSwitcher" />
