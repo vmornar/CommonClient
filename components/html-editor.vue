@@ -1,7 +1,5 @@
 <template>
     <div class="max-width" @keydown="handleSaveCancelKeydown">
-
-        {{ showEmojiPicker }}
         <div v-if="label">{{ label }}</div>
         <div class="row" v-if="showEmojiPicker || showIconPicker || vars.length > 0">
             <!-- <div class="col-4">
