@@ -39,7 +39,7 @@
 <script>
 import { loadComponent } from '@/common/component-loader';
 export default {
-    name: "Chat",
+    name: "Forum",
     components: {
         Autocomplete: loadComponent("autocomplete"),
         ForumMessage: loadComponent("forum-message"),
