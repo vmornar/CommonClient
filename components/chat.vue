@@ -39,6 +39,7 @@ export default {
             messages: [],
             room_id: null,
             cv_name: null,
+            cv_label: null,
             ws: null,
             message: "",
             socketUrl: null,
