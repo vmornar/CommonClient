@@ -2,8 +2,10 @@
     <div :style="{ marginBottom: '10px', marginLeft: ((level - 1) * 30) + 'px' }">
         <div class="text-bold"> {{ title }}</div>
         <div>
-            Author: {{ author }} Created: {{ time_created }}
-            <span v-if="time_created != time_modified"> Modified: {{ time_modified }}</span>
+            <hr :class="{ hr2: level == 1 }" /> Author: {{ author }} Created: {{ time_created }} <span
+                v-if="time_created != time_modified">
+                Modified:
+                {{ time_modified }}</span>
 
             <q-btn flat dense icon="reply" color="primary" @click="$emit('replyMessage', id)" />
             <q-btn flat dense icon="edit" color="primary" @click="$emit('editMessage', id)"

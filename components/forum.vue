@@ -1,7 +1,7 @@
 <template>
     <div>
         <Header title="Forum" />
-        <div class="row">
+        <div class="row q-pa-sm">
             <autocomplete v-model="forum_topic_id" label="Topic" dense :options="$store.catalogs.forum_topics"
                 @update:model-value="reload" :style="{ width: '300px' }" map-options emit-value :clearable="false" />
             <q-btn @click="reload" label="Reload" no-caps flat dense icon="refresh" />
@@ -9,7 +9,7 @@
         </div>
         <q-card flat>
             <q-card-section class="q-pa-none">
-                <q-scroll-area ref="scroll" :style="{ height: ($q.screen.height - 75 - 65) + 'px', width: '100%' }">
+                <q-scroll-area ref="scroll" :style="{ height: ($q.screen.height - 75 - 65 - 10) + 'px', width: '100%' }">
                     <div>
                         <forum-message v-for="msg in messages" :key="msg.id" :id="msg.id" :title="msg.title"
                             :message="msg.message" :person_id="msg.person_id" :author="msg.author"

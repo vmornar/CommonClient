@@ -1,13 +1,14 @@
 <template>
     <div>
         <Header title="Chat" />
-        <autocomplete v-model="room_id" :label="cv_label" dense :options="$store.catalogs.rooms"
-            @update:model-value="reload" :style="{ width: '200px' }" map-options emit-value :clearable="false" />
+        <div class="row q-pa-sm">
+            <autocomplete v-model="room_id" :label="cv_label" dense :options="$store.catalogs.rooms"
+                @update:model-value="reload" :style="{ width: '200px' }" map-options emit-value :clearable="false" />
+        </div>
         <q-card flat>
             <q-card-section class="q-pa-none">
-
                 <q-scroll-area ref="scroll"
-                    :style="{ height: ($q.screen.height - 75 - 65 - 50) + 'px', width: '100%' }">
+                    :style="{ height: ($q.screen.height - 75 - 65 - 65) + 'px', width: '100%' }">
                     <div class="q-pa-md row justify-center">
                         <div style="width: 100%; max-width: 600px">
                             <q-chat-message v-for="msg in messages" :key="msg.id" :name="msg.name" :text="msg.text"
@@ -17,7 +18,7 @@
                 </q-scroll-area>
             </q-card-section>
             <q-card-section>
-                <div class=" row">
+                <div class="row">
                     <div class="col">
                         <q-input v-model="message" label="Message" dense @keyup.enter="checkSendMessage" />
                     </div>
