@@ -84,9 +84,7 @@ export default {
                         this.messages.push(item);
                     });
                     await this.$nextTick();
-                    console.log("Scrolling to bottom");
                     this.$refs.scroll.setScrollPosition("vertical", 9999999);
-                    console.log("Messages ", this.messages);
                 };
                 this.ws.onclose = (event) => {
                     console.log("Socket closed ", event);
