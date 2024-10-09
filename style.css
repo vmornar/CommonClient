@@ -148,6 +148,12 @@ hr {
   border: 1px solid rgb(227, 227, 227);
 }
 
+.hr2 {
+  border: none;
+  height: 1.5px;
+  background-color: rgb(200, 200, 200);
+}
+
 .no-spinner ::-webkit-outer-spin-button,
 .no-spinner ::-webkit-inner-spin-button {
   -webkit-appearance: none;

@@ -2,8 +2,8 @@
  * A global mixin object containing commonly used methods and data.
  */
 import { getComponent } from '../component-loader.js';
-import CustomDialog from '../components/custom-dialog.vue';
-
+//import CustomDialog from '../components/custom-dialog.vue';
+import { loadComponent } from '../component-loader.js';
 export const GlobalMixin = {
     computed: {
         /**
@@ -134,7 +134,7 @@ export const GlobalMixin = {
         async showError(err) {
             return new Promise((resolve, reject) => {
                 this.$q.dialog({
-                    component: CustomDialog,
+                    component: loadComponent("custom-dialog"),//CustomDialog,
                     componentProps: {
                         title: this.$t("Error"),
                         error: true,
@@ -155,7 +155,7 @@ export const GlobalMixin = {
         async showMessage(message) {
             return new Promise((resolve, reject) => {
                 this.$q.dialog({
-                    component: CustomDialog,
+                    component:  loadComponent("custom-dialog"),
                     componentProps: {
                         title: this.$t("Message"),
                         message: message,                   
@@ -175,7 +175,7 @@ export const GlobalMixin = {
         async confirmDialog(message, title, okText, cancelText) {
             return new Promise((resolve, reject) => {
                 this.$q.dialog({
-                    component: CustomDialog,
+                    component:  loadComponent("custom-dialog"),
                     componentProps: {
                         title: title ?? this.$t("Message"),
                         message: message, cancel: true, persistent: true, cancelText: cancelText, okText: okText

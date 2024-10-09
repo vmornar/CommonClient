@@ -26,10 +26,12 @@ export default {
       error: null
     };
   },
+
   mounted() {
     this.copyObject(this.$store.popups.default.props, this, true);
     this.uploadURL = this.axios.API.defaults.baseURL + this.uploadURL;
   },
+
   methods: {
 
     formFields(files) {
@@ -39,7 +41,6 @@ export default {
     },
 
     upload() {
-
       this.error = null;
       this.$refs.uploader.upload();
     },
@@ -52,7 +53,11 @@ export default {
     },
 
     failed(info) {
-      this.error = info.xhr.statusText + " " + info.xhr.responseText;
+      if (info.xhr.statusText == "" && info.xhr.responseText == "") {
+        this.error = this.$t("Upload failed. Is the file open in another application?");
+      } else {
+        this.error = info.xhr.statusText + " " + info.xhr.responseText;
+      }
     }
 
   }
