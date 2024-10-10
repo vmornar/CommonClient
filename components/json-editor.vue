@@ -4,7 +4,7 @@
             @click.stop="stringify">
             <q-tooltip>{{ $t("Format JSON (alt-f)") }}</q-tooltip>
         </q-btn>
-        <textarea id="jsonTextarea" ref="jsonTextarea" v-model="jsonString" @focus="stringify" @input="updateJson" :style="style"
+        <textarea id="jsonTextarea" ref="jsonTextarea" v-model="jsonString" @focus="stringify" @input="inputHandler" :style="style"
             @keydown.tab="alignWithPreviousIndentation" />
         <autocomplete v-if="iconPicker" ref="picker" outlined popup-content-class="text-h6" v-model="chosenIcon"
             :options="$store.icons" dense options-dense clearable searchable map-options emit-value
@@ -60,6 +60,9 @@ export default {
             jsonTextarea: null,
             suggestionsBox: null,
             keys: [],
+            currentWord: '',
+            suggestion: '',
+            filteredSuggestions: [],
         };
     },
     computed: {
@@ -137,7 +140,6 @@ export default {
          * @param {Event} event - The input event.
          */
         updateJson(event) {
-            this.inputHandler();
             this.parse();
             this.$emit('update:modelValue', this.jsonString);
         },
@@ -162,20 +164,26 @@ export default {
             // Prevent the default tab key behavior
             event.preventDefault();
 
-            const pos = this.jsonTextarea.selectionStart;
-            const text = this.jsonTextarea.value;
-            const currentLineStart = text.lastIndexOf('\n', pos - 1) + 1;
-            const previousLineStart = text.lastIndexOf('\n', currentLineStart - 2) + 1;
-            const previousLineIndentation = text.slice(previousLineStart).match(/^ */)[0].length;
-            // Insert the indentation
-            jsonTextarea.value = text.slice(0, currentLineStart) + ' '.repeat(previousLineIndentation) + text.slice(currentLineStart);
-            jsonTextarea.selectionStart = jsonTextarea.selectionEnd = currentLineStart + previousLineIndentation;
+            console.log('cursorPosition', this.suggestionsShown);
+            if (this.suggestionsShown) {
+                this.suggestion = this.filteredSuggestions[0];
+                this.insertSuggestion();
+            } else {
+                const text = this.jsonTextarea.value;
+                const pos = this.jsonTextarea.selectionStart;
+                const currentLineStart = text.lastIndexOf('\n', pos - 1) + 1;
+                const previousLineStart = text.lastIndexOf('\n', currentLineStart - 2) + 1;
+                const previousLineIndentation = text.slice(previousLineStart).match(/^ */)[0].length;
+                // Insert the indentation
+                jsonTextarea.value = text.slice(0, currentLineStart) + ' '.repeat(previousLineIndentation) + text.slice(currentLineStart);
+                jsonTextarea.selectionStart = jsonTextarea.selectionEnd = currentLineStart + previousLineIndentation;
+            }
         },
 
         // Show suggestions
-        showSuggestions(filteredSuggestions, cursorPosition) {
+        showSuggestions() {
             this.suggestionsBox.innerHTML = '';
-            filteredSuggestions.forEach(suggestion => {
+            this.filteredSuggestions.forEach(suggestion => {
                 const div = document.createElement('div');
                 div.textContent = suggestion;
                 div.addEventListener('click', () => {
@@ -183,46 +191,47 @@ export default {
                 });
                 this.suggestionsBox.appendChild(div);
             });
-            this.suggestionsBox.style.display = filteredSuggestions.length ? 'block' : 'none';
+            this.suggestionsBox.style.display = this.filteredSuggestions.length ? 'block' : 'none';
         },
 
         // Insert the selected suggestion into the textarea
-        insertSuggestion(suggestion, cursorPosition) {
+        insertSuggestion() {
             const text = this.jsonTextarea.value;
-            const words = text.substring(0, cursorPosition).split(/\s+/);  // Get the current word
-            const lastWord = words[words.length - 1];
-            console.log('suggestion', suggestion, this.$store.suggestions.filter(x => x.key == suggestion));
-            const insertion = this.$store.suggestions.filter(x => x.key == suggestion)[0].value;
+            console.log('lastWord', this.currentWord, this.cursorPosition, this.currentWord.length);
+            const insertion = this.$store.suggestions.filter(x => x.key == this.suggestion)[0].value;
                         console.log('insertion', insertion);
-            this.jsonTextarea.value = text.slice(0, cursorPosition - lastWord.length + 1) + insertion + text.slice(cursorPosition);
-            suggestionsBox.style.display = 'none';
+            this.jsonTextarea.value = text.slice(0, this.cursorPosition - this.currentWord.length) + insertion + text.slice(this.cursorPosition);
+            this.suggestionsBox.style.display = 'none';
 
             //find the position of & in the jsonTextarea, delete it and set the cursor position to the position of the & in the jsonTextarea
-            this.parse();
-            cursorPosition = this.jsonTextarea.value.indexOf('&');
+            this.stringify();
+            this.cursorPosition = this.jsonTextarea.value.indexOf('&');
             this.jsonTextarea.value = this.jsonTextarea.value.replace('&', '');
-            this.jsonTextarea.selectionStart = cursorPosition;
-            this.jsonTextarea.selectionEnd = cursorPosition;
+            this.jsonTextarea.selectionStart = this.cursorPosition;
+            this.jsonTextarea.selectionEnd = this.cursorPosition;
             this.jsonTextarea.focus();
         },
 
-        inputHandler() {
-            
-            let cursorPosition = this.jsonTextarea.selectionStart;
-            const textBeforeCursor = this.jsonTextarea.value.substring(0, cursorPosition);
+        inputHandler() {           
+            this.cursorPosition = this.jsonTextarea.selectionStart;
+            const textBeforeCursor = this.jsonTextarea.value.substring(0, this.cursorPosition);
             const words = textBeforeCursor.split(/[^a-zA-Z]+/);
-            const currentWord = words[words.length - 1];
+            this.currentWord = words[words.length - 1];
             // Filter suggestions based on the current word
-            const filteredSuggestions = this.keywords.filter(keyword => keyword.startsWith(currentWord));
+            console.log('currentWord', "'" + this.currentWord + "'");
+            this.filteredSuggestions = this.keywords.filter(keyword => keyword.startsWith(this.currentWord));
             // Show suggestions near the textarea
-            if (filteredSuggestions.length > 0) {
+            if (this.filteredSuggestions.length > 0) {
                 const rect = this.jsonTextarea.getBoundingClientRect();
                 this.suggestionsBox.style.top = `${rect.top}px`;
                 this.suggestionsBox.style.left = `${rect.left}px`;
-                this.showSuggestions(filteredSuggestions, cursorPosition);
+                this.showSuggestions(this.filteredSuggestions, this.cursorPosition);
+                this.suggestionsShown = true;
             } else {
                 this.suggestionsBox.style.display = 'none';
+                this.suggestionsShown = false;
             }
+            this.updateJson();
         }
     },
 
@@ -238,9 +247,8 @@ export default {
         if (!this.$store.suggestions) {
             let data = await this.get('Table/meta_suggestion');
             this.$store.suggestions = this.frugalJsonToArray(data);
-            this.keywords = this.$store.suggestions.map(x => x.key);
-            console.log(this.keywords, this.$store.suggestions);
         }
+        this.keywords = this.$store.suggestions.map(x => x.key);
         await this.$nextTick();
         this.jsonTextarea = this.$refs.jsonTextarea;
         this.suggestionsBox = this.$refs.suggestionsBox;
