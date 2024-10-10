@@ -132,8 +132,8 @@ async function handleAxiosError(error) {
       }
     }
   } else if (error.request) {
-    //reason = i18n.global.t("No response from server");
-    //store.isOnline = false;
+    reason = i18n.global.t("No response from server");
+    store.isOnline = false;
     //logout();
     //expired = true;
   } 
