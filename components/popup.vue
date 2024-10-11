@@ -1,6 +1,7 @@
 <template>
     <q-dialog v-model="$store.popups[name].show" :persistent="$store.popups[name].props.persistent" @hide="closeDialog"
-        @keydown.esc="closeDialog" :maximized="$store.popups[name].props.maximized || $q.screen.width < 800"
+        @keydown.esc="closeDialog"
+        :maximized="$store.popups[name].props.maximized || (!$store.isWide && !$store.popups[name].props.doNotMaximize)"
         @keydown.f9="translate">
         <q-card flat class="max-width">
             <q-card-section dense class="max-width row items-center text-bold q-pa-sm background">

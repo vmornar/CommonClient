@@ -50,6 +50,10 @@ export default {
             type: String,
             default: "500px"
         },
+        width: {
+            type: String,
+            default: "100%"
+        },
         indent: {
             type: Number,
             default: 2
@@ -75,32 +79,38 @@ export default {
             suggestions: [{ key: "allowDelete", value: '"allowDelete" : false&' },
             { key: "allowEdit", value: '"allowEdit" : false&' },
             { key: "colAtts", value: '"colAtts" : { "&" : { "" : ""} } ' },
-            { key: "component", value: null },
-            { key: "conditionalConfirmationMessage", value: null },
-            { key: "confirmationMessage", value: null },
+            { key: "component" },
+            { key: "conditionalConfirmationMessage", value: '"conditionalConfirmationMessage" : { "condition" : "return exp(row,columns)&", "message" : "" }}' },
+            { key: "confirmationMessage" },
             { key: "contextValues", value: '"contextValues" : [ "&" : {"label" : "", "name" : "", "lookup" : "", "width" : "" } ]' },
-            { key: "customFunction", value: null },
-            { key: "dbFunction", value: null },
+            { key: "customFunction" },
+            { key: "cv_name" },
+            { key: "cv_label" },
+            { key: "dbFunction" },
             { key: "details", value: '"details": [ { "name": "&", "tableAPI": "" } ]' },
             { key: "disabled", value: '"disabled" : true&' },
-            { key: "exportPreprocess", value: null },
+
+            { key: "doNotMaximize", value: '"doNotMaximize" : true&' },
+            { key: "exportPreprocess" },
             { key: "frugal", value: '"frugal" : true&' },
-            { key: "icon", value: '' },
+            { key: "icon" },
             { key: "invisible", value: '"invisible" : true&' },
             { key: "json", value: '"json" :true&' },
-            { key: "label", value: null },
-            { key: "method", value: '' },
+            { key: "label" },
+            { key: "method" },
             { key: "noInlineEditing", value: '"noInlineEditing" : true&' },
             { key: "params", value: '"params" : { "&" : "" }' },
-            { key: "restAPI ", value: '' },
-            { key: "route", value: null },
+            { key: "restAPI " },
+            { key: "route" },
             { key: "rowActions", value: ' "rowActions" : [{ & }] ' },
             { key: "selection", value: '"selection" : "multiple"' },
             { key: "store.globalValues", value: '"store.globalValues" : { "&", "" }' },
             { key: "tableActions", value: ' "tableActions" : [{ & }] ' },
-            { key: "title", value: null },
-            { key: "tooltip", value: '' },
-            { key: "width", value: null }],
+            { key: "title" },
+            { key: "toolbar" },
+            { key: "toolbarCloseable", value: '"toolbarCloseable" : true&' },
+            { key: "tooltip" },
+            { key: "width" }],
         };
     },
     computed: {
@@ -111,6 +121,7 @@ export default {
             return {
                 backgroundColor: this.error ? 'lightcoral' : 'white',
                 height: this.height,
+                width: this.width,
                 minWidth: '400px',
             }
         },
@@ -122,6 +133,7 @@ export default {
          * @param {Event} event - The blur event.
         */
         handleComponentBlur(event) {
+            if (this.suggestionsShown) return;
             if (event.relatedTarget &&
                 (event.relatedTarget.className === 'q-focus-helper'
                     || event.relatedTarget.id == 'stringifyButton'
@@ -135,7 +147,10 @@ export default {
          * Focuses the JSON editor.
          */
         focus() {
-            this.jsonTextarea.focus();
+            this.$nextTick(() => {
+                this.jsonTextarea.focus();
+            });
+            //this.jsonTextarea.focus();
         },
 
         /**
@@ -156,7 +171,6 @@ export default {
          */
         parse() {
             try {
-                console.log('jsonString', this.jsonString);
                 this.parsedJson = JSON.parse(this.jsonString);
                 this.error = false;
             } catch (error) {
@@ -203,8 +217,8 @@ export default {
         alignWithPreviousIndentation(event) {
             // Prevent the default tab key behavior
             event.preventDefault();
+            event.stopPropagation();
 
-            console.log('cursorPosition', this.suggestionsShown);
             if (this.suggestionsShown) {
                 this.insertSuggestion(this.filteredSuggestions[0]);
             } else {
@@ -222,9 +236,7 @@ export default {
         // Insert the selected suggestion into the textarea
         insertSuggestion(suggestion) {
             const text = this.jsonTextarea.value;
-            console.log('lastWord', this.currentWord, this.cursorPosition, this.currentWord.length);
             const insertion = this.suggestions.filter(x => x.key == suggestion)[0].value;
-            console.log('insertion', insertion);
             this.jsonTextarea.value = text.slice(0, this.cursorPosition - this.currentWord.length) + insertion + text.slice(this.cursorPosition);
             this.cursorPosition = this.jsonTextarea.value.indexOf('&');
             this.jsonTextarea.value = this.jsonTextarea.value.replace('&', '');
@@ -243,13 +255,12 @@ export default {
             const words = textBeforeCursor.split(/[^a-zA-Z\*]+/);
             this.currentWord = words[words.length - 1];
             // Filter suggestions based on the current word
-            console.log('currentWord', "'" + this.currentWord + "'");
             if (this.currentWord.length < 1) {
                 this.filteredSuggestions = [];
             } else if (this.currentWord == "*") {
                 this.filteredSuggestions = this.keywords;
             } else {
-                this.filteredSuggestions = this.keywords.filter(keyword => keyword.includes(this.currentWord));
+                this.filteredSuggestions = this.keywords.filter(keyword => keyword.includes(this.currentWord)).sort();
             }
 
             // Show suggestions near the textarea
@@ -278,6 +289,7 @@ export default {
         this.keywords = this.suggestions.map(x => x.key);
         await this.$nextTick();
         this.jsonTextarea = this.$refs.jsonTextarea;
+        await this.$nextTick();
     }
 };
 </script>

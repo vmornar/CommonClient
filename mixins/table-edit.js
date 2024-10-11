@@ -208,6 +208,7 @@ export const TableEditMixin = {
             this.lookupName = null;
 
             console.log("col", col);
+            this.overlays = {};
 
             if (col.type == 'json') {
                 this.overlayShown = 'overlayJson';
@@ -255,9 +256,12 @@ export const TableEditMixin = {
             }
             this.editedItem = props.row[this.index];
             this.props = props;
+            
             await this.$nextTick();
             let overlay = this.$refs[this.overlayShown];
+
             let oRect = overlay.$el.getBoundingClientRect();
+            console.log("oRect", oRect);
             if (oRect.bottom > window.innerHeight) {
                 this.overlayStyle.top = (Math.max(window.innerHeight - oRect.height, 0)) + 'px';
                 this.$forceUpdate();
