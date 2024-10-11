@@ -207,6 +207,8 @@ export const TableEditMixin = {
 
             this.lookupName = null;
 
+            console.log("col", col);
+
             if (col.type == 'json') {
                 this.overlayShown = 'overlayJson';
             } else if (col.type == 'icon') {
@@ -253,19 +255,18 @@ export const TableEditMixin = {
             }
             this.editedItem = props.row[this.index];
             this.props = props;
-            this.$nextTick(() => {
-                let overlay = this.$refs[this.overlayShown];
-                let oRect = overlay.$el.getBoundingClientRect();
-                if (oRect.bottom > window.innerHeight) {
-                    this.overlayStyle.top = (Math.max(window.innerHeight - oRect.height, 0)) + 'px';
-                    this.$forceUpdate();
-                }
-                if (oRect.right > window.innerWidth) {  
-                    this.overlayStyle.left = (Math.max(window.innerWidth - oRect.width, 0)) + 'px';
-                    this.$forceUpdate();
-                }
-                overlay.focus();
-            });
+            await this.$nextTick();
+            let overlay = this.$refs[this.overlayShown];
+            let oRect = overlay.$el.getBoundingClientRect();
+            if (oRect.bottom > window.innerHeight) {
+                this.overlayStyle.top = (Math.max(window.innerHeight - oRect.height, 0)) + 'px';
+                this.$forceUpdate();
+            }
+            if (oRect.right > window.innerWidth) {  
+                this.overlayStyle.left = (Math.max(window.innerWidth - oRect.width, 0)) + 'px';
+                this.$forceUpdate();
+            }
+            overlay.focus();
         },
 
         /**

@@ -16,6 +16,15 @@ export const GlobalMixin = {
     },
        
     methods: {
+        /**
+         * Pauses execution for a specified number of milliseconds.
+         *
+         * @param {number} ms - The number of milliseconds to wait.
+         * @returns {Promise<void>} A promise that resolves after the specified delay.
+         */
+        async wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        },
 
         /**
          * Waits for a Vue component reference to be available.

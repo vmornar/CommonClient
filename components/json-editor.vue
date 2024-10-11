@@ -14,15 +14,13 @@
             label="Select a suggestion" style="position: absolute; top: 25px; right: 5px" dense
             @update:model-value="insertSuggestion(suggestion)" /> -->
         <q-list dense bordered
-            style="font-size: small; position:absolute; top: 25px; right: 5px; max-height: 200px; overflow-y: auto">
+            style="font-size: small; position:absolute; top: 30px; right: 0px; max-height: 300px; overflow-y: auto">
             <q-item class="q-pa-none q-ma-none" v-for="suggestion in filteredSuggestions" :key="suggestion" clickable
                 @click="insertSuggestion(suggestion)" dense>
                 <q-item-section class="q-pa-none q-ma-none">{{ suggestion }}</q-item-section>
             </q-item>
         </q-list>
     </div>
-    <!-- <div id="suggestionsBox" ref="suggestionsBox" class="suggestionsBox"></div> -->
-
 </template>
 
 <script>
@@ -74,35 +72,35 @@ export default {
             currentWord: '',
             filteredSuggestions: [],
             suggestion: null,
-            suggestions: [{ "id": 16, "key": "allowDelete", "value": "\"allowDelete\" : false&" },
-            { "id": 15, "key": "allowEdit", "value": "\"allowEdit\" : false&" },
-            { "id": 1, "key": "colAtts", "value": " \"colAtts\" : { \"&\" : { \"\" : \"\"} } " },
-            { "id": 22, "key": "component", "value": null },
-            { "id": 30, "key": "conditionalConfirmationMessage", "value": null },
-            { "id": 28, "key": "confirmationMessage", "value": null },
-            { "id": 18, "key": "contextValues", "value": "\"contextValues\" : [ \"&\" : {\"label\" : \"\", \"name\" : \"\", \"lookup\" : \"\", \"width\" : \"\" } ]" },
-            { "id": 23, "key": "customFunction", "value": null },
-            { "id": 11, "key": "dbFunction", "value": null },
-            { "id": 9, "key": "details", "value": "\"details\": [ { \"name\": \"&\", \"tableAPI\": \"\" } ]" },
-            { "id": 26, "key": "disabled", "value": "\"disabled\" : true&" },
-            { "id": 19, "key": "exportPreprocess", "value": null },
-            { "id": 13, "key": "frugal", "value": "\"frugal\" : true&" },
-            { "id": 5, "key": "icon", "value": "" },
-            { "id": 2, "key": "invisible", "value": "\"invisible\" : true&" },
-            { "id": 14, "key": "json", "value": "\"json\" :true&" },
-            { "id": 20, "key": "label", "value": null },
-            { "id": 8, "key": "method", "value": "" },
-            { "id": 12, "key": "noInlineEditing", "value": "\"noInlineEditing\" : true&" },
-            { "id": 7, "key": "params", "value": "\"params\" : { \"&\" : \"\" }" },
-            { "id": 6, "key": "restAPI ", "value": "" },
-            { "id": 24, "key": "route", "value": null },
-            { "id": 4, "key": "rowActions", "value": " \"rowActions\" : [{ & }] " },
-            { "id": 17, "key": "selection", "value": "\"selection\" : \"multiple\"" },
-            { "id": 29, "key": "store.globalValues", "value": "\"store.globalValues\" : { \"&\", \"\" }" },
-            { "id": 3, "key": "tableActions", "value": " \"tableActions\" : [{ & }] " },
-            { "id": 21, "key": "title", "value": null },
-            { "id": 10, "key": "tooltip", "value": "" },
-            { "id": 25, "key": "width", "value": null }],
+            suggestions: [{ key: "allowDelete", value: '"allowDelete" : false&' },
+            { key: "allowEdit", value: '"allowEdit" : false&' },
+            { key: "colAtts", value: '"colAtts" : { "&" : { "" : ""} } ' },
+            { key: "component", value: null },
+            { key: "conditionalConfirmationMessage", value: null },
+            { key: "confirmationMessage", value: null },
+            { key: "contextValues", value: '"contextValues" : [ "&" : {"label" : "", "name" : "", "lookup" : "", "width" : "" } ]' },
+            { key: "customFunction", value: null },
+            { key: "dbFunction", value: null },
+            { key: "details", value: '"details": [ { "name": "&", "tableAPI": "" } ]' },
+            { key: "disabled", value: '"disabled" : true&' },
+            { key: "exportPreprocess", value: null },
+            { key: "frugal", value: '"frugal" : true&' },
+            { key: "icon", value: '' },
+            { key: "invisible", value: '"invisible" : true&' },
+            { key: "json", value: '"json" :true&' },
+            { key: "label", value: null },
+            { key: "method", value: '' },
+            { key: "noInlineEditing", value: '"noInlineEditing" : true&' },
+            { key: "params", value: '"params" : { "&" : "" }' },
+            { key: "restAPI ", value: '' },
+            { key: "route", value: null },
+            { key: "rowActions", value: ' "rowActions" : [{ & }] ' },
+            { key: "selection", value: '"selection" : "multiple"' },
+            { key: "store.globalValues", value: '"store.globalValues" : { "&", "" }' },
+            { key: "tableActions", value: ' "tableActions" : [{ & }] ' },
+            { key: "title", value: null },
+            { key: "tooltip", value: '' },
+            { key: "width", value: null }],
         };
     },
     computed: {
@@ -112,7 +110,8 @@ export default {
         style() {
             return {
                 backgroundColor: this.error ? 'lightcoral' : 'white',
-                height: this.height
+                height: this.height,
+                minWidth: '400px',
             }
         },
     },
@@ -157,6 +156,7 @@ export default {
          */
         parse() {
             try {
+                console.log('jsonString', this.jsonString);
                 this.parsedJson = JSON.parse(this.jsonString);
                 this.error = false;
             } catch (error) {
@@ -226,14 +226,18 @@ export default {
             const insertion = this.suggestions.filter(x => x.key == suggestion)[0].value;
             console.log('insertion', insertion);
             this.jsonTextarea.value = text.slice(0, this.cursorPosition - this.currentWord.length) + insertion + text.slice(this.cursorPosition);
-            this.suggestionsShown = false;
             this.cursorPosition = this.jsonTextarea.value.indexOf('&');
             this.jsonTextarea.value = this.jsonTextarea.value.replace('&', '');
             this.jsonTextarea.selectionStart = this.jsonTextarea.selectionEnd = this.cursorPosition;
             this.jsonTextarea.focus();
+            this.jsonString = this.jsonTextarea.value;
+            this.$emit('update:modelValue', this.jsonString);
+            this.suggestionsShown = false;
+            this.filteredSuggestions = [];
+            this.parse();
         },
 
-        async inputHandler() {
+        async inputHandler(event) {
             this.cursorPosition = this.jsonTextarea.selectionStart;
             const textBeforeCursor = this.jsonTextarea.value.substring(0, this.cursorPosition);
             const words = textBeforeCursor.split(/[^a-zA-Z\*]+/);
@@ -242,22 +246,20 @@ export default {
             console.log('currentWord', "'" + this.currentWord + "'");
             if (this.currentWord.length < 1) {
                 this.filteredSuggestions = [];
-                return;
             } else if (this.currentWord == "*") {
                 this.filteredSuggestions = this.keywords;
             } else {
                 this.filteredSuggestions = this.keywords.filter(keyword => keyword.includes(this.currentWord));
             }
+
             // Show suggestions near the textarea
             if (this.filteredSuggestions.length > 0) {
                 this.suggestionsShown = true;
-                console.log('setting to', this.cursorPosition);
-                this.jsonTextarea.selectionStart = this.jsonTextarea.selectionEnd = this.cursorPosition;
-                this.jsonTextarea.focus();
             } else {
                 this.suggestionsShown = false;
             }
-            this.updateJson();
+            this.parse();
+            this.$emit('update:modelValue', this.jsonString);
         }
     },
 
@@ -276,8 +278,6 @@ export default {
         this.keywords = this.suggestions.map(x => x.key);
         await this.$nextTick();
         this.jsonTextarea = this.$refs.jsonTextarea;
-        this.$refs.suggestionsBox.showPopup();
-        this.jsonTextarea.focus();
     }
 };
 </script>
