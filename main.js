@@ -66,14 +66,13 @@ const i18n = createI18n({
  */
 async function logout() {
   console.log('Logging out');
-  if (store.userData) {
+//  if (store.userData) {
     store.userData = null;
     app.config.globalProperties.$q.localStorage.remove("token");
     app.config.globalProperties.$q.localStorage.remove('userData');
     if (app.config.globalProperties.$keycloak)
       app.config.globalProperties.$keycloak.logout();
-  }
-  //if (pushHome) router.push({ name: "Home" });
+//  }
 }
 
 /**
