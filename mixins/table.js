@@ -344,7 +344,10 @@ export const TableMixin = {
 
             // get data from the server
             await this.reload();
+
             this.loaded = true; 
+            await this.$nextTick();
+            console.log ("fsr", this.$refs.table.filteredSortedRows);
         },
 
         /**
@@ -413,12 +416,16 @@ export const TableMixin = {
         exportTable() {
             let exportRows;
 
+            console.log("exportTable", this.selectedRows, this.$refs.table.filteredSortedRows);
+
             if (this.selectedRows.length > 0) {
                 exportRows = this.selectedRows;
             } else {
                 exportRows = this.$refs.table.filteredSortedRows;
             }
             if (!exportRows || exportRows.length === 0) return;
+
+            console.log("exportRows", exportRows, this.$refs.table.filteredSortedRows);
 
             let content;
 
@@ -454,8 +461,7 @@ export const TableMixin = {
         initPopup(action, rowToPass, rows) {
             let popup = action.popup ?? 'default';
             this.$store.popups[popup].props = this.deepClone(action);
-            this.$store.popups[popup].props.rows = this.rows;
-            this.$store.popups[popup].props.selectedRows = rows;
+            this.$store.popups[popup].props.rows = rows;
             this.$store.popups[popup].props.parent = this;
             this.$store.popups[popup].props.row = rowToPass;
             this.$store.popups[popup].props.columns = this.columns;
@@ -514,8 +520,7 @@ export const TableMixin = {
             this.replaceVariables(route.props, rowToPass);
 
             route.props.row = rowToPass;
-            route.props.rows = this.rows;
-            route.props.selectedRows = rows;
+            route.props.rows = rows;
             route.props.columns = this.columns;
             route.props.editingRow = rowToPass;
             route.props.editingRowIndex = this.editingRowIndex;
@@ -618,17 +623,18 @@ export const TableMixin = {
             let rows;
 
             if (this.selection == "multiple") {
-                if (this.selectedRows.length == 0) {
-                    rows = this.rows; //this.$refs.table.filteredSortedRows;
-                } else {
-                    rows = this.selectedRows;
-                }
-                if (action.mustSelectRows && rows.length == 0) {
+                if (action.mustSelectRows && this.selectedRows.length == 0) {
                     this.showMessage(this.$t("Please select rows!"));
                     return;
                 }
+                if (this.selectedRows.length == 0) {
+                    rows = this.$refs.table.filteredSortedRows;
+                } else {
+                    rows = this.selectedRows;
+                }
+
             } else {
-                rows = this.rows;  //this.$refs.table.filteredSortedRows;
+                rows = this.$refs.table.filteredSortedRows;
             }
 
             console.log("runTableAction", action, rows);
