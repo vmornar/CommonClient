@@ -451,11 +451,11 @@ export const TableMixin = {
          * @param {Object} rowToPass - The row object to be passed to the popup.
          * @param {Array} rows - The array of rows in the table.
          */
-        initPopup(action, rowToPass) {
+        initPopup(action, rowToPass, rows) {
             let popup = action.popup ?? 'default';
             this.$store.popups[popup].props = this.deepClone(action);
             this.$store.popups[popup].props.rows = this.rows;
-            this.$store.popups[popup].props.selectedRows = this.$refs.table.filteredSortedRows;
+            this.$store.popups[popup].props.selectedRows = rows;
             this.$store.popups[popup].props.parent = this;
             this.$store.popups[popup].props.row = rowToPass;
             this.$store.popups[popup].props.columns = this.columns;
@@ -514,8 +514,8 @@ export const TableMixin = {
             this.replaceVariables(route.props, rowToPass);
 
             route.props.row = rowToPass;
-            route.props.rows = rows;
-            route.props.selectedRows = this.$refs.table.filteredSortedRows;
+            route.props.rows = this.rows;
+            route.props.selectedRows = rows;
             route.props.columns = this.columns;
             route.props.editingRow = rowToPass;
             route.props.editingRowIndex = this.editingRowIndex;
@@ -601,7 +601,7 @@ export const TableMixin = {
                 this.chart(this.rows, a);
             } else {
                 // activate a component
-                this.initPopup(a, rowToPass);
+                this.initPopup(a, rowToPass, this.rows);
             }
 
             if (a.reload) {
@@ -618,15 +618,20 @@ export const TableMixin = {
             let rows;
 
             if (this.selection == "multiple") {
-                rows = this.selectedRows;
+                if (this.selectedRows.length == 0) {
+                    rows = this.$refs.table.filteredSortedRows;
+                } else {
+                    rows = this.selectedRows;
+                }
                 if (action.mustSelectRows && rows.length == 0) {
                     this.showMessage(this.$t("Please select rows!"));
                     return;
                 }
             } else {
-                rows = this.rows;
+                rows = this.$refs.table.filteredSortedRows;
             }
 
+            console.log("runTableAction", action, rows);
             if (action.confirmationMessage) {
                 if (!await this.confirmDialog(action.confirmationMessage)) {
                     return;
@@ -651,7 +656,7 @@ export const TableMixin = {
                 this.$store.state[this.$route.path] = this.deepClone(this.$data);
                 this.prepareRoute(action, null, rows);
             } else if (action.component) {
-                this.initPopup(action, null);
+                this.initPopup(action, null, rows);
             }
 
             if (action.reload) {

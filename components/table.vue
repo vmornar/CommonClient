@@ -288,7 +288,6 @@ export default {
                 || (this.filter[col.name] != undefined && this.filter[col.name].toString() != "")
                 || (this.filter2[col.name] != undefined && this.filter2[col.name].toString() != "")
                 );
-console.log("filterSet",  ret, this.filter);
             if (ret.length > 0) {
                 let f = "";
                 for (let col of ret) {
@@ -321,7 +320,6 @@ console.log("filterSet",  ret, this.filter);
                     }
                 }
                 f = `return ${f}`;
-                console.log(f);
                 let filterFunction = new Function("row", f);
                 filterFunction = filterFunction.bind(this);
                 this.rowsFiltered = this.rows.filter(filterFunction);

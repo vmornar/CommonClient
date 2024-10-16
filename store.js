@@ -52,7 +52,11 @@ export const store = reactive({
         email: [val => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(val) || 'Please enter a valid email address';
-        }]
+        }],
+        emailMultiple: [val => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return val.split(';').every(v => emailRegex.test(v.trim())) || 'Please enter valid email address or adresses separated by semicolons';
+        }],
     },
     news: [],
     ...cstore
