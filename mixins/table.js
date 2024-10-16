@@ -619,7 +619,7 @@ export const TableMixin = {
 
             if (this.selection == "multiple") {
                 if (this.selectedRows.length == 0) {
-                    rows = this.$refs.table.filteredSortedRows;
+                    rows = this.rows; //this.$refs.table.filteredSortedRows;
                 } else {
                     rows = this.selectedRows;
                 }
@@ -628,7 +628,7 @@ export const TableMixin = {
                     return;
                 }
             } else {
-                rows = this.$refs.table.filteredSortedRows;
+                rows = this.rows;  //this.$refs.table.filteredSortedRows;
             }
 
             console.log("runTableAction", action, rows);
