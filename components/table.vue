@@ -283,16 +283,15 @@ export default {
          * @returns {boolean} True if the filter is set for any column, otherwise false.
          */
         filterSet() {
-            let ret = this.columns.find(col => this.filterExp[col.name] == "set" || this.filterExp[col.name] == "not set" || this.filter[col.name] != undefined || this.filter2[col.name] != undefined) != null;
-
-            if (ret) {
+            let ret = this.columns.filter(col => this.filterExp[col.name] == "set"
+                || this.filterExp[col.name] == "not set"
+                || (this.filter[col.name] != undefined && this.filter[col.name].toString() != "")
+                || (this.filter2[col.name] != undefined && this.filter2[col.name].toString() != "")
+                );
+console.log("filterSet",  ret, this.filter);
+            if (ret.length > 0) {
                 let f = "";
-                for (let col of this.columns.filter(col =>
-                    this.filterExp[col.name] == 'set'
-                    || this.filterExp[col.name] == 'not set'
-                    || (this.filter[col.name] != undefined && this.filter[col.name] != "")
-                    || (this.filter2[col.name] != undefined && this.filter2[col.name] != ""))) {
-
+                for (let col of ret) {
                     if (f != "") f += " && ";
                     let index = this.frugal ? col.index : '"' + col.name + '"';
                     if (this.filterExp[col.name] == 'set') {
@@ -326,9 +325,9 @@ export default {
                 let filterFunction = new Function("row", f);
                 filterFunction = filterFunction.bind(this);
                 this.rowsFiltered = this.rows.filter(filterFunction);
-
+                return true;
             }
-            return ret;
+            return false;
         },
 
         /**

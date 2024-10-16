@@ -455,7 +455,7 @@ export const TableMixin = {
             let popup = action.popup ?? 'default';
             this.$store.popups[popup].props = this.deepClone(action);
             this.$store.popups[popup].props.rows = this.rows;
-            this.$store.popups[popup].props.selectedRows = this.selectedRows;
+            this.$store.popups[popup].props.selectedRows = this.$refs.table.filteredSortedRows;
             this.$store.popups[popup].props.parent = this;
             this.$store.popups[popup].props.row = rowToPass;
             this.$store.popups[popup].props.columns = this.columns;
@@ -515,7 +515,7 @@ export const TableMixin = {
 
             route.props.row = rowToPass;
             route.props.rows = rows;
-            route.props.selectedRows = this.selectedRows;
+            route.props.selectedRows = this.$refs.table.filteredSortedRows;
             route.props.columns = this.columns;
             route.props.editingRow = rowToPass;
             route.props.editingRowIndex = this.editingRowIndex;

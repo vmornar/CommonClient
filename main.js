@@ -136,6 +136,7 @@ async function handleAxiosError(error) {
     reason = i18n.global.t("No response from server");
     //store.isOnline = false;
     logout();
+    return { data: null };
     //expired = true;
   } 
 

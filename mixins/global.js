@@ -627,7 +627,7 @@ export const GlobalMixin = {
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
             this.$q.notify({
-                message: this.$t("URL copied to clipboard"),
+                message: this.$t("Copied to clipboard"),
                 color: "positive",
                 timeout: 1000,
                 position: "bottom"
