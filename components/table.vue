@@ -287,7 +287,7 @@ export default {
                 || this.filterExp[col.name] == "not set"
                 || (this.filter[col.name] != undefined && this.filter[col.name].toString() != "")
                 || (this.filter2[col.name] != undefined && this.filter2[col.name].toString() != "")
-                );
+            );
             if (ret.length > 0) {
                 let f = "";
                 for (let col of ret) {
@@ -425,7 +425,6 @@ export default {
             // } else {
             //     ret = val;
             // }
-            // console.log("realValue", type, val, ret);
             // return ret;
         },
 

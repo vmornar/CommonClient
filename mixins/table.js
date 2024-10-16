@@ -347,7 +347,6 @@ export const TableMixin = {
 
             this.loaded = true; 
             await this.$nextTick();
-            console.log ("fsr", this.$refs.table.filteredSortedRows);
         },
 
         /**
@@ -416,16 +415,12 @@ export const TableMixin = {
         exportTable() {
             let exportRows;
 
-            console.log("exportTable", this.selectedRows, this.$refs.table.filteredSortedRows);
-
             if (this.selectedRows.length > 0) {
                 exportRows = this.selectedRows;
             } else {
                 exportRows = this.$refs.table.filteredSortedRows;
             }
             if (!exportRows || exportRows.length === 0) return;
-
-            console.log("exportRows", exportRows, this.$refs.table.filteredSortedRows);
 
             let content;
 
@@ -540,6 +535,7 @@ export const TableMixin = {
                 this.$store[action.deleteInStore].splice(index, 1);
             }
         },
+         
         /**
          * Runs a row action.
          * @param {Object} action - Action to be run.
@@ -637,7 +633,6 @@ export const TableMixin = {
                 rows = this.$refs.table.filteredSortedRows;
             }
 
-            console.log("runTableAction", action, rows);
             if (action.confirmationMessage) {
                 if (!await this.confirmDialog(action.confirmationMessage)) {
                     return;

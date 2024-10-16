@@ -109,7 +109,6 @@ export const TableEditMixin = {
             if (!this.lookupsLoaded) {
                 for (let col of this.columns) {
                     if (col.lookup) {
-                        console.log("col.lookup", col.lookup, this.lookups);
                         if (!this.lookups[col.lookup.name] || !this.lookups[col.lookup.name].loaded) {
                             let options;
                             if (col.lookup.options) {
@@ -207,7 +206,6 @@ export const TableEditMixin = {
 
             this.lookupName = null;
 
-            console.log("col", col);
             this.overlays = {};
 
             if (col.type == 'json') {
@@ -261,7 +259,6 @@ export const TableEditMixin = {
             let overlay = this.$refs[this.overlayShown];
 
             let oRect = overlay.$el.getBoundingClientRect();
-            console.log("oRect", oRect);
             if (oRect.bottom > window.innerHeight) {
                 this.overlayStyle.top = (Math.max(window.innerHeight - oRect.height, 0)) + 'px';
                 this.$forceUpdate();
