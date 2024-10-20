@@ -169,7 +169,6 @@ export const TableMixin = {
                 if (attribute.decimals) format = val => val != null ? Number(val).toFixed(attribute.decimals) : null;
                 return {
                     name: attribute.name,
-                    label: attribute.name,
                     field: this.frugal ? row => row[index] : attribute.name,
                     sortable: true,
                     format: val => format(val),
@@ -181,6 +180,16 @@ export const TableMixin = {
                     //width: this.calcWidth(attribute.type),
                 }
             });
+
+            for (let col of this.columns) {
+                let pos = col.name.indexOf('__');
+                if (pos > 0) {
+                                    console.log(col);
+                    col.refTable = col.name.substring(0, pos);
+                    col.name = col.name.substring(pos + 2);
+                }
+                col.label = col.name;
+            }
 
             // chemistry for lookup fields (id in popup, id_val in table)
             if (this.tableAPI ) {
@@ -201,13 +210,6 @@ export const TableMixin = {
                 // snake case to readable label
                 col.label = col.label.replaceAll(/_/g, ' ');
                 col.label = col.label.charAt(0).toUpperCase() + col.label.slice(1);
-
-
-                let pos = col.name.indexOf('__');
-                if (pos > 0) {
-                    col.refTable = col.name.substring(0, pos);
-                    col.name = col.name.substring(pos + 2);
-                }
 
                 if (this.colAtts[col.name]) {
                     this.copyObject(this.colAtts[col.name], col, true);
