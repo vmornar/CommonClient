@@ -18,6 +18,25 @@ export const GlobalMixin = {
     methods: {
 
         /**
+         * The function `arrayToObject` converts an array of objects into a single object using specified
+         * key-value pairs.
+         * @param array - An array of objects that you want to convert into a new object.
+         * @param key - The `key` parameter in the `arrayToObject` function is used to specify the property of
+         * each object in the array that will be used as the key in the resulting object.
+         * @param value - The `value` parameter in the `arrayToObject` function represents the property of each
+         * object in the input array that you want to use as the value in the resulting object.
+         * @returns The `arrayToObject` function is returning an object where the keys are taken from the `key`
+         * property of each item in the input `array`, and the values are taken from the `value` property of
+         * each item in the input `array`.
+         */
+        arrayToObject(array, key, value) {
+            return array.reduce((obj, item) => {
+                obj[item[key]] = item[value];
+                return obj;
+            }, {});
+        },
+
+        /**
          * Waits for a Vue component reference to be available.
          * @param {string} ref - The name of the component reference.
          * @returns {Promise<void>} - A promise that resolves when the component reference is available.
@@ -608,8 +627,8 @@ export const GlobalMixin = {
         },
 
         initializeComponent() {
-            if (this.asPopup) {
-                this.copyObject(this.$store.popups.default.props, this, true);
+            if (this.popupName) {
+                this.copyObject(this.$store.popups[popupName].props, this, true);
             } else {
                 this.copyObject(this.$store.props, this, true);
             }

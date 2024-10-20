@@ -6,7 +6,7 @@
 export default {
     name: "FileViewer",
     props: {
-        asPopup: true
+        popupName: "default"
     },
     data: function () {
         return {

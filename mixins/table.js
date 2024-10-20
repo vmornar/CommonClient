@@ -9,7 +9,7 @@ import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 export const TableMixin = {
     props: {
         options: null,
-        asPopup: false,
+        popupName: null,
     },
     mixins: [TableExportMixin, TableCustomMixin],
     data() {
@@ -201,6 +201,14 @@ export const TableMixin = {
                 // snake case to readable label
                 col.label = col.label.replaceAll(/_/g, ' ');
                 col.label = col.label.charAt(0).toUpperCase() + col.label.slice(1);
+
+
+                let pos = col.name.indexOf('__');
+                if (pos > 0) {
+                    col.refTable = col.name.substring(0, pos);
+                    col.name = col.name.substring(pos + 2);
+                }
+
                 if (this.colAtts[col.name]) {
                     this.copyObject(this.colAtts[col.name], col, true);
                     if (this.format[col.type]) {
@@ -229,10 +237,11 @@ export const TableMixin = {
                 }
 
                 if (col.name.endsWith("_id") && !col.noLookup) {                   
-                     col.lookup = { name: col.name.slice(0, -3), default: true };
+                     col.lookup = { name: col.name.slice(0, -3), default: true, refTable: col.refTable };
                 }
+
                 if (col.name.endsWith("_id_val") && !col.noLookup) {
-                    col.lookup = { name: col.name.slice(0, -7), default: true };
+                    col.lookup = { name: col.name.slice(0, -7), default: true, refTable: col.refTable };
                 }
 
                 if (col.name.endsWith('_id') && !col.visible
@@ -303,8 +312,8 @@ export const TableMixin = {
 
             if (this.options) { // embedded with options
                 this.copyObject(this.options, this, true);
-            } else if (this.asPopup) { // called in popup
-                this.copyObject(this.$store.popups.default.props, this, true);
+            } else if (this.popupName) { // called in popup
+                this.copyObject(this.$store.popups[this.popupName].props, this, true);
             } else {
                 this.copyObject(this.$store.props[this.$route.path], this, true);
             }

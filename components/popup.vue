@@ -15,7 +15,7 @@
                 <q-btn dense size="sm" flat round icon="close" @click="closeDialog" />
             </q-card-section>
             <q-card-section class="max-width q-pa-none">
-                <component v-if="component" :is="component" :asPopup="true" />
+                <component v-if="component" :is="component" :popupName="name" />
             </q-card-section>
         </q-card>
     </q-dialog>
@@ -33,6 +33,7 @@
 
 import { markRaw } from 'vue';
 import { loadComponent } from '@/common/component-loader';
+import eventBus from '@/common/event-bus';
 
 export default {
     name: 'Popup',
@@ -54,6 +55,7 @@ export default {
     methods: {
         closeDialog() {
             if (this.canCloseIfFormChanged || !this.$store.formChanged) this.$store.popups[this.name].show = false;
+            eventBus.emit('popupClosed', this.name);
         }
     }
 }

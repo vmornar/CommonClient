@@ -24,9 +24,10 @@
                             v-model="parent.editingRow[col.name]" :height="editStyle.height" :showIconPicker="false"
                             :label="col.label" :disable="col.disabled" />
                         <autocomplete v-else-if="col.lookup && !col.invisible" v-model="parent.editingRow[col.name]"
-                            :label="col.label" :options="parent.lookups[col.lookup.name].options" dense
+                            :label="col.label" :options="parent.lookups[col.lookup.name].options" dense 
                             style="width:95%" :option-label="parent.lookups[col.lookup.name].labelField"
                             :option-value="parent.lookups[col.lookup.name].valueField" emit-value map-options
+                            :lookup="col.lookup" :lookups="parent.lookups"
                             @update:model-value="selectionUpdated(col)" :disable="col.disabled">
                             <template v-slot:label>
                                 <label for="my-autocomplete" v-html="col.label"></label>

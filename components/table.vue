@@ -1,7 +1,7 @@
 <template>
     <div ref="header">
-        <Header v-if="!parent && !asPopup" :name="name ?? $route.name" :title="title ?? $t(name ?? $route.name)"
-            :backButton="!asPopup && $store.level > 1" />
+        <Header v-if="!parent && !popupName" :name="name ?? $route.name" :title="title ?? $t(name ?? $route.name)"
+            :backButton="!popupName && $store.level > 1" />
     </div>
     <div ref="parentElement" @keydown="handleKeyDown($event, true)">
         <!-- Overlays for inline editing -->
@@ -15,6 +15,7 @@
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
             :options="overlaySelectOptions.options" :option-label="overlaySelectOptions.optionLabel"
             :option-value="overlaySelectOptions.optionValue" @blur="closeOverlay"
+            :lookup="overlaySelectOptions.lookup"
             @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
         <icon-picker v-if="overlays.overlayIcon" ref="overlayIcon" v-model="editedItem" @blur="closeOverlay"
             @update:model-value="editedItemChanged" :style="overlayStyle" />
@@ -314,7 +315,7 @@ export default {
         height() {
             //await this.$nextTick();
             if (this.$refs.header && this.$refs.preheader) {
-                if (!this.parent && !this.asPopup) {
+                if (!this.parent && !this.popupName) {
                     //if (!this.$refs.preheader || !this.$refs.header) return 0;            
                     return this.$q.screen.height - this.$refs.header.offsetHeight - 40 - this.$refs.preheader.offsetHeight - 5;
                 } else {

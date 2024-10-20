@@ -312,5 +312,23 @@ export const GlobalApiMixin = {
         //     formData.append("params", JSON.stringify(params));
         //     return await this.post(url, formData);
         // }
+
+        /**
+         * Loads a lookup table from the API or local storage.
+         * @param {*} lookup 
+         */
+        async loadLookup(lookup) {
+            let options;
+            console.log("lookup il ll", lookup);
+            if (lookup.options) {
+                options = lookup.options;
+            } else if (lookup.API) {
+                options = await this.get(lookup.API);
+            } else {
+                options = await this.get("Table/GetLookup/" + lookup.refTable);
+            }
+            console.log("options", options);
+            return options;
+        }
     }
 }

@@ -1,3 +1,7 @@
+/**
+ * Store for the application
+ * @module store
+ */
 import { reactive } from 'vue'
 import { cstore } from '../specific/store.js';
 export const store = reactive({
@@ -32,6 +36,10 @@ export const store = reactive({
             show: false,
         },
         chart: {
+            props: {},
+            show: false
+        },
+        editLookup: {
             props: {},
             show: false
         },

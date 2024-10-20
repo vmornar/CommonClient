@@ -1,14 +1,22 @@
 <template>
-    <q-select v-model="value" ref="select" class="q-ma-none q-pa-none" :options="filteredOptions"
-        :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
-        :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
-        @focus="focus" :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html
-        @popup-show="startEditing" :disable="disable" :rules="rules" :square="square">
-        <template v-slot:before-options v-if="searchable">
-            <q-icon name="search" />
-            <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0" @keydown="keyDown" />
-        </template>
-    </q-select>
+    <span>
+        <q-select v-model="value" ref="select" class="q-ma-none q-pa-none" :options="filteredOptions"
+            :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
+            :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
+            @focus="focus" :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html
+            @popup-show="startEditing" :disable="disable" :rules="rules" :square="square" 
+            style="min-width: 100px;"
+            >
+            <template v-slot:before-options v-if="searchable">
+                <q-icon name="search" />
+                <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0" @keydown="keyDown" />
+            </template>
+            <template v-slot:append>
+                <q-btn size="sm" flat dense icon="edit" @click="editLookup"/>
+            </template>
+        </q-select>
+        
+    </span>
 </template>
 <script>
 /**
@@ -17,6 +25,7 @@
  * @component Autocomplete
  *
  */
+import eventBus from '@/common/event-bus';
 export default {
     name: "Autocomplete",
     props: {
@@ -37,6 +46,8 @@ export default {
         modelValue: { type: [String, Number, Array, Object, Boolean], default: null },
         rules: { type: Array, default: () => [] },
         square: { type: Boolean, default: true },
+        lookup: { type: Object, default: () => null },
+        lookups: { type: Object, default: () => null },
     },
     emits: ["update:modelValue"],
     data() {
@@ -85,7 +96,30 @@ export default {
         async focus() {
             this.$refs.select.focus();
         },
+        editLookup() {
+            this.$store.popups.editLookup.props.tableAPI = this.lookup.refTable;
+            this.$store.popups.editLookup.component = 'table'; 
+            this.$store.popups.editLookup.show = true;
+        },
+        keyDown(e) {
+            if (e.key == 'ArrowDown') {
+                this.$refs.select.showPopup();
+            }
+        }
     },
+    mounted() {
+        console.log('mounted', this.lookup, this.lookups);
+        let self = this;
+        eventBus.on('popupClosed', async (payload) => {
+            if (payload == 'editLookup') {
+                console.log('closed', self.lookup, self.lookups);
+                self.lookups[self.lookup.name].options = await self.loadLookup(self.lookup);
+            }
+        });
+    },
+    beforeUnmount() {
+        eventBus.off('popupClosed');
+    }
 }
 </script>
 <style scoped>

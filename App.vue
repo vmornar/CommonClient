@@ -82,6 +82,7 @@
 
       </q-layout>
       <popup v-if="$store.popups.default.show" name="default" @keydown.f9="translate" />
+      <popup v-if="$store.popups.editLookup.show" name="editLookup" @keydown.f9="translate" />
       <chart-popup v-if="$store.popups.chart.show" />
       <help-dialog @keydown.f9="translate" />
       <task-progress v-if="$store.progress.show" />

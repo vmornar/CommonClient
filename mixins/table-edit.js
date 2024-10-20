@@ -22,7 +22,8 @@ export const TableEditMixin = {
         overlaySelectOptions: {
             options: [],
             optionLabel: '',
-            optionValue: ''
+            optionValue: '',
+            lookup: null,
         },
         lookupName: null,
     }),
@@ -109,23 +110,20 @@ export const TableEditMixin = {
             if (!this.lookupsLoaded) {
                 for (let col of this.columns) {
                     if (col.lookup) {
-                        console.log("col.lookup", col.lookup, this.lookups);
-                        if (!this.lookups[col.lookup.name] || !this.lookups[col.lookup.name].loaded) {
-                            let options;
-                            if (col.lookup.options) {
-                                options = col.lookup.options;
-                            } else if (col.lookup.API) {
-                                options = await this.get(col.lookup.API);
-                            } else {
-                                options = await this.get("Table/GetLookup/" + col.lookup.name);
+                        let name = col.lookup.name;
+                        if (!this.lookups[name]) {
+                            let options = await this.loadLookup(col.lookup);
+                            this.lookups[name] = {};
+                            this.lookups[name].options = options;
+                            if (options) {
+                                if (options.length > 0) {
+                                    this.lookups[name].valueField = Object.keys(options[0])[0];
+                                    this.lookups[name].labelField = Object.keys(options[0])[1];
+                                } else {
+                                    this.lookups[name].valueField = "id";
+                                    this.lookups[name].labelField = "name";
+                                }
                             }
-                            if (options && options.length > 0) {
-                                this.lookups[col.lookup.name] = {};
-                                this.lookups[col.lookup.name].options = options;
-                                this.lookups[col.lookup.name].valueField = Object.keys(options[0])[0];
-                                this.lookups[col.lookup.name].labelField = Object.keys(options[0])[1];
-                            }
-                            this.lookups[col.lookup.name].loaded = true;
                         }
                     }
                 }
@@ -221,6 +219,7 @@ export const TableEditMixin = {
                 this.overlaySelectOptions.options = this.lookups[col.lookup.name].options;
                 this.overlaySelectOptions.optionLabel = this.lookups[col.lookup.name].labelField;
                 this.overlaySelectOptions.optionValue = this.lookups[col.lookup.name].valueField;
+                this.overlaySelectOptions.lookup = col.lookup
             } else {
                 this.overlayShown = 'overlayInput';
             }
