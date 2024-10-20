@@ -260,18 +260,73 @@ export default {
         },
     },
     data: () => ({
+        rowsFiltered: [],
     }),
     computed: {
+
+        /**
+         * Determines if the row toolbar should be displayed.
+         * The toolbar is shown if any of the following conditions are met:
+         * - Editing is allowed (`allowEdit` is true)
+         * - Deleting is allowed (`allowDelete` is true)
+         * - There are specific row actions defined (`rowActions` is true)
+         * - The user has admin privileges (`isAdmin` is true)
+         *
+         * @returns {boolean} True if the row toolbar should be displayed, otherwise false.
+         */
         hasRowToolbar() {
             return this.allowEdit || this.allowDelete || this.rowActions || this.isAdmin;
         },
+
         /**
          * Returns a boolean value indicating whether the filter is set for any column.
          * 
          * @returns {boolean} True if the filter is set for any column, otherwise false.
          */
         filterSet() {
-            return this.columns.find(col => this.filterExp[col.name] == "set" || this.filterExp[col.name] == "not set" || this.filter[col.name] != undefined || this.filter2[col.name] != undefined) != null;
+            let ret = this.columns.filter(col => this.filterExp[col.name] == "set"
+                || this.filterExp[col.name] == "not set"
+                || (this.filter[col.name] != undefined && this.filter[col.name].toString() != "")
+                || (this.filter2[col.name] != undefined && this.filter2[col.name].toString() != "")
+            );
+            if (ret.length > 0) {
+                let f = "";
+                for (let col of ret) {
+                    if (f != "") f += " && ";
+                    let index = this.frugal ? col.index : '"' + col.name + '"';
+                    if (this.filterExp[col.name] == 'set') {
+                        f += `row[${index}] != null`;
+                    } else if (this.filterExp[col.name] == 'not set') {
+                        f += `row[${index}] == null`;
+                    } else if (col.type == "boolean") {
+                        f += `row[${index}] == ${this.filter[col.name]}`;
+                    } else if (this.filterExp[col.name] == 'contains') {
+                        f += `(row[${index}] ?? "").toString().toLowerCase().includes("${this.filter[col.name].toLowerCase()}")`;
+                    } else if (this.filterExp[col.name] == '!contains') {
+                        f += `!row[${index}].toString().toLowerCase().includes("${this.filter[col.name].toLowerCase()}")`;
+                    } else if (this.filterExp[col.name] == '=') {
+                        f += `this.realValue("${col.type}", row[${index}]) == "${this.filter[col.name].toLowerCase()}"`;
+                    } else if (this.filterExp[col.name] == '!=') {
+                        f += `this.realValue("${col.type}", row[${index}]) != "${this.filter[col.name].toLowerCase()}"`;
+                    } else if (this.filterExp[col.name] == '>') {
+                        f += `this.realValue("${col.type}", row[${index}]) > ${this.filter[col.name]}`;
+                    } else if (this.filterExp[col.name] == '>=') {
+                        f += `this.realValue("${col.type}", row[${index}]) >= ${this.filter[col.name]}`;
+                    } else if (this.filterExp[col.name] == '<') {
+                        f += `this.realValue("${col.type}", row[${index}]) < ${this.filter[col.name]}`;
+                    } else if (this.filterExp[col.name] == '<=') {
+                        f += `this.realValue("${col.type}", row[${index}]) <= ${this.filter[col.name]}`;
+                    } else if (this.filterExp[col.name] == 'between') {
+                        f += `this.realValue("${col.type}", row[${index}]) >= ${this.filter[col.name]} && this.realValue("${col.type}", row[${index}]) <= ${this.filter2[col.name]}`;
+                    }
+                }
+                f = `return ${f}`;
+                let filterFunction = new Function("row", f);
+                filterFunction = filterFunction.bind(this);
+                this.rowsFiltered = this.rows.filter(filterFunction);
+                return true;
+            }
+            return false;
         },
 
         /**
@@ -338,48 +393,9 @@ export default {
          * 
          * @returns {Array} The filtered rows.
          */
-        rowsFiltered() {
-            return this.rows.filter(row => {
-                for (let col of this.columns.filter(col =>
-                    this.filterExp[col.name] == 'set'
-                    || this.filterExp[col.name] == 'not set'
-                    || this.filter[col.name] != undefined
-                    || this.filter2[col.name] != undefined)) {
-
-                    console.log("col has filter", col.name, col.type, this.filter[col.name]);
-                    //console.log(col.name, col.type, this.filterExp[col.name], this.filter[col.name], this.filter2[col.name], row[col.index]);
-
-                    if (this.filterExp[col.name] == 'set') {
-                        if (row[col.index] == null) return false;
-                    } else if (this.filterExp[col.name] == 'not set') {
-                        if (row[col.index] != null) return false;
-                    } else if (col.type == "boolean") {
-                        console.log("bulfilter", col.name, this.filter[col.name], row[col.index]);
-                        if (this.filter[col.name] != row[col.index]) return false;
-                    } else if (this.filterExp[col.name] == 'contains') {
-                        if (!this.realValue(col, row[col.index]).toString().includes(this.filter[col.name].toLowerCase())) return false;
-                    } else if (this.filterExp[col.name] == '!contains') {
-                        if (this.realValue(col, row[col.index]).toString().includes(this.filter[col.name].toLowerCase())) return false;
-                    } else if (this.filterExp[col.name] == '=') {
-                        if (this.realValue(col, row[col.index]) != this.filter[col.name]) return false;
-                    } else if (this.filterExp[col.name] == '!=') {
-                        if (this.realValue(col, row[col.index]) == this.filter[col.name]) return false;
-                    } else if (this.filterExp[col.name] == '>') {
-                        if (this.realValue(col, row[col.index]) <= this.filter[col.name]) return false;
-                    } else if (this.filterExp[col.name] == '>=') {
-                        if (this.realValue(col, row[col.index]) < this.filter[col.name]) return false;
-                    } else if (this.filterExp[col.name] == '<') {
-                        if (this.realValue(col, row[col.index]) >= this.filter[col.name]) return false;
-                    } else if (this.filterExp[col.name] == '<=') {
-                        if (this.realValue(col, row[col.index]) > this.filter[col.name]) return false;
-                    } else if (this.filterExp[col.name] == 'between') {
-                        if (this.realValue(col, row[col.index]) < this.filter[col.name] || this.realValue(col, row[col.index]) > this.filter2[col.name]) return false;
-                    }
-                }
-                console.log("row ", " passed");
-                return true;
-            });
-        },
+        // rowsFiltered() {
+        //     return this.rows.filter(this.filterFunction);
+        // },
     },
     methods: {
 
@@ -390,16 +406,27 @@ export default {
          * @param {any} val - The value to be converted.
          * @returns {any} - The converted value.
          */
-        realValue(col, val) {
-            if (col.type == "timestamp with time zone") {
+        realValue(type, val) {
+            if (type == "timestamp with time zone") {
                 return this.toLocalISOString(new Date(val));
-            } else if (col.type == "string" || col.type == "text" || col.type == "character varying" || col.type == "character") {
+            } else if (type == "string" || type == "text" || type == "character varying" || type == "character") {
                 return val?.toLowerCase();
             } else if (val == null) {
                 return '';
             } else {
                 return val;
             }
+            // let ret;
+            // if (type == "timestamp with time zone") {
+            //     ret = this.toLocalISOString(new Date(val));
+            // } else if (type == "string" || type == "text" || type == "character varying" || type == "character") {
+            //     ret = val?.toLowerCase();
+            // } else if (val == null) {
+            //     ret = '';
+            // } else {
+            //     ret = val;
+            // }
+            // return ret;
         },
 
         /**

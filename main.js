@@ -66,12 +66,13 @@ const i18n = createI18n({
  */
 async function logout() {
   console.log('Logging out');
-  app.config.globalProperties.$q.localStorage.remove("token");
-  store.userData = null;
-  app.config.globalProperties.$q.localStorage.remove('userData');
-  if (app.config.globalProperties.$keycloak)
-    app.config.globalProperties.$keycloak.logout(); 
-  //if (pushHome) router.push({ name: "Home" });
+//  if (store.userData) {
+    store.userData = null;
+    app.config.globalProperties.$q.localStorage.remove("token");
+    app.config.globalProperties.$q.localStorage.remove('userData');
+    if (app.config.globalProperties.$keycloak)
+      app.config.globalProperties.$keycloak.logout();
+//  }
 }
 
 /**
@@ -133,7 +134,9 @@ async function handleAxiosError(error) {
     }
   } else if (error.request) {
     reason = i18n.global.t("No response from server");
-    store.isOnline = false;
+    //store.isOnline = false;
+    logout();
+    return { data: null };
     //expired = true;
   } 
 

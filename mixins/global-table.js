@@ -158,5 +158,25 @@ export const GlobalTableMixin = {
                 return lookup.options.find(v => v[lookup.valueField] == value)[lookup.labelField];
             }
         },
+
+        /**
+         * Converts a frugal JSON object to an array of objects.
+         *
+         * @param {Object} data - The frugal JSON object containing data and attributes.
+         * @param {Array} data.data - The array of data rows.
+         * @param {Array} data.attributes - The array of attribute names.
+         * @returns {Array<Object>} An array of objects where each object represents a row of data with attribute names as keys.
+         */
+        frugalJsonToArray(data) {
+            let a = [];
+            for (let row of data.data) {
+                let obj = {};
+                for (let i = 0; i < data.attributes.length; i++) {
+                    obj[data.attributes[i].name] = row[i];
+                }
+                a.push(obj);
+            }
+            return a;
+        }
     }
 };
