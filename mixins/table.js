@@ -259,6 +259,7 @@ export const TableMixin = {
            
             this.clearFilter();
             this.rows = this.frugal ? this.data.data : this.data;
+            this.rowsFiltered = this.rows;
         },
 
         /**
