@@ -14,9 +14,8 @@
             :iconPicker="false" />
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
             :options="overlaySelectOptions.options" :option-label="overlaySelectOptions.optionLabel"
-            :option-value="overlaySelectOptions.optionValue" @blur="closeOverlay"
-            :lookup="overlaySelectOptions.lookup"
-            @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
+            :option-value="overlaySelectOptions.optionValue" @blur="closeOverlay" :lookup="overlaySelectOptions.lookup"
+            :lookups="lookups" @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
         <icon-picker v-if="overlays.overlayIcon" ref="overlayIcon" v-model="editedItem" @blur="closeOverlay"
             @update:model-value="editedItemChanged" :style="overlayStyle" />
 
