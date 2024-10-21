@@ -3,16 +3,13 @@
         <q-select v-model="value" ref="select" class="q-ma-none q-pa-none" :options="filteredOptions"
             :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
             :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
-            @focus="focus" :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html
+             :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html
             @popup-show="startEditing" :disable="disable" :rules="rules" :square="square" 
-            style="min-width: 100px;"
+            style="min-width: 100px;" @focus="handleFocus(0)" @blur="handleBlur(0)"
             >
             <template v-slot:before-options v-if="searchable">
                 <q-icon name="search" />
-                <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0" @keydown="keyDown" />
-            </template>
-            <template v-slot:append>
-                <q-btn size="sm" flat dense icon="edit" @click="editLookup"/>
+                <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0" @keydown="keyDown" @focus="handleFocus(1)" @blur="handleBlur(1)" /><q-btn class="q-pa-none q-ma-none" size="sm" flat dense icon="edit" @click="editLookup" @focus="handleFocus(2)" @blur="handleBlur(2)"/>
             </template>
         </q-select>
         
@@ -49,10 +46,11 @@ export default {
         lookup: { type: Object, default: () => null },
         lookups: { type: Object, default: () => null },
     },
-    emits: ["update:modelValue"],
+    emits: ["update:modelValue", "blur"],
     data() {
         return {
             filter: '',
+            focusedChildren: [false, false, false]
         }
     },
     computed: {
@@ -93,10 +91,26 @@ export default {
                 });
             }
         },
-        async focus() {
+        focus() {
             this.$refs.select.focus();
         },
+        handleFocus(key) {
+            return;
+            if (key == 0) {
+                this.$refs.select.focus();
+            }
+            this.focusedChildren[key] = true;
+        },
+        handleBlur(key) {
+            return;
+            this.focusedChildren[key] = false;
+            if (key == 2) return;
+            if (this.focusedChildren.every(e => !e)) {
+                this.$emit('blur');
+            }
+        },
         editLookup() {
+            this.$refs.select.hidePopup();
             this.$store.popups.editLookup.props.tableAPI = this.lookup.refTable;
             this.$store.popups.editLookup.component = 'table'; 
             this.$store.popups.editLookup.show = true;
