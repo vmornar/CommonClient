@@ -388,15 +388,6 @@ export default {
         tableStyle() {
             return `height: ${this.height}px; width: ${this.$store.screenWidth - 5}px;`;
         },
-
-        /**
-         * Filters the rows based on the specified filter expressions.
-         * 
-         * @returns {Array} The filtered rows.
-         */
-        // rowsFiltered() {
-        //     return this.rows.filter(this.filterFunction);
-        // },
     },
     methods: {
 

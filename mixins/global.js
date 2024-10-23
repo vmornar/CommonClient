@@ -635,8 +635,8 @@ export const GlobalMixin = {
             };
         },
 
-        initializeComponent() {
-            if (this.popupName) {
+        initializeComponent(popupName) {
+            if (popupName) {
                 this.copyObject(this.$store.popups[popupName].props, this, true);
             } else {
                 this.copyObject(this.$store.props, this, true);
