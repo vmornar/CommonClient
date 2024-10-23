@@ -55,15 +55,14 @@ export default {
          * 
          * @param {Object} detail - The detail to be opened.
          */
-        openDetail(detail) {
+        async openDetail(detail) {
             if (this.options && this.options.name == detail.name) {
                 return;
             }
             this.options = detail;
             this.options.parent = this.parent;
-            this.$nextTick(() => {
-                this.$refs.detailTable.init();
-            });
+            await this.$nextTick();
+            this.$refs.detailTable.init();
         }
     }
 }

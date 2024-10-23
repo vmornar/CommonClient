@@ -37,7 +37,6 @@ export const TableMixin = {
             editingRow: null,
             editingRowIndex: null,
             dbFunction: null,
-            lookups: {},
             key: "id",
             rowActions: null,
             tableActions: null,
@@ -73,12 +72,25 @@ export const TableMixin = {
             noInlineEditing: false,
             grid: false,
             lookupsLoaded: false,
+            activeLookup: null,
             summary: null,
             summary_top: null,
             read_only: false,
             hideDefaultToolbar: false,
             hideRecordsToolbar: false,
-            currentOverlay: null
+            currentOverlay: null,
+            props: {},
+            index: 0,
+            editedItem: null,
+            lookupDisplayIndex: 0,
+            overlayShown: null,
+            overlays: {
+                // overlayInput: false,
+                // overlaySelect: false,
+                // overlayJson: false,
+                // overlayText: false,
+                // overlayIcon: false
+            },
         }
     },
     methods: {
@@ -184,7 +196,6 @@ export const TableMixin = {
             for (let col of this.columns) {
                 let pos = col.name.indexOf('__');
                 if (pos > 0) {
-                                    console.log(col);
                     col.refTable = col.name.substring(0, pos);
                     col.name = col.name.substring(pos + 2);
                 }
@@ -196,7 +207,11 @@ export const TableMixin = {
                 this.visibleColumns = [];
                 this.swapIdAndValColumns(this.columns);
                 for (let col of this.columns) {
-                    if (this.parent && (col.name == this.parent.key || col.name == this.parent.key + '_val')) continue;
+                    if (this.parent && (col.name == this.parent.key || col.name == this.parent.key + '_val')) {
+                        col.lookup = null;
+                        col.refTable = null;
+                        continue;
+                    }
                     if (col.name.endsWith('_id')) {
                         col.label = col.label.slice(0, -3);
                     } else if (col.name.endsWith('_id_val')) {
@@ -239,11 +254,11 @@ export const TableMixin = {
                 }
 
                 if (col.name.endsWith("_id") && !col.noLookup) {                   
-                     col.lookup = { name: col.name.slice(0, -3), default: true, refTable: col.refTable };
+                     col.lookup = { name: col.name.slice(0, -3), default: true, refTable: col.refTable, options: null };
                 }
 
                 if (col.name.endsWith("_id_val") && !col.noLookup) {
-                    col.lookup = { name: col.name.slice(0, -7), default: true, refTable: col.refTable };
+                    col.lookup = { name: col.name.slice(0, -7), default: true, refTable: col.refTable, options: null };
                 }
 
                 if (col.name.endsWith('_id') && !col.visible
@@ -280,7 +295,6 @@ export const TableMixin = {
             this.dbFunction = null;
             this.rowActions = null;
             this.tableActions = null;
-            this.lookups = {};
             this.params = null;
             this.filter = {};
             this.filter2 = {};
@@ -302,6 +316,7 @@ export const TableMixin = {
             this.exportPreprocess = null;
             this.noInlineEditing = false;
             this.lookupsLoaded = false;
+            this.activeLookup = null;
             this.summary = null;
             this.summary_top = null;
             this.hideDefaultToolbar = false;
@@ -309,6 +324,12 @@ export const TableMixin = {
             this.allowDelete = true;
             this.allowEdit = true;
             this.allowNew = true;
+            this.props = {},
+            this.index = 0,
+            this.editedItem = null,
+            this.lookupDisplayIndex = 0,
+            this.overlayShown = null,
+            this.overlays = { },
 
             this.grid = this.$q.screen.width <= 800;
 

@@ -318,17 +318,18 @@ export const GlobalApiMixin = {
          * @param {*} lookup 
          */
         async loadLookup(lookup) {
-            let options;
-            console.log("lookup il ll", lookup);
-            if (lookup.options) {
-                options = lookup.options;
-            } else if (lookup.API) {
-                options = await this.get(lookup.API);
-            } else {
-                options = await this.get("Table/GetLookup/" + lookup.refTable);
+            if (lookup.API) {
+                lookup.options = await this.get(lookup.API);
+            } else if (lookup.refTable) {
+                lookup.options = await this.get("Table/GetLookup/" + lookup.refTable);
             }
-            console.log("options", options);
-            return options;
+            if (lookup.options.length > 0) {
+                lookup.valueField = Object.keys(lookup.options[0])[0];
+                lookup.labelField = Object.keys(lookup.options[0])[1];
+            } else {
+                lookup.valueField = "id";
+                lookup.labelField = "name";
+            }
         }
     }
 }

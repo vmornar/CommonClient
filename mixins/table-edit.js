@@ -5,28 +5,6 @@ import { computed } from "vue";
  * @module TableEditMixin
  */
 export const TableEditMixin = {
-    data: () => ({
-        props: {},
-        index: 0,
-        editedItem: null,
-        lookupTableName: "",
-        lookupDisplayIndex: 0,
-        overlayShown: null,
-        overlays: {
-            overlayInput: false,
-            overlaySelect: false,
-            overlayJson: false,
-            overlayText: false,
-            overlayIcon: false
-        },
-        overlaySelectOptions: {
-            options: [],
-            optionLabel: '',
-            optionValue: '',
-            lookup: null,
-        },
-        lookupName: null,
-    }),
     computed: {
         overlayStyle() {
             return {
@@ -58,10 +36,11 @@ export const TableEditMixin = {
             await this.loadLookups();
             this.editMode = 'add';
             this.editingRow = this.createEmptyRow(this.columns);
-            if (this.parent) {
-                this.editingRow[this.parent.key] = this.parent.value;
-                this.editingRow[this.parent.key + '_val'] = this.findLookupValue(this.parent.value, this.parent.key.slice(0, -3), this.lookups);
-            }
+            // if (this.parent) {
+            //     // todo
+            //     this.editingRow[this.parent.key] = this.parent.value;
+            //     this.editingRow[this.parent.key + '_val'] = this.findLookupValue(this.parent.value, this.parent.key.slice(0, -3), this.lookups);
+            // }
             this.editingRowIndex = -1;
             this.inEdit = true;
         },
@@ -110,20 +89,8 @@ export const TableEditMixin = {
             if (!this.lookupsLoaded) {
                 for (let col of this.columns) {
                     if (col.lookup) {
-                        let name = col.lookup.name;
-                        if (!this.lookups[name]) {
-                            let options = await this.loadLookup(col.lookup);
-                            this.lookups[name] = {};
-                            this.lookups[name].options = options;
-                            if (options) {
-                                if (options.length > 0) {
-                                    this.lookups[name].valueField = Object.keys(options[0])[0];
-                                    this.lookups[name].labelField = Object.keys(options[0])[1];
-                                } else {
-                                    this.lookups[name].valueField = "id";
-                                    this.lookups[name].labelField = "name";
-                                }
-                            }
+                        if (!col.lookup.options) {
+                            await this.loadLookup(col.lookup);
                         }
                     }
                 }
@@ -194,17 +161,15 @@ export const TableEditMixin = {
          * @param {*} col 
          * @param {*} props 
          */
-        async showOverlay(ref, col, props) {
+        async showOverlay(col, props) {
             this.currentOverlay = {col : col, props : props};
             if (!this.tableAPI || col.disabled || this.noInlineEditing) return;
-            // let el = this.$refs[ref];
-            // let rect = el[0].getBoundingClientRect();
-            let el = this.$refs[ref]?.[0];
+
+            let el = this.$refs[props.key + '-' + col.index]?.[0];
             el = el && el.$el ? el.$el : el;
             let rect = el.getBoundingClientRect();
 
-            this.lookupName = null;
-
+            this.activeLookup = null;
             this.overlays = {};
 
             if (col.type == 'json') {
@@ -216,21 +181,15 @@ export const TableEditMixin = {
             } else if (col.lookup) {
                 await this.loadLookups();
                 this.overlayShown = 'overlaySelect';
-                this.lookupName = col.lookup.name;
-                this.overlaySelectOptions.label = col.label;
-                this.overlaySelectOptions.options = this.lookups[col.lookup.name].options;
-                this.overlaySelectOptions.optionLabel = this.lookups[col.lookup.name].labelField;
-                this.overlaySelectOptions.optionValue = this.lookups[col.lookup.name].valueField;
-                this.overlaySelectOptions.lookup = col.lookup
+                this.activeLookup = col.lookup;
             } else {
                 this.overlayShown = 'overlayInput';
             }
-            this.overlays[this.overlayShown] = true;  
 
             let top = rect.top;
             let left = rect.left;
             let width = rect.width;
-            if (col.type == 'json' || col.type == 'text' || this.lookupName) {
+            if (col.type == 'json' || col.type == 'text' || this.activeLookup) {
                 width = Math.max(width, 400);
             // } else {
             //     width = Math.max(width, 150);
@@ -255,27 +214,43 @@ export const TableEditMixin = {
             this.editedItem = props.row[this.index];
             this.props = props;
             
+            this.overlays[this.overlayShown] = true;  
             await this.$nextTick();
-            let overlay = this.$refs[this.overlayShown];
 
-            let oRect = overlay.$el.getBoundingClientRect();
-            if (oRect.bottom > window.innerHeight) {
-                this.overlayStyle.top = (Math.max(window.innerHeight - oRect.height, 0)) + 'px';
-                this.$forceUpdate();
-            }
-            if (oRect.right > window.innerWidth) {  
-                this.overlayStyle.left = (Math.max(window.innerWidth - oRect.width, 0)) + 'px';
-                this.$forceUpdate();
-            }
-            overlay.focus();
+            setTimeout(() => {
+           
+                let overlay = this.$refs[this.overlayShown];
+                console.log("overlay ", overlay, overlay.$el);
+                
+                let oRect;
+                
+                if (overlay.$el) {
+                    oRect = overlay.$el.getBoundingClientRect();
+                } else {
+                    oRect = overlay.getBoundingClientRect();
+                }
+
+                if (oRect.bottom > window.innerHeight) {
+                    this.overlayStyle.top = (Math.max(window.innerHeight - oRect.height, 0)) + 'px';
+                    this.$forceUpdate();
+                }
+                if (oRect.right > window.innerWidth) {  
+                    this.overlayStyle.left = (Math.max(window.innerWidth - oRect.width, 0)) + 'px';
+                    this.$forceUpdate();
+                }
+
+                    overlay.focus();
+                }
+            , 100);
         },
+
 
         /**
          * The edited item has changed
          */
         editedItemChanged() {
-            if (this.lookupName) {
-                let displayValue = this.findLookupValue(this.editedItem, this.lookupName, this.lookups);
+            if (this.activeLookup) {
+                let displayValue = this.findLookupValue(this.editedItem, this.activeLookup);
                 this.props.row[this.lookupDisplayIndex] = displayValue;
             }
             this.props.row[this.index] = this.editedItem;
@@ -287,8 +262,10 @@ export const TableEditMixin = {
          * Close the overlay for editing a cell
          */
         closeOverlay() {
+            
             this.currentOverlay = null;
             this.overlays[this.overlayShown] = false;
+            this.overlayShown = null;
             if (this.editedItem != this.props.row[this.index]) {
                 this.props.row[this.index] = this.editedItem;
                 this.changedRows[this.props.row[0]] = [...this.props.row];
@@ -310,7 +287,7 @@ export const TableEditMixin = {
          * @param {*} col 
          */
         selectionUpdated(col) {
-            this.editingRow[col.name + '_val'] = this.findLookupValue(this.editingRow[col.name], col.name.slice(0, -3), this.lookups);
+            this.editingRow[col.name + '_val'] = this.findLookupValue(this.editingRow[col.name], col.lookup, this.lookups);
         }
 
     }

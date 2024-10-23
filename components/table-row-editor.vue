@@ -3,7 +3,7 @@
         <q-card style="overflow: hidden" class="max-width">
             <q-card-section :style="editStyle">
                 <div class="row text-subtitle1">{{ parent.editMode == "add" ? $t('Add row') :
-        $t('Edit row')
+                    $t('Edit row')
                     }}</div>
                 <q-form ref="form">
                     <div class="row" v-for="col in parent.editColumns" :key="col.name">
@@ -24,11 +24,10 @@
                             v-model="parent.editingRow[col.name]" :height="editStyle.height" :showIconPicker="false"
                             :label="col.label" :disable="col.disabled" />
                         <autocomplete v-else-if="col.lookup && !col.invisible" v-model="parent.editingRow[col.name]"
-                            :label="col.label" :options="parent.lookups[col.lookup.name].options" dense 
-                            style="width:95%" :option-label="parent.lookups[col.lookup.name].labelField"
-                            :option-value="parent.lookups[col.lookup.name].valueField" emit-value map-options
-                            :lookup="col.lookup" :lookups="parent.lookups"
-                            @update:model-value="selectionUpdated(col)" :disable="col.disabled">
+                            :label="col.label" :options="col.lookup.options" dense style="width:95%"
+                            :option-label="col.lookup.labelField" :option-value="col.lookup.valueField" emit-value
+                            map-options :lookup="col.lookup" @update:model-value="selectionUpdated(col)"
+                            :disable="col.disabled">
                             <template v-slot:label>
                                 <label for="my-autocomplete" v-html="col.label"></label>
                             </template>
@@ -95,7 +94,7 @@ export default {
             }
         },
         selectionUpdated(col) {
-            let displayValue = this.findLookupValue(this.parent.editingRow[col.name], col.lookup.name, this.parent.lookups);
+            let displayValue = this.findLookupValue(this.parent.editingRow[col.name], col.lookup);
             this.parent.editingRow[col.name + "_val"] = displayValue;
         }
     }

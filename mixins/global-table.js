@@ -150,8 +150,7 @@ export const GlobalTableMixin = {
          * @param {*} tableName 
          * @returns display value for the lookup value in the lookup table
          */
-        findLookupValue(value, lookupName, lookups) {
-            let lookup = lookups[lookupName];
+        findLookupValue(value, lookup) {
             if (value == null) {
                 return "";
             } else {

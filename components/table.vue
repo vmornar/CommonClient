@@ -12,10 +12,12 @@
         <q-input v-if="overlays.overlayText" class="textarea" type="textarea" rows=8 ref="overlayText"
             v-model="editedItem" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle"
             :iconPicker="false" />
+        <!-- <span v-if="overlays.overlaySelect" ref="overlaySelect" @focus="$refs.innerSelect.focus"> -->
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
-            :options="overlaySelectOptions.options" :option-label="overlaySelectOptions.optionLabel"
-            :option-value="overlaySelectOptions.optionValue" @blur="closeOverlay" :lookup="overlaySelectOptions.lookup"
-            :lookups="lookups" @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
+            :options="activeLookup.options" :option-label="activeLookup.labelField"
+            :option-value="activeLookup.valueField" @blur="closeOverlay" :lookup="activeLookup"
+            @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
+        <!-- </span> -->
         <icon-picker v-if="overlays.overlayIcon" ref="overlayIcon" v-model="editedItem" @blur="closeOverlay"
             @update:model-value="editedItemChanged" :style="overlayStyle" />
 
@@ -139,7 +141,7 @@
                             <q-item v-for="col in props.cols" :key="col.name">
                                 <span class="label">{{ col.label }}</span>&nbsp;<q-space />
                                 <!-- <span v-html="col.value"></span> -->
-                                <span @click="showOverlay(props.key + '-' + col.index, col, props)">
+                                <span @click="showOverlay(col, props)">
                                     <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
                                         :disable="!allowEdit || col.disabled || noInlineEditing"
                                         @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
@@ -176,7 +178,7 @@
                     <q-td v-for="   col in props.cols   " :key="col.name" :props="props"
                         :ref="props.key + '-' + col.index"
                         :style="{ maxWidth: col.width + ' !important', verticalAlign: 'middle' }"
-                        @click="showOverlay(props.key + '-' + col.index, col, props)" class="q-pa-none q-ma-none">
+                        @click="showOverlay(col, props)" class="q-pa-none q-ma-none">
                         <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
                             :disable="!allowEdit || col.disabled || noInlineEditing"
                             @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
@@ -550,7 +552,7 @@ export default {
                     await this.$nextTick();
                     let col = o.props.cols[o.col.index + 1];
                     if (col) {
-                        this.showOverlay(col.name + '-' + col.index, col, o.props)
+                        this.showOverlay(col, o.props)
                     }
 
                 }

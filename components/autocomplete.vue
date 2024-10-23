@@ -1,20 +1,20 @@
 <template>
-    <span>
-        <q-select v-model="value" ref="select" class="q-ma-none q-pa-none" :options="filteredOptions"
-            :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
-            :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
-             :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html
-            @popup-show="startEditing" :disable="disable" :rules="rules" :square="square" 
-            style="min-width: 100px;" @focus="handleFocus(0)" @blur="handleBlur(0)"
-            >
-            <template v-slot:before-options v-if="searchable">
-                <q-icon name="search" />
-                <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0" @keydown="keyDown" @focus="handleFocus(1)" @blur="handleBlur(1)" /><q-btn class="q-pa-none q-ma-none" size="sm" flat dense icon="edit" @click="editLookup" @focus="handleFocus(2)" @blur="handleBlur(2)"/>
-            </template>
-        </q-select>
-        
-    </span>
+    <q-select v-model="value" ref="select" class="q-ma-none q-pa-none" :options="filteredOptions"
+        :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
+        :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
+        :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html @popup-show="startEditing"
+        :disable="disable" :rules="rules" :square="square" style="min-width: 100px;" @focus="handleFocus(0)"
+        @blur="handleBlur(0)" @keydown="keyDownSel">
+        <template v-slot:before-options v-if="searchable">
+            <q-icon name="search" />
+            <input dense ref="inputFilter" id="x" v-model="filter" style="outline: none; border:0"
+                @focus="handleFocus(1)" @blur="handleBlur(1)" @keydown="keyDown" />
+            <q-btn v-if="lookup && lookup.refTable" class="q-pa-none q-ma-none" size="sm" flat dense icon="edit"
+                @click="editLookup" @focus="handleFocus(2)" @blur="handleBlur(2)" />
+        </template>
+    </q-select>
 </template>
+
 <script>
 /**
  * Autocomplete component for selecting options from a dropdown list.
@@ -44,7 +44,7 @@ export default {
         rules: { type: Array, default: () => [] },
         square: { type: Boolean, default: true },
         lookup: { type: Object, default: () => null },
-        lookups: { type: Object, default: () => null },
+        refTable: { type: String, default: null }
     },
     emits: ["update:modelValue", "blur"],
     data() {
@@ -68,6 +68,9 @@ export default {
          * @returns {Array} The filtered options.
          */
         filteredOptions() {
+            if (!this.filter) {
+                return this.options;
+            }
             let f = this.options.filter(option =>
                 option[this.optionLabel].toLowerCase().includes(this.filter.toLowerCase())
             );
@@ -93,43 +96,61 @@ export default {
         },
         focus() {
             this.$refs.select.focus();
+            this.$refs.select.showPopup();
+            this.$refs.select.setOptionIndex(-1);
         },
         handleFocus(key) {
-            return;
+            //return;
             if (key == 0) {
                 this.$refs.select.focus();
             }
             this.focusedChildren[key] = true;
         },
         handleBlur(key) {
-            return;
+            //return;
             this.focusedChildren[key] = false;
-            if (key == 2) return;
             if (this.focusedChildren.every(e => !e)) {
+                this.$refs.select.hidePopup();
                 this.$emit('blur');
             }
         },
         editLookup() {
             this.$refs.select.hidePopup();
             this.$store.popups.editLookup.props.tableAPI = this.lookup.refTable;
-            this.$store.popups.editLookup.component = 'table'; 
+            this.$store.popups.editLookup.component = 'table';
             this.$store.popups.editLookup.show = true;
         },
         keyDown(e) {
             if (e.key == 'ArrowDown') {
                 this.$refs.select.showPopup();
+                this.$refs.select.setOptionIndex(0);
+            }
+            // if (e.key == 'Enter') {
+            //     console.log("oi", this.value, this.filteredOptions[0]);
+            //     if (this.mapOptions) {
+            //         this.value = this.filteredOptions[0][this.optionValue];
+            //     } else {
+            //         this.value = this.filteredOptions[0];
+            //     }
+            // }
+        },
+        keyDownSel(e) {
+            if (e.key == 'ArrowUp') {
+                console.log("oi", this.$refs.select.getOptionIndex());
+                if (this.$refs.select.getOptionIndex() == 0) {
+                    this.$refs.inputFilter.focus();
+                }
             }
         }
     },
-    mounted() {
-        console.log('mounted', this.lookup, this.lookups);
-        let self = this;
+    async mounted() {
         eventBus.on('popupClosed', async (payload) => {
             if (payload == 'editLookup') {
-                console.log('closed', self.lookup, self.lookups);
-                self.lookups[self.lookup.name].options = await self.loadLookup(self.lookup);
+                if (this.lookup)
+                    await this.loadLookup(this.lookup);
             }
         });
+        await this.$nextTick();
     },
     beforeUnmount() {
         eventBus.off('popupClosed');
