@@ -10,6 +10,7 @@ export const TableMixin = {
     props: {
         options: null,
         popupName: null,
+        detailTable: false,
     },
     mixins: [TableExportMixin, TableCustomMixin],
     data() {
@@ -31,6 +32,7 @@ export const TableMixin = {
             frugal: false,
             json: false,
             tableAPI: null,
+            tableAPIKey: null,
             restAPI: null,
             inEdit: false,
             editMode: null,
@@ -54,12 +56,8 @@ export const TableMixin = {
             colWidths: {
                 "integer": '60px', "character varying": '150px', "text": '200px', "json": '200px', "double precision": '100px', "boolean": '50px', "number": '100px'
             },
-            details: null,
             showDetails: false,
-            current: null,
-            parent: null,
-            parentKey: null,
-            parentName: null,
+            masterKey: null,
             allowEdit: true,
             allowNew: true,
             allowDelete: true,
@@ -130,6 +128,8 @@ export const TableMixin = {
                 this.frugal = true;
                 if (this.params) {
                     this.data = await this.get("Table/" + this.tableAPI, { pars: JSON.stringify(this.params) });
+                } else if (this.tableAPIKey) {
+                    this.data = await this.get("Table/" + this.tableAPI + "/" + this.tableAPIKey);
                 } else {
                     this.data = await this.get("Table/" + this.tableAPI);
                 }
@@ -170,11 +170,6 @@ export const TableMixin = {
                 this.key = attributes[0].name;
             }
 
-            if (this.parent) {
-                let index = attributes.findIndex(att => att.name == this.parent.key);
-                this.data.data = this.data.data.filter(row => row[index] == this.parent.value);
-            }
-
             // set up the columns
             this.columns = attributes.map((attribute, index) => {
                 let format = this.format[attribute.type] ?? (val => val);
@@ -193,11 +188,20 @@ export const TableMixin = {
                 }
             });
 
+            let lookups = {};
             for (let col of this.columns) {
                 let pos = col.name.indexOf('__');
                 if (pos > 0) {
-                    col.refTable = col.name.substring(0, pos);
-                    col.name = col.name.substring(pos + 2);
+                    let refTable = col.name.substring(0, pos);
+                    col.name = col.name.substring(pos + 2);  
+                    let end = col.name.endsWith('_id') ? -3 : -7;
+                    let lookupName = col.name.slice(0, end);
+                    if (lookups[lookupName]) {
+                        col.lookup = lookups[lookupName];
+                    } else {
+                        col.lookup = { name: lookupName, default: true, refTable: refTable, options: null };
+                        lookups[lookupName] = col.lookup;
+                    }
                 }
                 col.label = col.name;
             }
@@ -207,9 +211,8 @@ export const TableMixin = {
                 this.visibleColumns = [];
                 this.swapIdAndValColumns(this.columns);
                 for (let col of this.columns) {
-                    if (this.parent && (col.name == this.parent.key || col.name == this.parent.key + '_val')) {
+                    if (this.masterKey && (col.name == this.masterKey || col.name == this.masterKey + '_val')) {
                         col.lookup = null;
-                        col.refTable = null;
                         continue;
                     }
                     if (col.name.endsWith('_id')) {
@@ -253,17 +256,13 @@ export const TableMixin = {
                     if (valCol) valCol.disabled = true;
                 }
 
-                if (col.name.endsWith("_id") && !col.noLookup) {                   
-                     col.lookup = { name: col.name.slice(0, -3), default: true, refTable: col.refTable, options: null };
+                if (col.noLookup) {
+                    col.lookup = null;
                 }
 
-                if (col.name.endsWith("_id_val") && !col.noLookup) {
-                    col.lookup = { name: col.name.slice(0, -7), default: true, refTable: col.refTable, options: null };
-                }
-
-                if (col.name.endsWith('_id') && !col.visible
+                if (col.name.endsWith("_id")
                     || col.invisible
-                    || this.parent != null && (col.name == this.parent.key || col.name == this.parent.key + '_val')) continue;
+                    || (this.masterKey != null && (col.name == this.masterKey || col.name == this.masterKey + '_val'))) continue;
                 
                 if (col.name == 'id' || col.name == 'time_created' || col.name == 'time_modified' || col.name == 'user_modified') col.disabled = true;
                 if (col.name == 'id') col.invisible = true;
@@ -291,7 +290,8 @@ export const TableMixin = {
             this.title = null;
             this.frugal = false;
             this.json = false;
-            this.tableAPI  = null;
+            this.tableAPI = null;
+            this.tableAPIKey = null;
             this.restAPI = null;
             this.dbFunction = null;
             this.rowActions = null;
@@ -303,10 +303,7 @@ export const TableMixin = {
             this.selectedRows = [];
             this.changedRows = {};
             this.colAtts = {};
-            this.details = null;
-            this.current = null;
-            this.parentKey = null;
-            this.parentName = null;
+            this.masterKey = null;
             this.selection = "none";
             this.columns = [];
             this.visibleColumns = [];

@@ -1,9 +1,9 @@
 <template>
     <div ref="header">
-        <Header v-if="!parent && !popupName" :name="name ?? $route.name" :title="title ?? $t(name ?? $route.name)"
+        <Header v-if="!detailTable && !popupName" :name="name ?? $route.name" :title="title ?? $t(name ?? $route.name)"
             :backButton="!popupName && $store.level > 1" />
     </div>
-    <div ref="parentElement" @keydown="handleKeyDown($event, true)">
+    <div @keydown="handleKeyDown($event, true)">
         <!-- Overlays for inline editing -->
         <q-input v-if="overlays.overlayInput" class="input-box" outlined ref="overlayInput" v-model="editedItem"
             type="text" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
@@ -20,11 +20,6 @@
         <!-- </span> -->
         <icon-picker v-if="overlays.overlayIcon" ref="overlayIcon" v-model="editedItem" @blur="closeOverlay"
             @update:model-value="editedItemChanged" :style="overlayStyle" />
-
-        <q-dialog v-model="showDetails">
-            <table-details v-if="showDetails && details" :details="details" :parent="current"
-                @close="showDetails = false" />
-        </q-dialog>
 
         <div ref="preheader">
             <div v-if="contextValuesLocal" class="row">
@@ -249,8 +244,7 @@ export default {
         TableFilter: loadComponent("table-filter"),
         Autocomplete: loadComponent("autocomplete"),
         JsonEditor: loadComponent("json-editor"),
-        IconPicker: loadComponent("icon-picker"),
-        TableDetails: loadComponent("table-details")
+        IconPicker: loadComponent("icon-picker")
     },
     watch: {
         '$route.query.timestamp': {
@@ -371,7 +365,7 @@ export default {
         height() {
             //await this.$nextTick();
             if (this.$refs.header && this.$refs.preheader) {
-                if (!this.parent && !this.popupName) {
+                if (!this.detailTable && !this.popupName) {
                     //if (!this.$refs.preheader || !this.$refs.header) return 0;            
                     return this.$q.screen.height - this.$refs.header.offsetHeight - 40 - this.$refs.preheader.offsetHeight - 5;
                 } else {
@@ -408,17 +402,6 @@ export default {
             } else {
                 return val;
             }
-            // let ret;
-            // if (type == "timestamp with time zone") {
-            //     ret = this.toLocalISOString(new Date(val));
-            // } else if (type == "string" || type == "text" || type == "character varying" || type == "character") {
-            //     ret = val?.toLowerCase();
-            // } else if (val == null) {
-            //     ret = '';
-            // } else {
-            //     ret = val;
-            // }
-            // return ret;
         },
 
         /**
@@ -480,9 +463,9 @@ export default {
          * Scroll event
          * @param {*} details 
          */
-        async scroll(details) {
-            this.from = details.from + 1;
-            this.to = details.to + 1;
+        async scroll(pos) {
+            this.from = pos.from + 1;
+            this.to = pos.to + 1;
             this.closeAllOverlays();
             await this.calculateColumnWidths();
         },
@@ -491,24 +474,6 @@ export default {
          */
         selectedRowsLabel() {
             this.selectedRows.length + ' ' + this.$t('selected');
-        },
-
-        /**
-         * Opens the details view for a given row.
-         *
-         * @param {Object} row - The row object containing the data for the selected row.
-         */
-        openDetails(row) {
-            let parentName = "";
-            if (this.parentName) {
-                if (!this.frugal) {
-                    parentName = row[this.parentName];
-                } else {
-                    parentName = row[this.columns.find(x => x.name == this.parentName).index];
-                }
-            }
-            this.current = { key: this.parentKey, value: row[0], name: parentName };
-            this.showDetails = true;
         },
 
         /**
@@ -545,7 +510,6 @@ export default {
                     if (col) {
                         this.showOverlay(col, o.props)
                     }
-
                 }
                 //this.closeOverlay();
             } else if (!isParent) {

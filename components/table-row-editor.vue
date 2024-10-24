@@ -32,8 +32,9 @@
                                 <label for="my-autocomplete" v-html="col.label"></label>
                             </template>
                         </autocomplete>
-                        <q-input v-else-if="!col.invisible" id="my-input" v-model="parent.editingRow[col.name]" dense
-                            style="width:95%" :label="col.label" :disable="col.disabled" :rules="col.rules"
+                        <q-input class="q-pl-sm" v-else-if="!col.invisible" id="my-input"
+                            v-model="parent.editingRow[col.name]" dense style="width:95%" :label="col.label"
+                            :disable="col.disabled" :rules="col.rules"
                             :type="col.password && !col.passwordShown ? 'password' : 'text'">
                             <template v-slot:label>
                                 <label for="my-input" v-html="col.label" style="font-size: smaller;"></label>

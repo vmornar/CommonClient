@@ -73,12 +73,12 @@ export const TableEditMixin = {
         },
 
         /**
-         * Determines whether a column should be shown in table mode.
+         * Determines whether a column should be shown in edit mode.
          * @param {Object} col - The column object.
-         * @returns {boolean} - True if the column should be shown in table mode, false otherwise.
+         * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
          */
         showColInEdit(col) {
-            return col.name != 'id' && !col.name.endsWith('_val');
+            return col.name != 'id' && !col.name.endsWith('_val') && col.name != this.masterKey;
         },
         
         /**
@@ -88,9 +88,10 @@ export const TableEditMixin = {
         async loadLookups() {
             if (!this.lookupsLoaded) {
                 for (let col of this.columns) {
-                    if (col.lookup) {
+                    if (col.lookup && !col.lookup.loaded) {
                         if (!col.lookup.options) {
                             await this.loadLookup(col.lookup);
+                            col.lookup.loaded = true;
                         }
                     }
                 }

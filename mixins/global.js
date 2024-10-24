@@ -639,7 +639,7 @@ export const GlobalMixin = {
             if (popupName) {
                 this.copyObject(this.$store.popups[popupName].props, this, true);
             } else {
-                this.copyObject(this.$store.props, this, true);
+                this.copyObject(this.$store.props[this.$route.path], this, true);
             }
         },
 

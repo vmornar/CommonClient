@@ -1,15 +1,14 @@
 <template>
-    <q-card class="max-width" v-if="details.length > 0">
-        <q-card-section class="row items-center">
-            {{ parent.name }}&nbsp;
+    <Header v-if="!popupName" :title="title" :backButton="!popupName && $store.level > 1" />
+    <q-card class="max-width">
+        <q-card-section v-if="details && details.length > 1" class="row items-center q-py-xs">
             <q-btn dense flat no-caps v-if="options"
                 :class="{ active: detail.name != options.name, bold: detail.name == options.name }"
                 v-for="detail in details" :label="detail.name" :key="detail.name" @click="openDetail(detail)" />
             <q-space />
-            <q-btn dense size="sm" flat round icon="close" @click="$emit('close')" />
         </q-card-section>
-        <q-card-section>
-            <detail-table v-if="options" ref="detailTable" :options="options" />
+        <q-card-section class="q-pa-none" v-if="options">
+            <Table ref="detailTable" :detailTable="true" :options="options" />
         </q-card-section>
     </q-card>
 </template>
@@ -29,25 +28,20 @@ import { loadComponent } from '@/common/component-loader';
 export default {
     name: 'TableDetails',
     components: {
-        DetailTable: loadComponent('table')
+        Table: loadComponent('table')
     },
-    props: {
-        parent: {
-            type: Object,
-            default: null
-        },
-        details: {
-            type: Array,
-            default: []
-        }
-    },
+    props: ['popupName'],
+
     data: () => {
         return {
-            options: null
+            options: null,
+            details: null,
+            title: 'Details'
         }
     },
     mounted() {
-        this.openDetail(this.details[0]);
+        this.initializeComponent(this.popupName);
+        this.openDetail(this.details[0]); // open the first detail by default
     },
     methods: {
         /**
@@ -56,11 +50,8 @@ export default {
          * @param {Object} detail - The detail to be opened.
          */
         async openDetail(detail) {
-            if (this.options && this.options.name == detail.name) {
-                return;
-            }
             this.options = detail;
-            this.options.parent = this.parent;
+            this.options.masterKey = this.masterKey;
             await this.$nextTick();
             this.$refs.detailTable.init();
         }
