@@ -15,118 +15,6 @@ export const TableEditMixin = {
         },
     },
     methods: {
-
-        /**
-         * Converts a row from the table to an object.
-         * @param {Array} row - The row to convert.
-         * @returns {Object} - The converted object.
-         */
-        rowToObject(row) {
-            let obj = {};
-            for (let col of this.columns) {
-                obj[col.name] = row[col.index];
-            }
-            return obj;
-        },
-
-        /**
-         * Adds a new row to the table for editing.
-         */
-        async addRow() {
-            await this.loadLookups();
-            this.editMode = 'add';
-            this.editingRow = this.createEmptyRow(this.columns);
-            // if (this.parent) {
-            //     // todo
-            //     this.editingRow[this.parent.key] = this.parent.value;
-            //     this.editingRow[this.parent.key + '_val'] = this.findLookupValue(this.parent.value, this.parent.key.slice(0, -3), this.lookups);
-            // }
-            this.editingRowIndex = -1;
-            this.inEdit = true;
-        },
-        
-        /**
-         * Edits a row in the table.
-         * @param {Object} row - The row to be edited.
-         */
-        async editRow(row) {
-            await this.loadLookups();
-            this.editMode = 'edit';
-            this.editingRowIndex = this.rows.indexOf(row);
-            this.editingRow = this.rowToObject(row);
-            this.inEdit = true;
-        },
-
-        /**
-         * Deletes a row from the table.
-         * @param {Object} row - The row to be deleted.
-         */
-        async deleteRow(row, confirmationMessage) {
-            if (confirmationMessage ||
-                await this.confirmDialog(this.$t("Delete row?"))) {
-                let key = this.frugal ? row[0] : row["id"];
-                let res = await this.delete("Table/" + this.tableAPI + "/" + key.toString());
-                if (res != null) {
-                    this.rows.splice(this.rows.indexOf(row), 1);
-                }
-            }
-        },
-
-        /**
-         * Determines whether a column should be shown in edit mode.
-         * @param {Object} col - The column object.
-         * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
-         */
-        showColInEdit(col) {
-            return col.name != 'id' && !col.name.endsWith('_val') && col.name != this.masterKey;
-        },
-        
-        /**
-         * Loads the lookup values for the columns in the table.
-         * @returns {Promise<void>} A promise that resolves when the lookup values are loaded.
-         */
-        async loadLookups() {
-            if (!this.lookupsLoaded) {
-                for (let col of this.columns) {
-                    if (col.lookup && !col.lookup.loaded) {
-                        if (!col.lookup.options) {
-                            await this.loadLookup(col.lookup);
-                            col.lookup.loaded = true;
-                        }
-                    }
-                }
-                this.lookupsLoaded = true;
-            }
-        },
-
-        /**
-         * Saves the edited row to the table.
-         * @async
-         * @function saveRow
-         * @returns {Promise<void>} A Promise that resolves when the row is saved.
-         */
-        async saveRow() {
-            this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
-            this.inEdit = false;            
-        },
-
-        /**
-         * Updates a row in the table with the provided properties. Invoked from popup.
-         * @param {Object} props - The properties to update in the row.
-         */
-        updateRow(props) {
-            let row = this.rows[this.editingRowIndex];
-            if (!this.frugal) {
-                for (let col in props) {
-                    row[col] = props[col];
-                }
-            } else {
-                for (let col in props) {
-                    row[this.columns.find(c => c.name == col).index] = props[col];
-                }
-            }
-        },
-
         /**
          * Saves the edited rows to the database.
          */
@@ -263,14 +151,15 @@ export const TableEditMixin = {
          * Close the overlay for editing a cell
          */
         closeOverlay() {
-            
-            this.currentOverlay = null;
-            this.overlays[this.overlayShown] = false;
-            this.overlayShown = null;
+            console.log("closeOverlay", this.editedItem, this.props.row[this.index]);
             if (this.editedItem != this.props.row[this.index]) {
                 this.props.row[this.index] = this.editedItem;
                 this.changedRows[this.props.row[0]] = [...this.props.row];
+
             }
+            this.currentOverlay = null;
+            this.overlays[this.overlayShown] = false;
+            this.overlayShown = null;
         },
 
         /**

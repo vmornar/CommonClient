@@ -570,9 +570,6 @@ export const GlobalMixin = {
                 el.value = val.slice(0, sel.start) + res.text + val.slice(sel.end);
                 let event = new Event('input', { bubbles: true });
                 el.dispatchEvent(event);
-                //send enter key
-                // let event = new KeyboardEvent("keyup", { key: "Enter" });
-                // el.dispatchEvent(event);
             }
         },
 

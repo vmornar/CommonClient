@@ -5,7 +5,7 @@
     </div>
     <div @keydown="handleKeyDown($event, true)">
         <!-- Overlays for inline editing -->
-        <q-input v-if="overlays.overlayInput" class="input-box" outlined ref="overlayInput" v-model="editedItem"
+        <q-input v-if="overlays.overlayInput" dense outlined class="input-box" ref="overlayInput" v-model="editedItem"
             type="text" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
         <JsonEditor v-if="overlays.overlayJson" ref="overlayJson" v-model="editedItem" @blur="closeOverlay"
             @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
@@ -215,7 +215,9 @@
         </q-table>
 
         <table-filter v-if="showFilter" :parent="this" @cancel="showFilter = false" />
-        <table-row-editor v-if="inEdit" :parent="this" @save="saveRow" @cancel="inEdit = false" />
+        <q-dialog v-if="inEdit" :model-value="true" @keydown="handleSaveCancelKeydown" persistent>
+            <table-row-editor v-if="inEdit" :parent="this" @save="save" @cancel="inEdit = false" />
+        </q-dialog>
     </div>
 </template>
 
@@ -347,17 +349,6 @@ export default {
         },
 
         /**
-         * Returns an array of columns that should be shown in the edit mode.
-         * 
-         * @returns {Array} The array of columns to be shown in edit mode.
-         */
-        editColumns() {
-            let ec = [...this.columns];
-            this.swapIdAndValColumns(ec);
-            return ec.filter(col => this.showColInEdit(col));
-        },
-
-        /**
          * Calculates the height of the table component.
          * 
          * @returns {number} The calculated height of the table.
@@ -384,6 +375,11 @@ export default {
         },
     },
     methods: {
+
+        async save() {
+            await this.saveRow();
+            this.inEdit = false;
+        },
 
         /**
          * Converts the given value based on the column type.
@@ -432,21 +428,6 @@ export default {
                 res = this.rowsFiltered.reduce((acc, row) => Math.max(acc, row[name]), -Infinity);
             }
             return col.format(res);
-        },
-        /**
-         * Clear the filter
-         */
-        clearFilter() {
-            for (let col of this.columns) {
-                this.filter[col.name] = undefined; this.filter2[col.name] = undefined;
-                if (col.type == "timestamp with time zone") {
-                    this.filterExp[col.name] = 'between';
-                } else if (col.type == "integer" || col.type == "numeric" || col.type == "float" || col.type == "double precision" || col.type == "boolean" || col.type == "rating") {
-                    this.filterExp[col.name] = '=';
-                } else {
-                    this.filterExp[col.name] = 'contains';
-                }
-            }
         },
         async calculateColumnWidths() {
             await this.$nextTick();

@@ -8,7 +8,9 @@
             <q-circular-progress v-if="$store.working" size="24px" indeterminate color="primary" class="nomy"
                 :thickness="0.3" />
         </div>
-        <table-row-editor v-if="inEdit" :parent="this" @save="saveRow" @cancel="inEdit = false" />
+        <q-dialog v-if="inEdit" :model-value="true">
+            <table-row-editor :parent="this" @save="saveRow" @cancel="inEdit = false" />
+        </q-dialog>
         <div class="q-pa-xs q-ma-none right row">
             <q-btn dense flat icon="route" @click="getRouteParameters" v-if="isAdmin">
                 <q-tooltip>{{ $t("Edit route parameters") }}</q-tooltip>
@@ -42,9 +44,9 @@ export default {
     data() {
         return {
             inEdit: false,
-            editColumns: [],
             editingRow: {},
-            lookups: {}
+            lookups: {},
+            columns: [],
         };
     },
     computed: {
@@ -82,7 +84,7 @@ export default {
         async saveRow() {
             let saveRow = {};
             this.copyObject(this.editingRow, saveRow);
-            this.prepareRow(saveRow, this.editColumns);
+            this.prepareRow(saveRow, this.columns);
 
             await this.put("Table/meta_route", saveRow);
             await this.getRoutes();
@@ -100,9 +102,11 @@ export default {
             let route = this.$store.routes.find((r) => r.path === this.$route.path);
             this.editingRow = {};
             this.copyObject(route, this.editingRow);
-            this.editColumns = Object.keys(this.editingRow).map((k) => {
+
+            this.columns = Object.keys(this.editingRow).map((k) => {
                 return { name: k, label: k, type: this.getValueType(this.editingRow[k]), required: true };
             });
+
             this.editingRow.props = JSON.stringify(this.editingRow.props);
             this.inEdit = true;
         },

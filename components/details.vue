@@ -1,14 +1,16 @@
 <template>
     <Header v-if="!popupName" :title="title" :backButton="!popupName && $store.level > 1" />
-    <q-card class="max-width">
+    <q-card class="max-width" v-if="options">
         <q-card-section v-if="details && details.length > 1" class="row items-center q-py-xs">
-            <q-btn dense flat no-caps v-if="options"
+            <q-btn dense flat no-caps
                 :class="{ active: detail.name != options.name, bold: detail.name == options.name }"
                 v-for="detail in details" :label="detail.name" :key="detail.name" @click="openDetail(detail)" />
             <q-space />
         </q-card-section>
-        <q-card-section class="q-pa-none" v-if="options">
-            <Table ref="detailTable" :detailTable="true" :options="options" />
+        <q-card-section class="q-pa-none">
+            <Table v-if="!asForm" ref="detailTable" :detailTable="true" :options="options" />
+            <table-row-editor v-if="asForm && inEdit" ref="detailForm" :parent="this" @save="save" multiRow
+                @cancel="cancel" />
         </q-card-section>
     </q-card>
 </template>
@@ -25,10 +27,12 @@
  */
 
 import { loadComponent } from '@/common/component-loader';
+import TableRowEditor from './table-row-editor.vue';
 export default {
     name: 'TableDetails',
     components: {
-        Table: loadComponent('table')
+        Table: loadComponent('table'),
+        TableRowEditor: loadComponent('table-row-editor')
     },
     props: ['popupName'],
 
@@ -36,7 +40,10 @@ export default {
         return {
             options: null,
             details: null,
-            title: 'Details'
+            title: 'Details',
+            asForm: false,
+            editingRow: {},
+            rows: []
         }
     },
     mounted() {
@@ -53,8 +60,26 @@ export default {
             this.options = detail;
             this.options.masterKey = this.masterKey;
             await this.$nextTick();
-            this.$refs.detailTable.init();
-        }
+            if (this.asForm) {
+                this.copyObject(this.options, this, true);
+                await this.reload();
+                console.log("masterKey", this.masterKey + " " + this.masterValue);
+                if (this.rows.length > 0) {
+                    this.editRow(this.rows[0]);
+                } else {
+                    this.addRow();
+                }
+                console.log("editing row/col", this.editingRow)
+            } else {
+                this.$refs.detailTable.init();
+            }
+        },
+        save() {
+            this.saveRow();
+        },
+        cancel() {
+            this.$store.popups[this.popupName].show = false;
+        },
     }
 }
 </script>

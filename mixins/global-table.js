@@ -3,7 +3,64 @@
  * @module GlobalTableMixin
  */
 export const GlobalTableMixin = {
+    data() {
+        return {
+            alignment: { "float": "right", "numeric": "right", "double precision": "right", "integer": "right", "boolean": "center", "number": "right" },
+            compare: { "float": "interval", "double precision": "interval", "integer": "interval", "date": "interval", "number": "interval", "timestamp with time zone": "interval" },
+            format: {
+                "date": val => this.formatDate(val),
+                "timestamp with time zone": val => this.formatDate(val),
+                "numeric": val => val != null ? val.toFixed(2) : null
+            },
+            colWidths: {
+                "integer": '60px', "character varying": '150px', "text": '200px', "json": '200px', "double precision": '100px', "boolean": '50px', "number": '100px'
+            },
+            colAtts: {},
+            inEdit: false,
+        }
+    },
     methods: {
+        /**
+ * Clear the filter
+ */
+        clearFilter() {
+            this.filter = {}; this.filter2 = {}; this.filterExp = {};
+            for (let col of this.columns) {
+                this.filter[col.name] = undefined; this.filter2[col.name] = undefined;
+                if (col.type == "timestamp with time zone") {
+                    this.filterExp[col.name] = 'between';
+                } else if (col.type == "integer" || col.type == "numeric" || col.type == "float" || col.type == "double precision" || col.type == "boolean" || col.type == "rating") {
+                    this.filterExp[col.name] = '=';
+                } else {
+                    this.filterExp[col.name] = 'contains';
+                }
+            }
+        },
+
+        /**
+         * Swaps the id and value columns for lookup fields.
+         * @param {*} columns 
+        */
+        swapIdAndValColumns(columns) {
+            let swapped = [];
+            for (let i = 0; i < columns.length; i++) {
+                if (columns[i].name.endsWith('_id')) {
+                    let name = columns[i].name.slice(0, -3);
+                    if (!swapped.includes(name)) {
+                        for (let j = 0; j < columns.length; j++) {
+                            if (columns[j].name == name + '_id_val') {
+                                swapped.push(name);
+                                let temp = columns[i];
+                                columns[i] = columns[j];
+                                columns[j] = temp;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
 
         /**
          * Returns the type of the given value.
@@ -118,7 +175,7 @@ export const GlobalTableMixin = {
                     for (let name in ret) {
                         newRow[this.findIndexOfColumn(columns, name)] = ret[name];
                     }
-                }  
+                }
                 rows[editingRowIndex] = newRow;
             }
             return true;
@@ -176,6 +233,302 @@ export const GlobalTableMixin = {
                 a.push(obj);
             }
             return a;
-        }
+        },
+
+
+        /** 
+         * reload (or load) the table data 
+        */
+        async reload() {
+            
+            let routerRoute = this.$store.routes.filter((item) => item.path == this.$route.path)[0];
+            let offline = false;
+
+            if (routerRoute) {
+                offline = routerRoute.offline;
+            }
+
+            if (this.contextValuesLocal && this.contextValuesLocal.length > 0) {
+                this.params = {};
+                for (let cv of this.contextValuesLocal) {
+                    this.params[cv.name] = cv.value;
+                    this.$q.localStorage.setItem("context_value_" + cv.name, cv.value);
+                    this.$store.contextValues[cv.name] = cv.value;
+                }
+            }
+
+            if (this.dbFunction) {
+                this.data = await this.get("Table/GetTable", {
+                    dbFunction: this.dbFunction,
+                    frugal: this.frugal.toString(),
+                    json: this.json.toString(),
+                    pars: JSON.stringify(this.params) ?? "{}",
+                    preprocess: this.preprocess ?? null
+                }, offline);
+            } else if (this.restAPI) {
+                let api = this.restAPI;
+                for (let key in this.params) {
+                    api = api + "/" + this.params[key];
+                }
+                this.data = await this.get(api);
+            } else if (this.tableAPI) {
+                this.frugal = true;
+                if (this.params) {
+                    this.data = await this.get("Table/" + this.tableAPI, { pars: JSON.stringify(this.params) });
+                } else if (this.tableAPIKey) {
+                    this.data = await this.get("Table/" + this.tableAPI + "/" + this.tableAPIKey);
+                } else {
+                    this.data = await this.get("Table/" + this.tableAPI);
+                }
+            }
+
+            if (!this.data) {
+                this.rows = [];
+                this.columns = [];
+                return;
+            }
+            
+            // set up the tableAPI 
+            let attributes = [];
+            if (this.frugal) {
+                attributes = this.data.attributes;
+                this.key = '0';
+            } else {
+                if (this.data.length > 0) {
+                    for (let key in this.data[0]) {
+                        attributes.push({ name: key, type: null });
+                    }
+                    // determine attribute types
+                    this.data.forEach(obj => {
+                        let i = 0;
+                        for (let key in obj) {
+                            if (obj[key] != null) {
+                                const currentType = typeof obj[key];
+                                if (!attributes[i].type) {
+                                    attributes[i].type = currentType;
+                                } else if (attributes[i].type !== currentType) {
+                                    attributes[i].type = 'string';
+                                }
+                            }
+                            i++;
+                        }
+                    });
+                }
+                this.key = attributes[0].name;
+            }
+
+            // set up the columns
+            this.columns = attributes.map((attribute, index) => {
+                let format = this.format[attribute.type] ?? (val => val);
+                if (attribute.decimals) format = val => val != null ? Number(val).toFixed(attribute.decimals) : null;
+                return {
+                    name: attribute.name,
+                    field: this.frugal ? row => row[index] : attribute.name,
+                    sortable: true,
+                    format: val => format(val),
+                    align: this.alignment[attribute.type] ?? 'left',
+                    index: this.frugal ? index : attribute.name,
+                    type: attribute.type,
+                    compare: this.compare[attribute.type] ?? 'string',
+                    decimals: attribute.decimals,
+                    //width: this.calcWidth(attribute.type),
+                }
+            });
+
+            let lookups = {};
+            for (let col of this.columns) {
+                let pos = col.name.indexOf('__');
+                if (pos > 0) {
+                    let refTable = col.name.substring(0, pos);
+                    col.name = col.name.substring(pos + 2);
+                    let end = col.name.endsWith('_id') ? -3 : -7;
+                    let lookupName = col.name.slice(0, end);
+                    if (lookups[lookupName]) {
+                        col.lookup = lookups[lookupName];
+                    } else {
+                        col.lookup = { name: lookupName, default: true, refTable: refTable, options: null };
+                        lookups[lookupName] = col.lookup;
+                    }
+                }
+                col.label = col.name;
+            }
+
+            // chemistry for lookup fields (id in popup, id_val in table)
+            if (this.tableAPI) {
+                this.visibleColumns = [];
+                this.swapIdAndValColumns(this.columns);
+                for (let col of this.columns) {
+                    if (this.masterKey && (col.name == this.masterKey || col.name == this.masterKey + '_val')) {
+                        col.lookup = null;
+                        continue;
+                    }
+                    if (col.name.endsWith('_id')) {
+                        col.label = col.label.slice(0, -3);
+                    } else if (col.name.endsWith('_id_val')) {
+                        col.label = col.label.slice(0, -7);
+                    }
+                }
+            }
+
+            for (let col of this.columns) {
+
+                // snake case to readable label
+                col.label = col.label.replaceAll(/_/g, ' ');
+                col.label = col.label.charAt(0).toUpperCase() + col.label.slice(1);
+
+                if (this.colAtts[col.name]) {
+                    this.copyObject(this.colAtts[col.name], col, true);
+                    if (this.format[col.type]) {
+                        col.format = val => this.format[col.type](val);
+                        if (col.decimals) col.format = val => val != null ? val.toFixed(col.decimals) : null;
+                    }
+                    if (col.rules) {
+                        col.rules = this.$store.rules[col.rules];
+                    }
+                    if (col.type == 'rating') {
+                        if (this.frugal) {
+                            this.data.data.forEach(row => {
+                                row[col.index] = row[col.index] ?? 0;
+                            });
+                        } else {
+                            this.data.forEach(row => {
+                                row[col.name] = row[col.name] ?? 0;
+                            });
+                        }
+                    }
+                }
+
+                if (col.disabled) {
+                    let valCol = this.columns.find(c => c.name == col.name + '_val');
+                    if (valCol) valCol.disabled = true;
+                }
+
+                if (col.noLookup) {
+                    col.lookup = null;
+                }
+
+                if (col.name.endsWith("_id")
+                    || col.invisible
+                    || (this.masterKey != null && (col.name == this.masterKey || col.name == this.masterKey + '_val'))) continue;
+                
+                if (col.name == 'id' || col.name == 'time_created' || col.name == 'time_modified' || col.name == 'user_modified') col.disabled = true;
+                if (col.name == 'id') col.invisible = true;
+                if (!col.invisible) {
+                    this.visibleColumns.push(col.name);
+                }
+            }
+           
+            this.clearFilter();
+            this.rows = this.frugal ? this.data.data : this.data;
+            this.rowsFiltered = this.rows;
+        },
+
+        /**
+         * Saves the edited row to the table.
+         * @async
+         * @function saveRow
+         * @returns {Promise<void>} A Promise that resolves when the row is saved.
+        */
+        async saveRow() {
+            this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
+        },
+
+        /**
+     * Converts a row from the table to an object.
+     * @param {Array} row - The row to convert.
+     * @returns {Object} - The converted object.
+     */
+        rowToObject(row) {
+            let obj = {};
+            for (let col of this.columns) {
+                obj[col.name] = row[col.index];
+            }
+            return obj;
+        },
+
+        /**
+         * Adds a new row to the table for editing.
+         */
+        async addRow() {
+            await this.loadLookups();
+            this.editMode = 'add';
+            this.editingRow = this.createEmptyRow(this.columns);
+            if (this.masterKey) {
+                this.editingRow[this.masterKey] = this.masterValue;
+            }
+            this.editingRowIndex = this.rows.length;
+            this.inEdit = true;
+        },
+            
+        /**
+         * Edits a row in the table.
+         * @param {Object} row - The row to be edited.
+         */
+        async editRow(row) {
+            await this.loadLookups();
+            this.editMode = 'edit';
+            this.editingRowIndex = this.rows.indexOf(row);
+            this.editingRow = this.rowToObject(row);
+            this.inEdit = true;
+        },
+
+        /**
+         * Deletes a row from the table.
+         * @param {Object} row - The row to be deleted.
+         */
+        async deleteRow(row, confirmationMessage) {
+            if (confirmationMessage ||
+                await this.confirmDialog(this.$t("Delete row?"))) {
+                let key = this.frugal ? row[0] : row["id"];
+                let res = await this.delete("Table/" + this.tableAPI + "/" + key.toString());
+                if (res != null) {
+                    this.rows.splice(this.rows.indexOf(row), 1);
+                }
+            }
+        },
+
+        /**
+         * Determines whether a column should be shown in edit mode.
+         * @param {Object} col - The column object.
+         * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
+         */
+        showColInEdit(col) {
+            return col.name != 'id' && !col.name.endsWith('_val') && col.name != this.masterKey;
+        },
+            
+        /**
+         * Loads the lookup values for the columns in the table.
+         * @returns {Promise<void>} A promise that resolves when the lookup values are loaded.
+         */
+        async loadLookups() {
+            if (!this.lookupsLoaded) {
+                for (let col of this.columns) {
+                    if (col.lookup && !col.lookup.loaded) {
+                        if (!col.lookup.options) {
+                            await this.loadLookup(col.lookup);
+                            col.lookup.loaded = true;
+                        }
+                    }
+                }
+                this.lookupsLoaded = true;
+            }
+        },
+
+        /**
+         * Updates a row in the table with the provided properties. Invoked from popup.
+         * @param {Object} props - The properties to update in the row.
+         */
+        updateRow(props) {
+            let row = this.rows[this.editingRowIndex];
+            if (!this.frugal) {
+                for (let col in props) {
+                    row[col] = props[col];
+                }
+            } else {
+                for (let col in props) {
+                    row[this.columns.find(c => c.name == col).index] = props[col];
+                }
+            }
+        },
     }
 };
