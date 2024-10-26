@@ -17,6 +17,7 @@ export const GlobalTableMixin = {
             },
             colAtts: {},
             inEdit: false,
+            editMode: null,
         }
     },
     methods: {

@@ -146,8 +146,9 @@ export default {
     async mounted() {
         eventBus.on('popupClosed', async (payload) => {
             if (payload == 'editLookup') {
-                if (this.lookup)
+                if (this.lookup) {
                     await this.loadLookup(this.lookup);
+                }
             }
         });
         await this.$nextTick();

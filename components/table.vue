@@ -234,12 +234,13 @@
 
 import { TableEditMixin } from '../mixins/table-edit.js';
 import { TableMixin } from '../mixins/table.js';
+import { GlobalTableMixin } from '../mixins/global-table.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 import { loadComponent } from '@/common/component-loader';
 
 export default {
     name: "Table",
-    mixins: [TableMixin, TableEditMixin, TableCustomMixin],
+    mixins: [TableMixin, TableEditMixin, TableCustomMixin, GlobalTableMixin],
     components: {
         TableRowEditor: loadComponent("table-row-editor"),
         TableRowToolbar: loadComponent("table-row-toolbar"),

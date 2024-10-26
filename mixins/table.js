@@ -5,6 +5,7 @@
 import { exportFile } from 'quasar';
 import { TableExportMixin } from '@/specific/mixins/table-export.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
+import { GlobalTableMixin } from '@/common/mixins/global-table.js';
 
 export const TableMixin = {
     props: {
@@ -12,7 +13,7 @@ export const TableMixin = {
         popupName: null,
         detailTable: false,
     },
-    mixins: [TableExportMixin, TableCustomMixin],
+    mixins: [TableExportMixin, TableCustomMixin, GlobalTableMixin],
     data() {
         return {
             name: null,
@@ -33,7 +34,6 @@ export const TableMixin = {
             tableAPI: null,
             tableAPIKey: null,
             restAPI: null,
-            editMode: null,
             editingRow: null,
             editingRowIndex: null,
             dbFunction: null,
@@ -68,13 +68,7 @@ export const TableMixin = {
             editedItem: null,
             lookupDisplayIndex: 0,
             overlayShown: null,
-            overlays: {
-                // overlayInput: false,
-                // overlaySelect: false,
-                // overlayJson: false,
-                // overlayText: false,
-                // overlayIcon: false
-            },
+            overlays: { },
         }
     },
     methods: {

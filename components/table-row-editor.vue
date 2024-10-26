@@ -55,10 +55,14 @@
                     @click="moveTo(0)" />
                 <q-btn :disable="parent.editingRowIndex == 0" flat color="primary" icon="chevron_left"
                     @click="moveTo(parent.editingRowIndex - 1)" />
-                {{ parent.editingRowIndex + 1 }} / {{ parent.rows.length }}
-                <q-btn :disable="parent.editingRowIndex == parent.rows.length - 1" flat color="primary"
+
+                <span v-if="parent.editMode == 'add'">{{$t('New record')}}</span>
+                <span v-else-if="parent.rows.length > 0">{{ parent.editingRowIndex + 1 }} / {{ parent.rows.length }}</span>
+                <span v-else>{{$t('No records')}}</span>
+
+                <q-btn :disable="parent.editingRowIndex >= parent.rows.length - 1" flat color="primary"
                     icon="chevron_right" @click="moveTo(parent.editingRowIndex + 1)" />
-                <q-btn :disable="parent.editingRowIndex == parent.rows.length - 1" flat color="primary" icon="last_page"
+                <q-btn :disable="parent.editingRowIndex >= parent.rows.length - 1" flat color="primary" icon="last_page"
                     @click="moveTo(parent.rows.length - 1)" />
             </span>
             <q-btn v-if="isChanged" flat color="positive" :label="$t('Save')" @click="save" />
@@ -68,10 +72,8 @@
 </template>
 <script>
 import { loadComponent } from '@/common/component-loader';
-import { GlobalTableMixin } from "@/common/mixins/global-table.js"
 export default {
     name: "TableRowEditor",
-    mixins: [GlobalTableMixin],
     components: {
         jsonEditor: loadComponent('json-editor'),
         autocomplete: loadComponent('autocomplete'),
@@ -87,16 +89,7 @@ export default {
             };
         },
     },
-    props: {
-        parent: {
-            type: Object,
-            default: () => { }
-        },
-        multiRow: {
-            type: Boolean,
-            default: false
-        }
-    },
+    props: ['parent', 'multiRow'],
     data() {
         return {
             editingRowSaved: {},
@@ -106,13 +99,12 @@ export default {
     mounted() {
         this.copyObject(this.parent.editingRow, this.editingRowSaved);
         let ec = [...this.parent.columns];
-        this.swapIdAndValColumns(ec);
+        this.parent.swapIdAndValColumns(ec);
         this.editColumns = ec.filter(col => this.parent.showColInEdit(col));
-        console.log(this.editColumns);
     },
     methods: {
         async save() {
-            if (await this.validateForm(this.$refs.form)) {
+            if (await this.parent.validateForm(this.$refs.form)) {
                 this.$emit('save');
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
             }

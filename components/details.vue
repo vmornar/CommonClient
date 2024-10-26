@@ -1,15 +1,16 @@
 <template>
     <Header v-if="!popupName" :title="title" :backButton="!popupName && $store.level > 1" />
-    <q-card class="max-width" v-if="options">
+    <q-card class="max-width" v-if="localOptions">
         <q-card-section v-if="details && details.length > 1" class="row items-center q-py-xs">
             <q-btn dense flat no-caps
-                :class="{ active: detail.name != options.name, bold: detail.name == options.name }"
+                :class="{ active: detail.name != localOptions.name, bold: detail.name == localOptions.name }"
                 v-for="detail in details" :label="detail.name" :key="detail.name" @click="openDetail(detail)" />
             <q-space />
         </q-card-section>
         <q-card-section class="q-pa-none">
-            <Table v-if="!asForm" ref="detailTable" :detailTable="true" :options="options" />
-            <table-row-editor v-if="asForm && inEdit" ref="detailForm" :parent="this" @save="save" multiRow
+            parent {{ editMode }}
+            <Table v-if="!asForm" ref="detailTable" :detailTable="true" :options="localOptions" />
+            <table-row-editor v-if="asForm && inEdit" ref="detailForm" :parent="this" @save="save" :multiRow="true"
                 @cancel="cancel" />
         </q-card-section>
     </q-card>
@@ -28,8 +29,11 @@
 
 import { loadComponent } from '@/common/component-loader';
 import TableRowEditor from './table-row-editor.vue';
+import { GlobalTableMixin } from "@/common/mixins/global-table.js"
+import { TableMixin } from "@/common/mixins/table.js"
 export default {
     name: 'TableDetails',
+    mixins: [GlobalTableMixin, TableMixin],
     components: {
         Table: loadComponent('table'),
         TableRowEditor: loadComponent('table-row-editor')
@@ -38,12 +42,9 @@ export default {
 
     data: () => {
         return {
-            options: null,
+            localOptions: null,
             details: null,
             title: 'Details',
-            asForm: false,
-            editingRow: {},
-            rows: []
         }
     },
     mounted() {
@@ -57,21 +58,20 @@ export default {
          * @param {Object} detail - The detail to be opened.
          */
         async openDetail(detail) {
-            this.options = detail;
-            this.options.masterKey = this.masterKey;
+            detail.masterKey = this.masterKey;
             await this.$nextTick();
             if (this.asForm) {
-                this.copyObject(this.options, this, true);
+                this.copyObject(detail, this, true);
                 await this.reload();
-                console.log("masterKey", this.masterKey + " " + this.masterValue);
                 if (this.rows.length > 0) {
-                    this.editRow(this.rows[0]);
+                    await this.editRow(this.rows[0]);
                 } else {
-                    this.addRow();
+                    await this.addRow();
                 }
-                console.log("editing row/col", this.editingRow)
+                this.localOptions = detail;
+                console.log("editing row/col", this.inEdit, this.editMode, this.editingRow)
             } else {
-                this.$refs.detailTable.init();
+                await this.$refs.detailTable.init();
             }
         },
         save() {

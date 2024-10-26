@@ -28,7 +28,6 @@
  */
 
 import { StatisticsMixin } from "../mixins/statistics";
-import { copyToClipboard } from "quasar";
 
 import { loadComponent } from "@/common/component-loader";
 

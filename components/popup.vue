@@ -55,8 +55,9 @@ export default {
     },
     methods: {
         closeDialog() {
-            if (this.canCloseIfFormChanged || !this.$store.formChanged) this.$store.popups[this.name].show = false;
+            console.log('popupClosed', this.name);
             eventBus.emit('popupClosed', this.name);
+            if (this.canCloseIfFormChanged || !this.$store.formChanged) this.$store.popups[this.name].show = false;
         }
     }
 }

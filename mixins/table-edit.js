@@ -109,10 +109,8 @@ export const TableEditMixin = {
             setTimeout(() => {
            
                 let overlay = this.$refs[this.overlayShown];
-                console.log("overlay ", overlay, overlay.$el);
                 
-                let oRect;
-                
+                let oRect;              
                 if (overlay.$el) {
                     oRect = overlay.$el.getBoundingClientRect();
                 } else {
@@ -151,7 +149,6 @@ export const TableEditMixin = {
          * Close the overlay for editing a cell
          */
         closeOverlay() {
-            console.log("closeOverlay", this.editedItem, this.props.row[this.index]);
             if (this.editedItem != this.props.row[this.index]) {
                 this.props.row[this.index] = this.editedItem;
                 this.changedRows[this.props.row[0]] = [...this.props.row];
