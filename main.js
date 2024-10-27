@@ -24,7 +24,6 @@ import '../specific/style.css'
 import { store } from "./store.js"
 import { GlobalMixin } from "./mixins/global.js"
 import { GlobalApiMixin } from "./mixins/global-api.js"
-//import { GlobalTableMixin } from "./mixins/global-table.js"
 import router from '../router.js'
 import Keycloak from 'keycloak-js'; 
 
@@ -231,7 +230,6 @@ app.config.globalProperties.$store.version = packageJson.version; //import.meta.
 
 app.mixin(GlobalMixin);
 app.mixin(GlobalApiMixin);
-//app.mixin(GlobalTableMixin);
 
 router.app = app;
 app.use(router);

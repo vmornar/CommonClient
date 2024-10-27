@@ -9,7 +9,7 @@
                 :thickness="0.3" />
         </div>
         <q-dialog v-if="inEdit" :model-value="true">
-            <table-row-editor :parent="this" @save="saveRow" @cancel="inEdit = false" />
+            <table-row-editor v-if="inEdit" :parent="this" @save="saveRow" @cancel="inEdit = false" />
         </q-dialog>
         <div class="q-pa-xs q-ma-none right row">
             <q-btn dense flat icon="route" @click="getRouteParameters" v-if="isAdmin">
@@ -61,11 +61,6 @@ export default {
                 maxWidth: this.$store.screenWidth + 'px',
             };
         },
-        // editStyle() {
-        //     return {
-        //         maxHeight: (this.$q.screen.height - 200) + 'px', overflow: 'auto', width: '600px'
-        //     };
-        // },
     },
     methods: {
         /**
@@ -82,31 +77,35 @@ export default {
          * @returns {Promise<void>} A promise that resolves when the changes are saved.
          */
         async saveRow() {
+            
+            this.inEdit = false;
+
             let saveRow = {};
             this.copyObject(this.editingRow, saveRow);
+
             this.prepareRow(saveRow, this.columns);
 
             await this.put("Table/meta_route", saveRow);
-            await this.getRoutes();
 
+            await this.getRoutes();
             let route = this.$store.routes.find((r) => r.path === this.$route.path);
+    
             this.activateRoute(route);
 
-            this.inEdit = false;
         },
 
         /**
          * Retrieves the route parameters and initializes the editingRow object. Admins only.
          */
-        getRouteParameters() {
+        async getRouteParameters() {
+            this.inEdit = false;
+            await this.$nextTick();
             let route = this.$store.routes.find((r) => r.path === this.$route.path);
             this.editingRow = {};
             this.copyObject(route, this.editingRow);
-
             this.columns = Object.keys(this.editingRow).map((k) => {
                 return { name: k, label: k, type: this.getValueType(this.editingRow[k]), required: true };
             });
-
             this.editingRow.props = JSON.stringify(this.editingRow.props);
             this.inEdit = true;
         },

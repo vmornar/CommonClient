@@ -37,6 +37,12 @@
                         <q-tooltip v-if="action.tooltip">{{ $t(action.tooltip) }}</q-tooltip>
                     </q-btn>
                     <span v-if="!hideDefaultToolbar">
+                        <q-btn v-if="asForm" dense flat icon="table" color="primary" @click="asForm = false">
+                            <q-tooltip>{{ $t("Table view") }}</q-tooltip>
+                        </q-btn>
+                        <q-btn v-if="!asForm" dense flat icon="assignment" color="primary" @click="asForm = true">
+                            <q-tooltip>{{ $t("Form view") }}</q-tooltip>
+                        </q-btn>
                         <q-btn dense flat icon="filter_alt" color="primary" @click="showFilter = true">
                             <q-tooltip>{{ $t("Filter form") }}</q-tooltip>
                         </q-btn>
@@ -80,8 +86,10 @@
             </div>
         </div>
 
+        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" :multiRow="true" :parent="this" />
+
         <!-- The table -->
-        <q-table square v-if="loaded" ref="table" class="my-sticky-header-table" @virtual-scroll="scroll"
+        <q-table square v-if="loaded && !asForm" ref="table" class="my-sticky-header-table" @virtual-scroll="scroll"
             :table-style="tableStyle" dense flat bordered :rows="filterSet ? rowsFiltered : rows" :columns="columns"
             :visible-columns="visibleColumns" :row-key="key" virtual-scroll virtual-scroll-slice-size=1
             v-model:pagination="pagination" :rows-per-page-options="[0]" :selection="selection"
@@ -215,7 +223,8 @@
         </q-table>
 
         <table-filter v-if="showFilter" :parent="this" @cancel="showFilter = false" />
-        <q-dialog v-if="inEdit" :model-value="true" @keydown="handleSaveCancelKeydown" persistent>
+
+        <q-dialog v-if="inEdit && !asForm" :model-value="true" @keydown="handleSaveCancelKeydown" persistent>
             <table-row-editor v-if="inEdit" :parent="this" @save="save" @cancel="inEdit = false" />
         </q-dialog>
     </div>
@@ -234,13 +243,13 @@
 
 import { TableEditMixin } from '../mixins/table-edit.js';
 import { TableMixin } from '../mixins/table.js';
-import { GlobalTableMixin } from '../mixins/global-table.js';
+import { TableUtilsMixin } from '../mixins/table-utils.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 import { loadComponent } from '@/common/component-loader';
 
 export default {
     name: "Table",
-    mixins: [TableMixin, TableEditMixin, TableCustomMixin, GlobalTableMixin],
+    mixins: [TableMixin, TableEditMixin, TableCustomMixin, TableUtilsMixin],
     components: {
         TableRowEditor: loadComponent("table-row-editor"),
         TableRowToolbar: loadComponent("table-row-toolbar"),
@@ -376,7 +385,6 @@ export default {
         },
     },
     methods: {
-
         async save() {
             await this.saveRow();
             this.inEdit = false;
@@ -465,6 +473,7 @@ export default {
          * @param {boolean} isParent - Indicates whether the event is triggered by a parent component.
          */
         async handleKeyDown(event, isParent) {
+            console.log("handleKeyDown", event.key, event.ctrlKey, event.altKey, event.shiftKey, event.metaKey);
             if (event.ctrlKey && event.key === 'f') {
                 this.showFilter = true;
                 event.preventDefault();
@@ -482,6 +491,8 @@ export default {
                 this.undoChanges();
                 event.preventDefault();
                 this.closeOverlay();
+            } else if (event.key === 'Escape') {
+                this.closeOverlay();
             } else if (event.key === 'Tab') {
                 if (this.currentOverlay) {
                     let o = this.currentOverlay;
@@ -498,7 +509,7 @@ export default {
                 this.editedItemChanged();
             }
         },
-    }
+    },
 }
 </script>
 

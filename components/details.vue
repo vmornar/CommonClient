@@ -8,7 +8,6 @@
             <q-space />
         </q-card-section>
         <q-card-section class="q-pa-none">
-            parent {{ editMode }}
             <Table v-if="!asForm" ref="detailTable" :detailTable="true" :options="localOptions" />
             <table-row-editor v-if="asForm && inEdit" ref="detailForm" :parent="this" @save="save" :multiRow="true"
                 @cancel="cancel" />
@@ -28,12 +27,12 @@
  */
 
 import { loadComponent } from '@/common/component-loader';
-import TableRowEditor from './table-row-editor.vue';
-import { GlobalTableMixin } from "@/common/mixins/global-table.js"
+import { TableUtilsMixin } from "@/common/mixins/table-utils.js"
 import { TableMixin } from "@/common/mixins/table.js"
+
 export default {
     name: 'TableDetails',
-    mixins: [GlobalTableMixin, TableMixin],
+    mixins: [TableUtilsMixin, TableMixin],
     components: {
         Table: loadComponent('table'),
         TableRowEditor: loadComponent('table-row-editor')

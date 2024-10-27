@@ -1,5 +1,5 @@
 <template>
-    <q-card style="overflow: hidden" class="max-width">
+    <q-card style="overflow: hidden" class="max-width" @keydown="handleSaveCancelKeydown">
         <q-card-section :style="editStyle">
             <div v-if="!multiRow" class="row text-subtitle1">{{ parent.editMode == "add" ? $t('Add row') :
                 $t('Edit row')
@@ -48,9 +48,9 @@
         </q-card-section>
         <q-card-actions align="right">
             <span v-if="multiRow">
-                <q-btn flat color="primary" icon="add" @click="addRow" />
-                <q-btn :disable="parent.editMode == 'add'" flat color="negative" icon="delete"
-                    @click="parent.deleteRow(parent.rows[parent.editingRowIndex])" />
+                <q-btn :disable="parent.editMode == 'add' || isChanged" flat color="primary" icon="add" @click="addRow" />
+                <q-btn :disable="parent.editMode == 'add' || isChanged" flat color="negative" icon="delete"
+                    @click="deleteRow" />
                 <q-btn :disable="parent.editingRowIndex == 0" flat color="primary" icon="first_page"
                     @click="moveTo(0)" />
                 <q-btn :disable="parent.editingRowIndex == 0" flat color="primary" icon="chevron_left"
@@ -66,7 +66,8 @@
                     @click="moveTo(parent.rows.length - 1)" />
             </span>
             <q-btn v-if="isChanged" flat color="positive" :label="$t('Save')" @click="save" />
-            <q-btn flat color="negative" :label="isChanged ? $t('Cancel') : $t('Close')" @click="cancel" />
+            <q-btn v-if="isChanged" flat color="negative" :label="$t('Cancel')" @click="cancel" />
+            <q-btn v-if="parent.popupName || !parent.isForm" flat color="negative" :label="$t('Close')" @click="cancel" />
         </q-card-actions>
     </q-card>
 </template>
@@ -97,20 +98,31 @@ export default {
         };
     },
     mounted() {
+        console.log("mounted", this.parent.editingRow);
         this.copyObject(this.parent.editingRow, this.editingRowSaved);
         let ec = [...this.parent.columns];
-        this.parent.swapIdAndValColumns(ec);
-        this.editColumns = ec.filter(col => this.parent.showColInEdit(col));
+        this.swapIdAndValColumns(ec);
+        this.editColumns = ec.filter(col => this.showColInEdit(col, this.parent.masterKey));
     },
-    methods: {
+    methods: {       
+        /**
+         * Determines whether a column should be shown in edit mode.
+         * @param {Object} col - The column object.
+         * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
+         */
+        showColInEdit(col, masterKey) {
+            return col.name != 'id' && !col.name.endsWith('_val') && col.name != masterKey;
+        },
         async save() {
             if (await this.parent.validateForm(this.$refs.form)) {
                 this.$emit('save');
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
+                this.parent.editMode = 'edit';
             }
         },
         cancel() {
             this.copyObject(this.editingRowSaved, this.parent.editingRow);
+            this.parent.editMode = 'edit';
             if (!this.multiRow || !this.isChanged)
                 this.$emit('cancel');
         },
@@ -118,14 +130,26 @@ export default {
             let displayValue = this.parent.findLookupValue(this.parent.editingRow[col.name], col.lookup);
             this.parent.editingRow[col.name + "_val"] = displayValue;
         },
-        moveTo(index) {
-            console.log("moveTo", index);
-            this.parent.editRow(this.parent.rows[index]);
+        async moveTo(index) {
+            await this.parent.editRow(this.parent.rows[index]);
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
+            console.log("moveTo", index, this.isChanged, this.parent.editingRow, this.editingRowSaved);
         },
         addRow() {
             this.parent.addRow();
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
+        },
+        async deleteRow() {
+            if (await this.parent.deleteRow(this.parent.rows[this.parent.editingRowIndex])) {
+                if (this.parent.rows.length == 0) {
+                    this.addRow();
+                    return;
+                } else if (this.parent.editingRowIndex >= this.parent.rows.length) {
+                    this.parent.editingRowIndex--;
+                }
+                await this.parent.editRow(this.parent.rows[this.parent.editingRowIndex]);
+                this.copyObject(this.parent.editingRow, this.editingRowSaved);
+            } 
         }
     }
 };

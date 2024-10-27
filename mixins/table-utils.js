@@ -1,8 +1,8 @@
 /**
  * @desc A global mixin object containing methods for table editing and saving.
- * @module GlobalTableMixin
+ * @module TableUtilsMixin
  */
-export const GlobalTableMixin = {
+export const TableUtilsMixin = {
     data() {
         return {
             alignment: { "float": "right", "numeric": "right", "double precision": "right", "integer": "right", "boolean": "center", "number": "right" },
@@ -38,66 +38,7 @@ export const GlobalTableMixin = {
             }
         },
 
-        /**
-         * Swaps the id and value columns for lookup fields.
-         * @param {*} columns 
-        */
-        swapIdAndValColumns(columns) {
-            let swapped = [];
-            for (let i = 0; i < columns.length; i++) {
-                if (columns[i].name.endsWith('_id')) {
-                    let name = columns[i].name.slice(0, -3);
-                    if (!swapped.includes(name)) {
-                        for (let j = 0; j < columns.length; j++) {
-                            if (columns[j].name == name + '_id_val') {
-                                swapped.push(name);
-                                let temp = columns[i];
-                                columns[i] = columns[j];
-                                columns[j] = temp;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        },
-
-
-        /**
-         * Returns the type of the given value.
-         * @param {*} value - The value to determine the type of.
-         * @returns {string} The type of the value. Possible values are "boolean", "json", or "text".
-         */
-        getValueType(value) {
-            if (value === null) {
-                return "text";
-            } else if (typeof value === "boolean") {
-                return "boolean";
-            } else if (typeof value === "object") {
-                return "json";
-            } else {
-                return "text";
-            }
-        },
-        
-        /**
-         * Prepare row for saving : converts JSON strings to objects, blanks to nulls.
-         * 
-         * @param {Object} row - The row object.
-         * @param {Object[]} columns - The array of column objects.
-         */
-        prepareRow(row, columns) {
-            for (let col of columns) {
-                if (col.type == 'json') {
-                    row[col.name] = JSON.parse(row[col.name]);
-                } else if (col.type == 'boolean') {
-                    row[col.name] = row[col.name] ? true : false
-                } else if (row[col.name] == "") {
-                    row[col.name] = null;
-                }
-            }
-        },
-
+      
         /**
          * Finds the index of a column in the given array of columns based on the column name.
          *
@@ -200,20 +141,6 @@ export const GlobalTableMixin = {
                 }
             }
             return obj;
-        },
-
-        /**
-         * Finds display value for a lookup value in lookup table
-         * @param {*} value 
-         * @param {*} tableName 
-         * @returns display value for the lookup value in the lookup table
-         */
-        findLookupValue(value, lookup) {
-            if (value == null) {
-                return "";
-            } else {
-                return lookup.options.find(v => v[lookup.valueField] == value)[lookup.labelField];
-            }
         },
 
         /**
@@ -478,23 +405,18 @@ export const GlobalTableMixin = {
          * @param {Object} row - The row to be deleted.
          */
         async deleteRow(row, confirmationMessage) {
+            console.log("Delete row 1");
             if (confirmationMessage ||
                 await this.confirmDialog(this.$t("Delete row?"))) {
+                console.log("Delete row", row);
                 let key = this.frugal ? row[0] : row["id"];
                 let res = await this.delete("Table/" + this.tableAPI + "/" + key.toString());
                 if (res != null) {
                     this.rows.splice(this.rows.indexOf(row), 1);
+                    return true;
                 }
             }
-        },
-
-        /**
-         * Determines whether a column should be shown in edit mode.
-         * @param {Object} col - The column object.
-         * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
-         */
-        showColInEdit(col) {
-            return col.name != 'id' && !col.name.endsWith('_val') && col.name != this.masterKey;
+            return false;
         },
             
         /**

@@ -663,7 +663,8 @@ export const GlobalMixin = {
                 this.$router.addRoute({
                     path: route.path,
                     name: route.name,
-                    component: importedComponent
+                    component: importedComponent,
+                    componentName : route.component
                 });
             }
             // because of https://github.com/vuejs/router/blob/main/packages/router/CHANGELOG.md#414-2022-08-22
@@ -673,7 +674,81 @@ export const GlobalMixin = {
                 this.$store.level++;
                 this.$router.push({ name: route.name, query: { timestamp: ts }, props: route.props });
             } catch (e) {
+                console.log(e);
                 this.showError(this.$t("Error activating component. Are props a valid JSON?"));
+            }
+        },
+
+        /**
+         * Returns the type of the given value.
+         * @param {*} value - The value to determine the type of.
+         * @returns {string} The type of the value. Possible values are "boolean", "json", or "text".
+         */
+        getValueType(value) {
+            if (value === null) {
+                return "text";
+            } else if (typeof value === "boolean") {
+                return "boolean";
+            } else if (typeof value === "object") {
+                return "json";
+            } else {
+                return "text";
+            }
+        },
+
+                /**
+         * Prepare row for saving : converts JSON strings to objects, blanks to nulls.
+         * 
+         * @param {Object} row - The row object.
+         * @param {Object[]} columns - The array of column objects.
+         */
+        prepareRow(row, columns) {
+            for (let col of columns) {
+                if (col.type == 'json') {
+                    row[col.name] = JSON.parse(row[col.name]);
+                } else if (col.type == 'boolean') {
+                    row[col.name] = row[col.name] ? true : false
+                } else if (row[col.name] == "") {
+                    row[col.name] = null;
+                }
+            }
+        },
+
+        /**
+         * Finds display value for a lookup value in lookup table
+         * @param {*} value 
+         * @param {*} tableName 
+         * @returns display value for the lookup value in the lookup table
+         */
+        findLookupValue(value, lookup) {
+            if (value == null) {
+                return "";
+            } else {
+                return lookup.options.find(v => v[lookup.valueField] == value)[lookup.labelField];
+            }
+        },
+
+        /**
+         * Swaps the id and value columns for lookup fields.
+         * @param {*} columns 
+        */
+        swapIdAndValColumns(columns) {
+            let swapped = [];
+            for (let i = 0; i < columns.length; i++) {
+                if (columns[i].name.endsWith('_id')) {
+                    let name = columns[i].name.slice(0, -3);
+                    if (!swapped.includes(name)) {
+                        for (let j = 0; j < columns.length; j++) {
+                            if (columns[j].name == name + '_id_val') {
+                                swapped.push(name);
+                                let temp = columns[i];
+                                columns[i] = columns[j];
+                                columns[j] = temp;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         },
 
