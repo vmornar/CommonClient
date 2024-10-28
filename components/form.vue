@@ -35,11 +35,11 @@ export default {
     async mounted() {
         this.initializeComponent(this.popupName);
         await this.reload();
-        if (this.rows.length > 0) {
-           await this.editRow(this.rows[0]);
-        } else {
-           await this.addRow();
-        }
+        // if (this.rows.length > 0) {
+        //    await this.editRow(this.rows[0]);
+        // } else {
+        //    await this.addRow();
+        // }
         this.loaded = true;
     },
     methods: {

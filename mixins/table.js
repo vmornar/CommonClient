@@ -69,7 +69,7 @@ export const TableMixin = {
             lookupDisplayIndex: 0,
             overlayShown: null,
             overlays: { },
-            asForm: false,
+            asForm: true,
         }
     },
     methods: {
@@ -173,7 +173,7 @@ export const TableMixin = {
             await this.reload();
 
             this.loaded = true; 
-            await this.$nextTick();
+              await this.$nextTick();
         },
 
  

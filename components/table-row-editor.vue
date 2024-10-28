@@ -1,11 +1,12 @@
 <template>
-    <q-card style="overflow: hidden" class="max-width" @keydown="handleSaveCancelKeydown">
+
+    <q-card style="overflow: hidden" v-if="loaded" class="max-width" @keydown="handleSaveCancelKeydown">
         <q-card-section :style="editStyle">
             <div v-if="!multiRow" class="row text-subtitle1">{{ parent.editMode == "add" ? $t('Add row') :
                 $t('Edit row')
                 }}</div>
             <q-form ref="form">
-                <div class="row" v-for="col in editColumns" :key="col.name">
+                <div :class="{ row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
                     <span v-if="col.type == 'boolean' && !col.invisible" style="width:90%">
                         <q-checkbox v-model="parent.editingRow[col.name]" dense :label="col.label"
                             :disable="col.disabled">
@@ -47,27 +48,28 @@
             </q-form>
         </q-card-section>
         <q-card-actions align="right">
+            
             <span v-if="multiRow">
-                <q-btn :disable="parent.editMode == 'add' || isChanged" flat color="primary" icon="add" @click="addRow" />
-                <q-btn :disable="parent.editMode == 'add' || isChanged" flat color="negative" icon="delete"
+                <q-btn :disable="parent.editMode == 'add' || isChanged || rows.length == 0" flat color="negative" icon="delete"
                     @click="deleteRow" />
-                <q-btn :disable="parent.editingRowIndex == 0" flat color="primary" icon="first_page"
+                <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="first_page"
                     @click="moveTo(0)" />
-                <q-btn :disable="parent.editingRowIndex == 0" flat color="primary" icon="chevron_left"
-                    @click="moveTo(parent.editingRowIndex - 1)" />
+                <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="chevron_left"
+                    @click="moveTo(editingRowIndex - 1)" />
 
                 <span v-if="parent.editMode == 'add'">{{$t('New record')}}</span>
-                <span v-else-if="parent.rows.length > 0">{{ parent.editingRowIndex + 1 }} / {{ parent.rows.length }}</span>
+                <span v-else-if="rows.length > 0">{{ editingRowIndex + 1 }} / {{ rows.length }}</span>
                 <span v-else>{{$t('No records')}}</span>
 
-                <q-btn :disable="parent.editingRowIndex >= parent.rows.length - 1" flat color="primary"
-                    icon="chevron_right" @click="moveTo(parent.editingRowIndex + 1)" />
-                <q-btn :disable="parent.editingRowIndex >= parent.rows.length - 1" flat color="primary" icon="last_page"
-                    @click="moveTo(parent.rows.length - 1)" />
+                <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary"
+                    icon="chevron_right" @click="moveTo(editingRowIndex + 1)" />
+                <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary" icon="last_page"
+                    @click="moveTo(rows.length - 1)" />
             </span>
-            <q-btn v-if="isChanged" flat color="positive" :label="$t('Save')" @click="save" />
-            <q-btn v-if="isChanged" flat color="negative" :label="$t('Cancel')" @click="cancel" />
-            <q-btn v-if="parent.popupName || !parent.isForm" flat color="negative" :label="$t('Close')" @click="cancel" />
+
+            <q-btn v-if="isChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
+            <q-btn v-if="isChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
+            <q-btn v-if="!isChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
         </q-card-actions>
     </q-card>
 </template>
@@ -82,7 +84,8 @@ export default {
     },
     computed: {
         isChanged() {
-            return !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
+            this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
+            return this.$store.formChanged;
         },
         editStyle() {
             return {
@@ -90,19 +93,41 @@ export default {
             };
         },
     },
-    props: ['parent', 'multiRow'],
+    watch: {
+        "rows.length": async function (val) {
+            //this.$emit('update:modelValue', val);
+            if (val == 0) {
+                this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
+            } else {
+                if (this.editingRowIndex >= this.rows.length) this.editingRowIndex = this.rows.length - 1;
+                await this.parent.editRow(this.rows[this.editingRowIndex]);
+            }
+            this.copyObject(this.parent.editingRow, this.editingRowSaved);
+        }
+    },
+    props: ['parent', 'multiRow', 'rows'],
     data() {
         return {
             editingRowSaved: {},
             editColumns: [],
+            loaded: false,
+            editingRowIndex: 0
         };
     },
-    mounted() {
-        console.log("mounted", this.parent.editingRow);
+    async mounted() {
+        if (this.multiRow) {
+            if (this.parent.rows.length > 0) {
+                await this.parent.editRow(this.parent.rows[0]);
+            } else {
+                await this.parent.loadLookups();
+                this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
+            }
+        }
         this.copyObject(this.parent.editingRow, this.editingRowSaved);
         let ec = [...this.parent.columns];
         this.swapIdAndValColumns(ec);
         this.editColumns = ec.filter(col => this.showColInEdit(col, this.parent.masterKey));
+        this.loaded = true;
     },
     methods: {       
         /**
@@ -117,40 +142,49 @@ export default {
             if (await this.parent.validateForm(this.$refs.form)) {
                 this.$emit('save');
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
+                if (this.parent.editMode == "add") this.editingRowIndex = this.rows.length;
                 this.parent.editMode = 'edit';
             }
+        },
+        close () {
+            this.$emit('cancel');
         },
         cancel() {
             this.copyObject(this.editingRowSaved, this.parent.editingRow);
             this.parent.editMode = 'edit';
-            if (!this.multiRow || !this.isChanged)
-                this.$emit('cancel');
         },
         selectionUpdated(col) {
             let displayValue = this.parent.findLookupValue(this.parent.editingRow[col.name], col.lookup);
             this.parent.editingRow[col.name + "_val"] = displayValue;
         },
         async moveTo(index) {
-            await this.parent.editRow(this.parent.rows[index]);
+            await this.parent.editRow(this.rows[index]);
+            this.editingRowIndex = index;
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
-            console.log("moveTo", index, this.isChanged, this.parent.editingRow, this.editingRowSaved);
         },
         addRow() {
             this.parent.addRow();
+            this.editingRowIndex = this.rows.length - 1;
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
         },
         async deleteRow() {
-            if (await this.parent.deleteRow(this.parent.rows[this.parent.editingRowIndex])) {
-                if (this.parent.rows.length == 0) {
-                    this.addRow();
-                    return;
-                } else if (this.parent.editingRowIndex >= this.parent.rows.length) {
-                    this.parent.editingRowIndex--;
+            if (await this.parent.deleteRow(this.rows[this.editingRowIndex])) {
+                if (this.rows.length == 0) {
+                    this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
+                } else if (this.editingRowIndex >= this.rows.length) {
+                    this.editingRowIndex--;
+                    await this.parent.editRow(this.rows[this.editingRowIndex]);
                 }
-                await this.parent.editRow(this.parent.rows[this.parent.editingRowIndex]);
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
             } 
         }
     }
 };
 </script>
+
+<style scoped>
+.form-disabled * {
+  pointer-events: none;
+  opacity: 0.8;
+}
+</style>

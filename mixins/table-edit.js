@@ -38,13 +38,6 @@ export const TableEditMixin = {
         },
 
         /**
-         *  Undoes the changes made to the edited row and refreshes the table.
-         */ 
-        undoChanges() {
-            this.init();
-        },
-
-        /**
          * Show the overlay for editing a cell
          * @param {*} ref 
          * @param {*} col 

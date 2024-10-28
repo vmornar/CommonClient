@@ -281,9 +281,11 @@ export const TableUtilsMixin = {
                 col.label = col.name;
             }
 
+            
+            this.visibleColumns = [];
             // chemistry for lookup fields (id in popup, id_val in table)
             if (this.tableAPI) {
-                this.visibleColumns = [];
+
                 this.swapIdAndValColumns(this.columns);
                 for (let col of this.columns) {
                     if (this.masterKey && (col.name == this.masterKey || col.name == this.masterKey + '_val')) {

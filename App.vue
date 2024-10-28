@@ -296,7 +296,6 @@ export default {
       if (id == null) return;
       if (this.$store.formChanged) {
         if (!await this.confirmDialog(this.$t('Unsaved changes will be lost. Continue?'))) {
-          this.$store.formChanged = false;
           return;
         }
         this.$store.formChanged = false;

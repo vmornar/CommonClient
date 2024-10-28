@@ -31,32 +31,32 @@
             <!-- Toolbar before the table -->
             <div class="header-container toolbar">
                 <div class="left">
-                    <q-btn v-for="action of tableActions " dense flat :icon="action.icon"
+                    <q-btn :disable="$store.formChanged" v-for="action of tableActions " dense flat :icon="action.icon"
                         :color="action.iconColor ?? 'primary'" no-caps @click="runTableAction(action)">
                         <div v-if="action.label" v-html="action.label"></div>
                         <q-tooltip v-if="action.tooltip">{{ $t(action.tooltip) }}</q-tooltip>
                     </q-btn>
                     <span v-if="!hideDefaultToolbar">
-                        <q-btn v-if="asForm" dense flat icon="table" color="primary" @click="asForm = false">
+                        <q-btn v-if="asForm" dense flat icon="table_chart" color="primary" @click="inEdit = false;  asForm = false" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Table view") }}</q-tooltip>
                         </q-btn>
-                        <q-btn v-if="!asForm" dense flat icon="assignment" color="primary" @click="asForm = true">
+                        <q-btn v-if="!asForm" dense flat icon="assignment" color="primary" @click="asForm = true" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Form view") }}</q-tooltip>
                         </q-btn>
-                        <q-btn dense flat icon="filter_alt" color="primary" @click="showFilter = true">
+                        <q-btn dense flat icon="filter_alt" color="primary" @click="showFilter = true" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Filter form") }}</q-tooltip>
                         </q-btn>
-                        <q-btn v-if="filterSet" dense flat icon="filter_alt_off" color="red" @click="clearFilter">
+                        <q-btn v-if="filterSet" dense flat icon="filter_alt_off" color="red" @click="clearFilter" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Clear filter") }}</q-tooltip></q-btn>
-                        <q-btn dense flat icon="refresh" color="primary" @click="reload">
+                        <q-btn dense flat icon="refresh" color="primary" @click="reload" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Reload data") }}</q-tooltip></q-btn>
-                        <q-btn dense flat :icon="grid ? 'view_list' : 'view_module'" color="primary"
-                            @click="grid = !grid">
+                        <q-btn v-if="!asForm" dense flat :icon="grid ? 'view_list' : 'view_module'" color="primary"
+                            @click="grid = !grid" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Toggle grid view") }}</q-tooltip></q-btn>
                         <q-btn v-if="allowNew" class="text-bold" dense flat icon="add" color="primary"
-                            @click="addRow()">
+                            @click="addRow()" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Add new row") }}</q-tooltip></q-btn>
-                        <q-btn v-if="$store.formChanged" dense flat icon="save" color="positive" @click="saveRows">
+                        <q-btn v-if="$store.formChanged" dense flat icon="save" color="positive" @click="saveChanges">
                             <q-tooltip>{{ $t("Save changes") }}
                             </q-tooltip>
                         </q-btn>
@@ -66,7 +66,7 @@
                         </q-btn>
                     </span>
                 </div>
-                <div class="right" v-if="!hideRecordsToolbar">
+                <div class="right" v-if="!hideRecordsToolbar && !asForm">
                     <span v-if="nRows > 0">
                         {{ $t("Records") }} {{ from }}-{{ to }} {{ $t("of") }} {{ nRows }}
                     </span>
@@ -86,7 +86,7 @@
             </div>
         </div>
 
-        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" :multiRow="true" :parent="this" />
+        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" @cancel="cancel" :multiRow="true" :parent="this" :rows="filterSet ? rowsFiltered : rows"/>
 
         <!-- The table -->
         <q-table square v-if="loaded && !asForm" ref="table" class="my-sticky-header-table" @virtual-scroll="scroll"
@@ -385,9 +385,27 @@ export default {
         },
     },
     methods: {
+        async saveChanges() {
+            if (!this.asForm) {
+                await this.saveRows();
+            } else {
+                await this.$refs.form.save();
+            }
+        },
+        async undoChanges() {
+            if (!this.asForm) {
+                await this.reload();
+                this.$store.formChanged = false;
+            } else {
+                await this.$refs.form.cancel();
+            }
+        },
         async save() {
             await this.saveRow();
             this.inEdit = false;
+        },
+        cancel () {
+          //  this.inEdit = false;
         },
 
         /**
@@ -473,7 +491,6 @@ export default {
          * @param {boolean} isParent - Indicates whether the event is triggered by a parent component.
          */
         async handleKeyDown(event, isParent) {
-            console.log("handleKeyDown", event.key, event.ctrlKey, event.altKey, event.shiftKey, event.metaKey);
             if (event.ctrlKey && event.key === 'f') {
                 this.showFilter = true;
                 event.preventDefault();
