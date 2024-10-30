@@ -29,18 +29,18 @@
                     :clearable="cv.clearable" />
             </div>
             <!-- Toolbar before the table -->
-            <div class="header-container toolbar">
-                <div class="left">
+            <div class="header-container toolbar" style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <div>
                     <q-btn :disable="$store.formChanged" v-for="action of tableActions " dense flat :icon="action.icon"
                         :color="action.iconColor ?? 'primary'" no-caps @click="runTableAction(action)">
                         <div v-if="action.label" v-html="action.label"></div>
                         <q-tooltip v-if="action.tooltip">{{ $t(action.tooltip) }}</q-tooltip>
                     </q-btn>
                     <span v-if="!hideDefaultToolbar">
-                        <q-btn v-if="asForm" dense flat icon="table_chart" color="primary" @click="inEdit = false;  asForm = false" :disable="$store.formChanged">
+                        <q-btn v-if="asForm && !noInlineEditing" dense flat icon="table_chart" color="primary" @click="inEdit = false;  asForm = false" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Table view") }}</q-tooltip>
                         </q-btn>
-                        <q-btn v-if="!asForm" dense flat icon="assignment" color="primary" @click="asForm = true" :disable="$store.formChanged">
+                        <q-btn v-if="!asForm && !noInlineEditing" dense flat icon="assignment" color="primary" @click="asForm = true" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Form view") }}</q-tooltip>
                         </q-btn>
                         <q-btn dense flat icon="filter_alt" color="primary" @click="showFilter = true" :disable="$store.formChanged">
@@ -66,7 +66,7 @@
                         </q-btn>
                     </span>
                 </div>
-                <div class="right" v-if="!hideRecordsToolbar && !asForm">
+                <div v-if="!hideRecordsToolbar && !asForm">
                     <span v-if="nRows > 0">
                         {{ $t("Records") }} {{ from }}-{{ to }} {{ $t("of") }} {{ nRows }}
                     </span>
@@ -82,6 +82,9 @@
                     <q-btn v-if="nRows > 0" dense flat icon="download" color="primary" @click="exportTable">
                         <q-tooltip>{{ $t("Download table") }}</q-tooltip>
                     </q-btn>
+                </div>
+                <div v-if="!hideRecordsToolbar && asForm && $refs.form">
+                    <TableRecords :parent="this"/>
                 </div>
             </div>
         </div>
@@ -246,6 +249,7 @@ import { TableMixin } from '../mixins/table.js';
 import { TableUtilsMixin } from '../mixins/table-utils.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 import { loadComponent } from '@/common/component-loader';
+import TableRecords from './table-records.vue';
 
 export default {
     name: "Table",
@@ -256,7 +260,8 @@ export default {
         TableFilter: loadComponent("table-filter"),
         Autocomplete: loadComponent("autocomplete"),
         JsonEditor: loadComponent("json-editor"),
-        IconPicker: loadComponent("icon-picker")
+        IconPicker: loadComponent("icon-picker"),
+        TableRecords: loadComponent("table-records"),
     },
     watch: {
         '$route.query.timestamp': {

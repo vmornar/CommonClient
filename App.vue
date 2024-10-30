@@ -71,7 +71,7 @@
           </q-scroll-area>
         </q-drawer>
 
-        <q-scroll-area style="height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }"
+        <q-scroll-area style="height: 100vh; max-width: 100vw;" :bar-style="{ width: '10px' }" 
           :thumb-style="{ width: '0px' }">
           <q-page-container class="q-pt-none">
             <q-page>

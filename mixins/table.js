@@ -69,7 +69,7 @@ export const TableMixin = {
             lookupDisplayIndex: 0,
             overlayShown: null,
             overlays: { },
-            asForm: true,
+            asForm: false,
         }
     },
     methods: {
@@ -125,6 +125,8 @@ export const TableMixin = {
             this.lookupDisplayIndex = 0,
             this.overlayShown = null,
             this.overlays = { },
+            this.asForm = false;
+            this.inEdit = false;
 
             this.grid = this.$q.screen.width <= 800;
 

@@ -1,11 +1,44 @@
 <template>
 
-    <q-card style="overflow: hidden" v-if="loaded" class="max-width" @keydown="handleSaveCancelKeydown">
-        <q-card-section :style="editStyle">
-            <div v-if="!multiRow" class="row text-subtitle1">{{ parent.editMode == "add" ? $t('Add row') :
+    <q-card flat style="display: flex; flex-direction: column" v-if="loaded" class="max-width" @keydown="handleSaveCancelKeydown">
+        <!-- <q-card-section :style="editStyle" v-if="!multiRow">
+            {{ parent.editMode == "add" ? $t('Add row') :
                 $t('Edit row')
-                }}</div>
-            <q-form ref="form">
+                }}
+        </q-card-section> -->
+        <q-card-actions v-if="!parent.asForm">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; min-width: 600px;">
+                <div>
+                {{ parent.editMode == "add" ? $t('Add row') :
+                    $t('Edit row')
+                    }}
+                </div>	
+                <!-- <span v-if="multiRow">
+                    <q-btn :disable="parent.editMode == 'add' || isChanged || rows.length == 0" flat color="negative" icon="delete"
+                        @click="deleteRow" />
+                    <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="first_page"
+                        @click="moveTo(0)" />
+                    <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="chevron_left"
+                        @click="moveTo(editingRowIndex - 1)" />
+
+                    <span v-if="parent.editMode == 'add'">{{$t('New record')}}</span>
+                    <span v-else-if="rows.length > 0">{{ editingRowIndex + 1 }} / {{ rows.length }}</span>
+                    <span v-else>{{$t('No records')}}</span>
+
+                    <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary"
+                        icon="chevron_right" @click="moveTo(editingRowIndex + 1)" />
+                    <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary" icon="last_page"
+                        @click="moveTo(rows.length - 1)" />
+                </span> -->
+                <div>
+                <q-btn dense v-if="isChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
+                <q-btn dense v-if="isChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
+                <q-btn dense v-if="!isChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
+                </div>
+            </div>
+        </q-card-actions>
+        <q-card-section style="flex-grow: 1; overflow-y: auto;">
+            <q-form class="q-mt-none" ref="form">
                 <div :class="{ row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
                     <span v-if="col.type == 'boolean' && !col.invisible" style="width:90%">
                         <q-checkbox v-model="parent.editingRow[col.name]" dense :label="col.label"
@@ -22,12 +55,12 @@
                     </span>
                     <html-editor v-else-if="col.type == 'html' && !col.invisible" style="width:90%"
                         v-model="parent.editingRow[col.name]" :height="editStyle.height" :showIconPicker="false"
-                        :label="col.label" :disable="col.disabled" />
+                        :label="col.label" :disable="col.disabled" ref="inputRefs" />
                     <autocomplete v-else-if="col.lookup && !col.invisible" v-model="parent.editingRow[col.name]"
                         :label="col.label" :options="col.lookup.options" dense style="width:95%"
                         :option-label="col.lookup.labelField" :option-value="col.lookup.valueField" emit-value
                         map-options :lookup="col.lookup" @update:model-value="selectionUpdated(col)"
-                        :disable="col.disabled">
+                        :disable="col.disabled" ref="inputRefs">
                         <template v-slot:label>
                             <label for="my-autocomplete" v-html="col.label"></label>
                         </template>
@@ -35,7 +68,7 @@
                     <q-input class="q-pl-sm" v-else-if="!col.invisible" id="my-input"
                         v-model="parent.editingRow[col.name]" dense style="width:95%" :label="col.label"
                         :disable="col.disabled" :rules="col.rules"
-                        :type="col.password && !col.passwordShown ? 'password' : 'text'">
+                        :type="col.password && !col.passwordShown ? 'password' : 'text'" ref="inputRefs">
                         <template v-slot:label>
                             <label for="my-input" v-html="col.label" style="font-size: smaller;"></label>
                         </template>
@@ -47,30 +80,7 @@
                 </div>
             </q-form>
         </q-card-section>
-        <q-card-actions align="right">
-            
-            <span v-if="multiRow">
-                <q-btn :disable="parent.editMode == 'add' || isChanged || rows.length == 0" flat color="negative" icon="delete"
-                    @click="deleteRow" />
-                <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="first_page"
-                    @click="moveTo(0)" />
-                <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="chevron_left"
-                    @click="moveTo(editingRowIndex - 1)" />
 
-                <span v-if="parent.editMode == 'add'">{{$t('New record')}}</span>
-                <span v-else-if="rows.length > 0">{{ editingRowIndex + 1 }} / {{ rows.length }}</span>
-                <span v-else>{{$t('No records')}}</span>
-
-                <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary"
-                    icon="chevron_right" @click="moveTo(editingRowIndex + 1)" />
-                <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary" icon="last_page"
-                    @click="moveTo(rows.length - 1)" />
-            </span>
-
-            <q-btn v-if="isChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
-            <q-btn v-if="isChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
-            <q-btn v-if="!isChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
-        </q-card-actions>
     </q-card>
 </template>
 <script>
@@ -127,7 +137,10 @@ export default {
         let ec = [...this.parent.columns];
         this.swapIdAndValColumns(ec);
         this.editColumns = ec.filter(col => this.showColInEdit(col, this.parent.masterKey));
-        this.loaded = true;
+        this.loaded = true;   
+        this.$nextTick(() => {
+            this.$refs.inputRefs[0].focus();
+        });
     },
     methods: {       
         /**
