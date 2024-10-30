@@ -186,7 +186,7 @@
                         :style="{ maxWidth: col.width + ' !important', verticalAlign: 'middle' }"
                         @click="showOverlay(col, props)" class="q-pa-none q-ma-none">
                         <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
-                            :disable="!allowEdit || col.disabled || noInlineEditing"
+                            :disable="!col.enabled && (!allowEdit || col.disabled || noInlineEditing)"
                             @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                         <span v-else-if="col.type == 'rating'">
                             <q-rating v-model="props.row[col.index]" :max="col.max" :color="col.color"
