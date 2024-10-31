@@ -134,12 +134,13 @@ async function handleAxiosError(error) {
       }
     }
   } else if (error.request) {
-    reason = i18n.global.t("No response from server");
-    //store.isOnline = false;
-    logout();
-    return { data: null };
-    //expired = true;
-  } 
+    reason = i18n.global.t("Error request") + ": " + error;  //i18n.global.t("No response from server");
+    //logout();
+    //return { data: null };
+    expired = true;
+  } else {
+    reason = i18n.global.t("Error else") + ": " + error;
+  }
 
   await app.config.globalProperties.$q.dialog({
     component: CustomDialog,
@@ -149,7 +150,7 @@ async function handleAxiosError(error) {
   });
 
   if (expired) {
-    logout();
+    // logout();
   }
 
   return { data: null };
