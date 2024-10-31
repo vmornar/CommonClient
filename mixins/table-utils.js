@@ -388,6 +388,10 @@ export const TableUtilsMixin = {
             }
             this.editingRowIndex = this.rows.length;
             this.inEdit = true;
+            await this.$nextTick();
+            if (this.asForm) {
+                this.$refs.form.$refs.inputRefs[0].focus();;
+            }
         },
             
         /**

@@ -63,14 +63,16 @@ const i18n = createI18n({
  * Logs out the user by removing the token from local storage and clearing user data.
  * If Keycloak is available, it also performs a Keycloak logout.
  */
-async function logout() {
+function logout() {
   console.log('Logging out');
 //  if (store.userData) {
     store.userData = null;
     app.config.globalProperties.$q.localStorage.remove("token");
     app.config.globalProperties.$q.localStorage.remove('userData');
-    if (app.config.globalProperties.$keycloak)
-      app.config.globalProperties.$keycloak.logout();
+  if (app.config.globalProperties.$keycloak) {
+    app.config.globalProperties.$keycloak.logout();
+    app.config.globalProperties.$keycloak.token = null;
+  }
 //  }
 }
 
@@ -119,7 +121,7 @@ async function handleAxiosError(error) {
         reason = i18n.global.t("Session expired - please login again");
         expired = true;
       } else {
-        reason = i18n.global.t("Unauthorized");
+        reason = i18n.global.t("Unauthorized - please login again");
         expired = true;
       }
     } else if (response.status == 429) {

@@ -1,39 +1,15 @@
 <template>
 
     <q-card flat style="display: flex; flex-direction: column" v-if="loaded" class="max-width" @keydown="handleSaveCancelKeydown">
-        <!-- <q-card-section :style="editStyle" v-if="!multiRow">
-            {{ parent.editMode == "add" ? $t('Add row') :
-                $t('Edit row')
-                }}
-        </q-card-section> -->
         <q-card-actions v-if="!parent.asForm">
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; min-width: 600px;">
                 <div>
-                {{ parent.editMode == "add" ? $t('Add row') :
-                    $t('Edit row')
-                    }}
+                    {{ parent.editMode == "add" ? $t('Add row') : $t('Edit row') }}
                 </div>	
-                <!-- <span v-if="multiRow">
-                    <q-btn :disable="parent.editMode == 'add' || isChanged || rows.length == 0" flat color="negative" icon="delete"
-                        @click="deleteRow" />
-                    <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="first_page"
-                        @click="moveTo(0)" />
-                    <q-btn :disable="isChanged || editingRowIndex == 0" flat color="primary" icon="chevron_left"
-                        @click="moveTo(editingRowIndex - 1)" />
-
-                    <span v-if="parent.editMode == 'add'">{{$t('New record')}}</span>
-                    <span v-else-if="rows.length > 0">{{ editingRowIndex + 1 }} / {{ rows.length }}</span>
-                    <span v-else>{{$t('No records')}}</span>
-
-                    <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary"
-                        icon="chevron_right" @click="moveTo(editingRowIndex + 1)" />
-                    <q-btn :disable="isChanged || editingRowIndex >= rows.length - 1" flat color="primary" icon="last_page"
-                        @click="moveTo(rows.length - 1)" />
-                </span> -->
                 <div>
-                <q-btn dense v-if="isChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
-                <q-btn dense v-if="isChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
-                <q-btn dense v-if="!isChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
+                    <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
+                    <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
+                    <q-btn dense v-if="!$store.formChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
                 </div>
             </div>
         </q-card-actions>
@@ -85,6 +61,7 @@
 </template>
 <script>
 import { loadComponent } from '@/common/component-loader';
+import { xhr } from 'ol/featureloader';
 export default {
     name: "TableRowEditor",
     components: {
@@ -92,11 +69,9 @@ export default {
         autocomplete: loadComponent('autocomplete'),
         htmlEditor: loadComponent('html-editor')
     },
+    props: ['parent', 'multiRow', 'rows'],
+
     computed: {
-        isChanged() {
-            this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
-            return this.$store.formChanged;
-        },
         editStyle() {
             return {
                 maxHeight: (this.$q.screen.height - 100) + 'px', overflow: 'auto', minWidth: "600px"
@@ -105,7 +80,6 @@ export default {
     },
     watch: {
         "rows.length": async function (val) {
-            //this.$emit('update:modelValue', val);
             if (val == 0) {
                 this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
             } else {
@@ -113,18 +87,34 @@ export default {
                 await this.parent.editRow(this.rows[this.editingRowIndex]);
             }
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
+        },
+        "parent.editingRow": {
+            handler(val) {
+                console.log("watch2");
+                this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
+            },
+            deep: true,
+            immediate: true
+        },
+        x: {
+            handler(val) {
+                console.log("watc3");
+            },
+            deep: true,
+            immediate: true
         }
     },
-    props: ['parent', 'multiRow', 'rows'],
     data() {
         return {
             editingRowSaved: {},
             editColumns: [],
             loaded: false,
-            editingRowIndex: 0
+            editingRowIndex: 0, 
+            x: {}
         };
     },
     async mounted() {
+        console.log("mounted", this.multiRow);
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
                 await this.parent.editRow(this.parent.rows[0]);
@@ -137,10 +127,11 @@ export default {
         let ec = [...this.parent.columns];
         this.swapIdAndValColumns(ec);
         this.editColumns = ec.filter(col => this.showColInEdit(col, this.parent.masterKey));
-        this.loaded = true;   
-        this.$nextTick(() => {
-            this.$refs.inputRefs[0].focus();
-        });
+
+        this.loaded = true; 
+        await this.$nextTick(); 
+  
+        this.$refs.inputRefs[0].focus();
     },
     methods: {       
         /**
@@ -179,6 +170,7 @@ export default {
             this.parent.addRow();
             this.editingRowIndex = this.rows.length - 1;
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
+            this.x = this.parent.editingRow;
         },
         async deleteRow() {
             if (await this.parent.deleteRow(this.rows[this.editingRowIndex])) {
