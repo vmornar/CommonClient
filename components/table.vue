@@ -37,10 +37,10 @@
                         <q-tooltip v-if="action.tooltip">{{ $t(action.tooltip) }}</q-tooltip>
                     </q-btn>
                     <span v-if="!hideDefaultToolbar">
-                        <q-btn v-if="asForm && !noInlineEditing" dense flat icon="table_chart" color="primary" @click="inEdit = false;  asForm = false" :disable="$store.formChanged">
+                        <q-btn v-if="tableAPI && asForm && !noInlineEditing" dense flat icon="table_chart" color="primary" @click="inEdit = false;  asForm = false" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Table view") }}</q-tooltip>
                         </q-btn>
-                        <q-btn v-if="!asForm && !noInlineEditing" dense flat icon="assignment" color="primary" @click="asForm = true" :disable="$store.formChanged">
+                        <q-btn v-if="tableAPI && !asForm && !noInlineEditing" dense flat icon="assignment" color="primary" @click="asForm = true" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Form view") }}</q-tooltip>
                         </q-btn>
                         <q-btn dense flat icon="filter_alt" color="primary" @click="showFilter = true" :disable="$store.formChanged">

@@ -61,7 +61,6 @@
 </template>
 <script>
 import { loadComponent } from '@/common/component-loader';
-import { xhr } from 'ol/featureloader';
 export default {
     name: "TableRowEditor",
     components: {
@@ -90,19 +89,14 @@ export default {
         },
         "parent.editingRow": {
             handler(val) {
-                console.log("watch2");
-                this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
+                console.log("watch1", this.parent.editingRow, this.editingRowSaved);
+                if (val) {
+                    this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
+                }
             },
             deep: true,
             immediate: true
         },
-        x: {
-            handler(val) {
-                console.log("watc3");
-            },
-            deep: true,
-            immediate: true
-        }
     },
     data() {
         return {
@@ -129,6 +123,7 @@ export default {
         this.editColumns = ec.filter(col => this.showColInEdit(col, this.parent.masterKey));
 
         this.loaded = true; 
+
         await this.$nextTick(); 
   
         this.$refs.inputRefs[0].focus();
@@ -148,6 +143,7 @@ export default {
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
                 if (this.parent.editMode == "add") this.editingRowIndex = this.rows.length;
                 this.parent.editMode = 'edit';
+                this.$store.formChanged = false;
             }
         },
         close () {
@@ -165,12 +161,13 @@ export default {
             await this.parent.editRow(this.rows[index]);
             this.editingRowIndex = index;
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
+            this.$store.formChanged = false;    
         },
         addRow() {
             this.parent.addRow();
             this.editingRowIndex = this.rows.length - 1;
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
-            this.x = this.parent.editingRow;
+            this.$store.formChanged = false;   
         },
         async deleteRow() {
             if (await this.parent.deleteRow(this.rows[this.editingRowIndex])) {

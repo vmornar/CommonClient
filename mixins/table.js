@@ -70,6 +70,7 @@ export const TableMixin = {
             overlayShown: null,
             overlays: { },
             asForm: false,
+            visibleColumns: [],
         }
     },
     methods: {
