@@ -363,7 +363,7 @@ export default {
 
     async crud(options) {
       await console.log("crud", options);
-      this.post("Dev/Crud", { schemaName: options.schema_name, tableName: options.table_name });
+      this.post("Dev/Crud", { schemaName: options.schema_name, tableName: options.table_name, forDetail: false, withOwnership: false });
     },
 
     routeAtts(route) {

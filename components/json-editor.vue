@@ -82,7 +82,7 @@ export default {
             { key: "component" },
             { key: "conditionalConfirmationMessage", value: '"conditionalConfirmationMessage" : { "condition" : "return exp(row,columns)&", "message" : "" }}' },
             { key: "confirmationMessage" },
-            { key: "contextValues", value: '"contextValues" : [ "&" : {"label" : "", "name" : "", "lookup" : "", "width" : "" } ]' },
+            { key: "contextValues", value: '"contextValues" : [ {"label" : "", "name" : "", "lookup" : "", "width" : "" } ]' },
             { key: "customFunction" },
             { key: "cv_name" },
             { key: "cv_label" },

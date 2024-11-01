@@ -343,6 +343,24 @@ export const TableUtilsMixin = {
                 
                 if (col.name == 'id' || col.name == 'time_created' || col.name == 'time_modified' || col.name == 'user_modified') col.disabled = true;
                 if (col.name == 'id') col.invisible = true;
+
+                if (col.name.endsWith('_disabled_')) {
+                    col.name = col.name.replace('_disabled_', '');
+                    col.label = col.label.replace(' disabled', '');
+                    col.disabled = true;
+                }
+
+                // override deefault invisible
+                if (col.visible) {
+                    col.invisible = false;
+                }
+
+                // overrride default disabled
+                if (col.enabled) {
+                    col.disabled = false;
+                }
+
+
                 if (!col.invisible) {
                     this.visibleColumns.push(col.name);
                 }
