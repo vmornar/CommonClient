@@ -228,7 +228,7 @@
         <table-filter v-if="showFilter" :parent="this" @cancel="showFilter = false" />
 
         <q-dialog v-if="inEdit && !asForm" :model-value="true" @keydown="handleSaveCancelKeydown" persistent>
-            <table-row-editor v-if="inEdit" :parent="this" @save="save" @cancel="inEdit = false" />
+            <table-row-editor v-if="inEdit" :parent="this" @save="save" :rows="filterSet ? rowsFiltered : rows" @cancel="inEdit = false" />
         </q-dialog>
     </div>
 </template>

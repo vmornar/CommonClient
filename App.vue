@@ -298,9 +298,10 @@ export default {
         if (!await this.confirmDialog(this.$t('Unsaved changes will be lost. Continue?'))) {
           return;
         }
+        console.log("tu sam");
         this.$store.formChanged = false;
+        console.log("tu sam 2", this.$store.formChanged);
       }
-      if (this.$store.formChanged) return;
       let route = this.$store.routes.find((item) => item.path == id);
       if (route.component > "") {
         this.$store.state = {};

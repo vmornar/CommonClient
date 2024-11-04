@@ -160,6 +160,9 @@ export const TableMixin = {
                     if (this.$q.localStorage.has("context_value_" + cv.name)) {
                         cv.value = this.$q.localStorage.getItem("context_value_" + cv.name);
                     }
+                    if (cv.catalog) {
+                        cv.options = this.$store.catalogs[cv.catalog];
+                    }
                     if (cv.lookup) {
                         cv.options = await this.get("Table/GetParamLookup/" + cv.lookup);
                     }

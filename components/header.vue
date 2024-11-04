@@ -101,7 +101,12 @@ export default {
             this.inEdit = false;
             await this.$nextTick();
             let route = this.$store.routes.find((r) => r.path === this.$route.path);
+            if (!route) {
+                await this.showError("Can't edit route parameters defined in router.js");
+                return;
+            }
             this.editingRow = {};
+
             this.copyObject(route, this.editingRow);
             this.columns = Object.keys(this.editingRow).map((k) => {
                 return { name: k, label: k, type: this.getValueType(this.editingRow[k]), required: true };

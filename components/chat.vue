@@ -3,7 +3,7 @@
         <Header title="Chat" />
         <div class="row q-pa-sm">
             <autocomplete v-model="room_id" :label="cv_label" dense :options="$store.catalogs.rooms"
-                @update:model-value="reload" :style="{ width: '200px' }" map-options emit-value :clearable="false" />
+                @update:model-value="reload" :style="{ width: '250px' }" map-options emit-value :clearable="false" />
         </div>
         <q-card flat>
             <q-card-section class="q-pa-none">
@@ -48,7 +48,7 @@ export default {
         }
     },
     mounted() {
-        console.log("Chat mounted", this.$route.path, this.$store.props[this.$route.path]);
+
         this.copyObject(this.$store.props[this.$route.path], this, true);
 
         if (this.$q.localStorage.has(this.cv_name)) {

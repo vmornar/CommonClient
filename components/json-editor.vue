@@ -76,6 +76,8 @@ export default {
             currentWord: '',
             filteredSuggestions: [],
             suggestion: null,
+            // & denotes the cursor position after the suggestion is inserted
+            // keys without values by default have value of "key" : "&"
             suggestions: [{ key: "allowDelete", value: '"allowDelete" : false&' },
             { key: "allowEdit", value: '"allowEdit" : false&' },
             { key: "colAtts", value: '"colAtts" : { "&" : { "" : ""} } ' },
@@ -84,13 +86,11 @@ export default {
             { key: "confirmationMessage" },
             { key: "contextValues", value: '"contextValues" : [ {"label" : "", "name" : "", "lookup" : "", "width" : "" } ]' },
             { key: "customFunction" },
-            { key: "cv_name" },
-            { key: "cv_label" },
             { key: "dbFunction" },
             { key: "deleteInStore", value: '"deleteInStore" : true&' },
             { key: "details", value: '"details": [ { "name": "&", "tableAPI": "" } ]' },
             { key: "disabled", value: '"disabled" : true&' },
-
+            { key: "enabled", value: '"enabled" : true&'},
             { key: "doNotMaximize", value: '"doNotMaximize" : true&' },
             { key: "exportPreprocess" },
             { key: "frugal", value: '"frugal" : true&' },
@@ -116,7 +116,8 @@ export default {
             { key: "title" },
             { key: "toolbar" },
             { key: "toolbarCloseable", value: '"toolbarCloseable" : true&' },
-            { key: "tooltip" },
+                { key: "tooltip" },
+            { key: "visible", value: '"visible" : true&' },
             { key: "width" }],
         };
     },

@@ -89,7 +89,6 @@ export default {
         },
         "parent.editingRow": {
             handler(val) {
-                console.log("watch1", this.parent.editingRow, this.editingRowSaved);
                 if (val) {
                     this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
                 }
@@ -108,7 +107,6 @@ export default {
         };
     },
     async mounted() {
-        console.log("mounted", this.multiRow);
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
                 await this.parent.editRow(this.parent.rows[0]);
@@ -135,7 +133,7 @@ export default {
          * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
          */
         showColInEdit(col, masterKey) {
-            return col.name != 'id' && !col.name.endsWith('_val') && col.name != masterKey;
+            return !col.invisible && !col.name.endsWith('_val') && col.name != masterKey;
         },
         async save() {
             if (await this.parent.validateForm(this.$refs.form)) {
