@@ -1,4 +1,5 @@
 <template>
+    <div>
     <div ref="header">
         <Header v-if="!detailTable && !popupName" :name="name ?? $route.name" :title="title ?? $t(name ?? $route.name)"
             :backButton="!popupName && $store.level > 1" />
@@ -146,7 +147,6 @@
                         <q-list dense>
                             <q-item v-for="col in props.cols" :key="col.name">
                                 <span class="label">{{ col.label }}</span>&nbsp;<q-space />
-                                <!-- <span v-html="col.value"></span> -->
                                 <span @click="showOverlay(col, props)">
                                     <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
                                         :disable="!allowEdit || col.disabled || noInlineEditing"
@@ -164,6 +164,7 @@
                                         v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                                         :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
                                 </span>
+                                <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(col.value)" class="q-pa-none q-ma-none" ></q-btn>
                             </q-item>
                         </q-list>
                     </q-card>
@@ -196,8 +197,11 @@
                                 @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                             {{ props.row[col.index] }}
                         </span>
-                        <span v-else v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
+                        <div v-else class="cell-content">
+                            <span v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                             :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
+                            <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(col.value)" class="q-pa-none q-ma-none right-in-cell"></q-btn>
+                        </div>
                     </q-td>
                 </q-tr>
             </template>
@@ -231,6 +235,7 @@
             <table-row-editor v-if="inEdit" :parent="this" @save="save" :rows="filterSet ? rowsFiltered : rows" @cancel="inEdit = false" />
         </q-dialog>
     </div>
+    </div>
 </template>
 
 <script>
@@ -250,6 +255,7 @@ import { TableUtilsMixin } from '../mixins/table-utils.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 import { loadComponent } from '@/common/component-loader';
 import TableRecords from './table-records.vue';
+import { openURL } from 'quasar';
 
 export default {
     name: "Table",

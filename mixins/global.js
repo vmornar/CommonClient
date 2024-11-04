@@ -1,6 +1,7 @@
 /**
  * A global mixin object containing commonly used methods and data.
  */
+import { openURL } from 'quasar';
 import { getComponent } from '../component-loader.js';
 //import CustomDialog from '../components/custom-dialog.vue';
 import { loadComponent } from '../component-loader.js';
@@ -16,6 +17,17 @@ export const GlobalMixin = {
     },
        
     methods: {
+
+
+        /**
+         * Opens a URL in a new tab.
+         * @param {string} url - The URL to open.
+         * @returns {void}
+         */
+        openURL(url) {
+            window.open(url, '_blank');
+        },
+
         /**
          * Pauses execution for a specified number of milliseconds.
          *

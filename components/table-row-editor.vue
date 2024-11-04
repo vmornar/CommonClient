@@ -15,7 +15,7 @@
         </q-card-actions>
         <q-card-section style="flex-grow: 1; overflow-y: auto;">
             <q-form class="q-mt-none" ref="form">
-                <div :class="{ row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
+                <div :class="{ 'q-mt-sm': true, row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
                     <span v-if="col.type == 'boolean' && !col.invisible" style="width:90%">
                         <q-checkbox v-model="parent.editingRow[col.name]" dense :label="col.label"
                             :disable="col.disabled">
@@ -53,6 +53,7 @@
                                 @click="col.passwordShown = !col.passwordShown"></q-icon>
                         </template>
                     </q-input>
+                    <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(parent.editingRow[col.name])" class="q-pa-none q-ma-none" ></q-btn>
                 </div>
             </q-form>
         </q-card-section>
@@ -90,6 +91,7 @@ export default {
         "parent.editingRow": {
             handler(val) {
                 if (val) {
+                    console.log('parent.editingRow', val);
                     this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
                 }
             },
@@ -176,6 +178,7 @@ export default {
                     await this.parent.editRow(this.rows[this.editingRowIndex]);
                 }
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
+                this.$store.formChanged = false;   
             } 
         }
     }

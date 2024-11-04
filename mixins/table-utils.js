@@ -417,10 +417,10 @@ export const TableUtilsMixin = {
          * @param {Object} row - The row to be edited.
          */
         async editRow(row) {
-            await this.loadLookups();
             this.editMode = 'edit';
             this.editingRowIndex = this.rows.indexOf(row);
             this.editingRow = this.rowToObject(row);
+            await this.loadLookups();
             this.inEdit = true;
         },
 

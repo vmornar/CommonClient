@@ -8,9 +8,7 @@
             <q-space />
         </q-card-section>
         <q-card-section class="q-pa-none">
-            <Table v-if="!asForm" ref="detailTable" :detailTable="true" :options="localOptions" />
-            <table-row-editor v-if="asForm && inEdit" ref="detailForm" :parent="this" @save="save" :multiRow="true"
-                @cancel="cancel" />
+            <Table ref="detailTable" :detailTable="true" :options="localOptions" />
         </q-card-section>
     </q-card>
 </template>
@@ -35,18 +33,19 @@ export default {
     mixins: [TableUtilsMixin, TableMixin],
     components: {
         Table: loadComponent('table'),
-        TableRowEditor: loadComponent('table-row-editor')
     },
-    props: ['popupName'],
+    props: ['popupName', 'parentPopup'],
 
     data: () => {
         return {
             localOptions: null,
             details: null,
             title: 'Details',
+            asForm: false,
+            loaded: false
         }
     },
-    mounted() {
+    async mounted() {
         this.initializeComponent(this.popupName);
         this.openDetail(this.details[0]); // open the first detail by default
     },
@@ -58,26 +57,17 @@ export default {
          */
         async openDetail(detail) {
             detail.masterKey = this.masterKey;
+            detail.masterValue = this.masterValue;
+            this.localOptions = detail;
+            this.title = this.localOptions.title;
+            console.log('openDetail', this.localOptions);
+            if (this.parentPopup) {
+                this.parentPopup.title = this.localOptions.title;
+            }   
             await this.$nextTick();
-            if (this.asForm) {
-                this.copyObject(detail, this, true);
-                await this.reload();
-                if (this.rows.length > 0) {
-                    await this.editRow(this.rows[0]);
-                } else {
-                    await this.addRow();
-                }
-                this.localOptions = detail;
-                console.log("editing row/col", this.inEdit, this.editMode, this.editingRow)
-            } else {
-                await this.$refs.detailTable.init();
-            }
-        },
-        save() {
-            this.saveRow();
-        },
-        cancel() {
-            this.$store.popups[this.popupName].show = false;
+            setTimeout(() => {
+                this.$refs.detailTable.init();
+            }, 10);
         },
     }
 }

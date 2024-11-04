@@ -12,6 +12,7 @@ export const TableMixin = {
         options: null,
         popupName: null,
         detailTable: false,
+        parentPopup: null,
     },
     mixins: [TableExportMixin, TableCustomMixin, TableUtilsMixin],
     data() {
@@ -138,6 +139,12 @@ export const TableMixin = {
             } else {
                 this.copyObject(this.$store.props[this.$route.path], this, true);
             }
+
+            if (this.parentPopup) {
+                this.parentPopup.title = this.title;
+                console.log("Parent popup: " + this.parentPopup.title);
+            }
+            console.log("Table init: " + this.title);   
             
             // copy context values so that action is not changed
             if (this.contextValues) {

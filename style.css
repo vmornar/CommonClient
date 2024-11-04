@@ -128,6 +128,16 @@ a {
   justify-content: space-between;
 }
 
+.cell-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right-in-cell {
+  margin-left: auto;
+}
+
 .left {
   text-align: left;
 }

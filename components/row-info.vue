@@ -2,6 +2,7 @@
     <table class="q-ma-md">
         <tbody>
             <tr>
+                <th>Index</th>
                 <th>Label</th>
                 <th>Field</th>
                 <th>Value</th>
@@ -10,7 +11,7 @@
                 <td>{{ index }}</td>
                 <td>{{ col.label }}</td>
                 <td>{{ col.name }}</td>
-                <td>{{ rowToShow[col.name] }}</td>
+                <td>{{ v(col.name) }}</td>
             </tr>
         </tbody>
     </table>
@@ -19,6 +20,7 @@
 <script>
 export default {
     name: "RowInfo",
+    props: ['parentPopup'],
     data: function () {
         return {
             columns: [],
@@ -26,7 +28,19 @@ export default {
         }
     },
     created() {
-        this.columns = this.$store.popups.default.props.columns; this.rowToShow = this.$store.popups.default.props.rowToShow;
+        this.columns = this.$store.popups.default.props.columns;
+        this.rowToShow = this.$store.popups.default.props.rowToShow;
+        console.log('columns', this.rowToShow);
+    },
+    methods: {
+        v(colName) {
+            if (!this.rowToShow) return '';
+            if (typeof this.rowToShow[colName] == 'object') {
+                return JSON.stringify(this.rowToShow[colName]);
+            } else {
+                return this.rowToShow[colName];
+            }
+        }
     }
 }
 </script>

@@ -5,7 +5,7 @@
         @keydown.f9="translate">
         <q-card flat class="max-width">
             <q-card-section dense class="max-width row items-center text-bold q-pa-sm background">
-                {{ $store.popups[name].props.title }}
+                {{ title }}
                 <q-space />
                 <q-btn v-for="button in $store.popups[name].props.buttons" :key="button.label" dense flat round
                     :label="button.label" :icon="button.icon" @click="button.action">
@@ -16,7 +16,7 @@
                 <q-btn dense size="sm" flat round icon="close" @click="closeDialog" />
             </q-card-section>
             <q-card-section class="max-width q-pa-none">
-                <component v-if="component" :is="component" :popupName="name" />
+                <component v-if="component" :is="component" :popupName="name" :parentPopup="this" />
             </q-card-section>
         </q-card>
     </q-dialog>
@@ -48,16 +48,18 @@ export default {
     data() {
         return {
             component: null,
+            title: null
         }
     },
     async mounted() {
         this.component = markRaw(loadComponent(this.$store.popups[this.name].component));
+        this.title = this.$store.popups[this.name].props.title
     },
     methods: {
         closeDialog() {
             console.log('popupClosed', this.name);
             eventBus.emit('popupClosed', this.name);
-            if (this.canCloseIfFormChanged || !this.$store.formChanged) this.$store.popups[this.name].show = false;
+            if (this.$store.popups[this.name].canCloseIfFormChanged || !this.$store.formChanged) this.$store.popups[this.name].show = false;
         }
     }
 }

@@ -87,8 +87,7 @@
       <help-dialog @keydown.f9="translate" />
       <task-progress v-if="$store.progress.show" />
       <div v-for="popup in $store.additionalPopups" :key="popup.name">
-        <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"
-          :canCloseIfFormChanged="popup.canCloseIfFormChanged" />
+        <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"/>
       </div>
     </div>
   </div>
@@ -298,9 +297,7 @@ export default {
         if (!await this.confirmDialog(this.$t('Unsaved changes will be lost. Continue?'))) {
           return;
         }
-        console.log("tu sam");
         this.$store.formChanged = false;
-        console.log("tu sam 2", this.$store.formChanged);
       }
       let route = this.$store.routes.find((item) => item.path == id);
       if (route.component > "") {
