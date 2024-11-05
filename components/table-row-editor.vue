@@ -125,8 +125,9 @@ export default {
         this.loaded = true; 
 
         await this.$nextTick(); 
-  
-        this.$refs.inputRefs[0].focus();
+        setTimeout(() => {
+            this.$refs.inputRefs[0].focus();
+        }, 100);
     },
     methods: {       
         /**
@@ -139,7 +140,7 @@ export default {
         },
         async save() {
             if (await this.parent.validateForm(this.$refs.form)) {
-                this.$emit('save');
+                await this.parent.saveRow();
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
                 if (this.parent.editMode == "add") this.editingRowIndex = this.rows.length;
                 this.parent.editMode = 'edit';

@@ -61,7 +61,9 @@
                       :color="props.node.iconColor" />
                     <span v-html="props.node.label" />
                     <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
-                      { label: $t('CRUD'), callback: crud, options: props.node }]" />
+  { label: $t('CRUD'), callback: crud, options: props.node, visible: !props.node.locked },
+  { label: $t('Lock'), callback: setLocked, options: props.node, visible: !props.node.locked  },
+  { label: $t('Unlock'), callback: setLocked, options: props.node, visible: props.node.locked } ]" />
                   </span>
                   <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
                   </span>
@@ -360,8 +362,19 @@ export default {
     },
 
     async crud(options) {
-      await console.log("crud", options);
-      this.post("Dev/Crud", { schemaName: options.schema_name, tableName: options.table_name, forDetail: false, withOwnership: false });
+      if (!options.props.tableAPI) {
+        await this.showError(this.$t('Table API not defined'));
+        return;
+      } else {
+        let i = options.props.tableAPI.indexOf('_');
+        await this.post("Dev/Crud", { schemaName: options.props.tableAPI.substring(0, i), tableName: options.props.tableAPI.substring(i+1), forDetail: false, withOwnership: false });       
+      }
+    },
+
+    async setLocked(options) {
+      await this.put("Dev/SetLocked/" + options.id + "/" + !options.locked);
+      await this.delete("Dev/ClearCache");
+      await this.getRoutes();
     },
 
     routeAtts(route) {
@@ -375,7 +388,9 @@ export default {
         id: route.id,
         children: this.getChildRoutes(route.path),
         schema_name: route.schema_name,
-        table_name: route.table_name
+        table_name: route.table_name,
+        props: route.props,
+        locked: route.locked
       }
     },
 

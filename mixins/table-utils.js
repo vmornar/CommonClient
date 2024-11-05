@@ -120,6 +120,7 @@ export const TableUtilsMixin = {
                 }
                 rows[editingRowIndex] = newRow;
             }
+            this.$store.formChanged = false;
             return true;
         },
 
@@ -378,7 +379,7 @@ export const TableUtilsMixin = {
          * @returns {Promise<void>} A Promise that resolves when the row is saved.
         */
         async saveRow() {
-            this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
+            await this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
         },
 
         /**
