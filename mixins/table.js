@@ -36,6 +36,7 @@ export const TableMixin = {
             tableAPIKey: null,
             restAPI: null,
             editingRow: null,
+            editingRowSaved: {},
             editingRowIndex: 0,
             dbFunction: null,
             key: "id",
@@ -129,6 +130,7 @@ export const TableMixin = {
             this.overlays = { },
             this.asForm = false;
             this.inEdit = false;
+            this.editingRowIndex = 0;
 
             this.grid = this.$q.screen.width <= 800;
 

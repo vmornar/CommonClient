@@ -90,8 +90,6 @@
             </div>
         </div>
 
-        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" @cancel="cancel" :multiRow="true" :parent="this" :rows="filterSet ? rowsFiltered : rows"/>
-
         <!-- The table -->
         <q-table square v-if="loaded && !asForm" ref="table" class="my-sticky-header-table" @virtual-scroll="scroll"
             :table-style="tableStyle" dense flat bordered :rows="filterSet ? rowsFiltered : rows" :columns="columns"
@@ -231,7 +229,11 @@
 
         <table-filter v-if="showFilter" :parent="this" @cancel="showFilter = false" />
 
-        <q-dialog v-if="inEdit && !asForm" :model-value="true" @keydown="handleSaveCancelKeydown" persistent>
+        <!-- Form view -->
+        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" @cancel="cancel" :multiRow="true" :parent="this" :rows="filterSet ? rowsFiltered : rows"/>
+
+        <!-- Dialog for editing a single row -->
+        <q-dialog v-if="inEdit && !asForm" :model-value="true" ref="popupForm" @keydown="handleSaveCancelKeydown" persistent>
             <table-row-editor v-if="inEdit" :parent="this" @save="save" :rows="filterSet ? rowsFiltered : rows" @cancel="inEdit = false" />
         </q-dialog>
     </div>
@@ -254,8 +256,6 @@ import { TableMixin } from '../mixins/table.js';
 import { TableUtilsMixin } from '../mixins/table-utils.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 import { loadComponent } from '@/common/component-loader';
-import TableRecords from './table-records.vue';
-import { openURL } from 'quasar';
 
 export default {
     name: "Table",
@@ -396,20 +396,43 @@ export default {
         },
     },
     methods: {
-        async saveChanges() {
-            if (!this.asForm) {
-                await this.saveRows();
-            } else {
-                await this.$refs.form.save();
+
+        async moveTo(index) {
+            await this.editRow(this.rows[index]);
+            this.editingRowIndex = index;
+            this.copyObject(this.editingRow, this.editingRowSaved);
+            this.$store.formChanged = false;    
+        },
+
+        async saveForm() {
+            await this.saveRow();
+            if (this.editMode == "add") {
+                await this.addRow();
+                //this.editingRowIndex = this.rows.length - 1;
             }
+            this.copyObject(this.editingRow, this.editingRowSaved);
+            this.$store.formChanged = false;
+        },
+
+        async saveChanges() {
+            console.log('saveChanges', this.asForm);
+            let formToValidate = this.$refs.form ?? this.$refs.popupForm;
+            if (formToValidate && await this.validateForm(formToValidate.form)) {
+                if (this.asForm) {
+                    await this.saveForm();
+                } else {
+                    await this.saveRows();
+                }
+            }
+            this.$store.formChanged = false;
         },
         async undoChanges() {
-            if (!this.asForm) {
-                await this.reload();
-                this.$store.formChanged = false;
-            } else {
+            if (this.asForm) {
                 await this.$refs.form.cancel();
+            } else {
+                await this.reload();                
             }
+            this.$store.formChanged = false;
         },
         async save() {
             await this.saveRow();
@@ -513,7 +536,7 @@ export default {
             } else if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
                 event.stopPropagation();
-                this.saveRows();
+                this.saveChanges();
                 this.closeOverlay();
             } else if (event.ctrlKey && event.key === 'u') {
                 this.undoChanges();

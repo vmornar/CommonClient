@@ -420,12 +420,12 @@ export const TableUtilsMixin = {
                 this.editingRow[this.masterKey] = this.masterValue;
             }
             this.editingRowIndex = this.rows.length;
-            this.inEdit = true;
-            await this.$nextTick();
-            if (this.asForm) {
-                this.$refs.form.$refs.inputRefs[0].focus();;
+            if (this.asForm && this.$refs.form) {
+                this.$refs.form.focus();
             }
+            this.inEdit = true;
             await this.loadLookups();
+
         },
             
         /**
