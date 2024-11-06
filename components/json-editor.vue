@@ -92,6 +92,7 @@ export default {
             { key: "disabled", value: '"disabled" : true&' },
             { key: "enabled", value: '"enabled" : true&'},
             { key: "doNotMaximize", value: '"doNotMaximize" : true&' },
+            { key: "defaultPrevious", value: '"defaultPrevious" : true&' },            
             { key: "exportPreprocess" },
             { key: "frugal", value: '"frugal" : true&' },
             { key: "icon" },

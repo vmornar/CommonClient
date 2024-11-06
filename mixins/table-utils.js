@@ -130,7 +130,7 @@ export const TableUtilsMixin = {
          * @param {Array} columns - An array of column objects.
          * @returns {Object} - An empty row object with default values.
          */
-        createEmptyRow(columns) {
+        async createEmptyRow(columns) {
             let obj = {};
             for (let col of columns) {
                 if (col.type == 'json') {
@@ -139,6 +139,16 @@ export const TableUtilsMixin = {
                     obj[col.name] = false;
                 } else {
                     obj[col.name] = null;
+                } 
+                if (col.defaultPrevious) {
+                    obj[col.name] = this.$q.localStorage.getItem("default_" + col.name) ?? obj[col.name];
+                    if (col.lookup) {
+                        await this.loadLookup(col.lookup);
+                        console.log("Lookup", obj[col.name], col.lookup);
+                        let displayValue = this.findLookupValue(obj[col.name], col.lookup);
+                        console.log("Lookup", displayValue);
+                        obj[col.name + '_val'] = displayValue;
+                    }
                 }
             }
             return obj;
@@ -379,6 +389,11 @@ export const TableUtilsMixin = {
          * @returns {Promise<void>} A Promise that resolves when the row is saved.
         */
         async saveRow() {
+            for (let col of this.columns) {
+                if (col.defaultPrevious) {
+                    this.$q.localStorage.setItem("default_" + col.name, this.editingRow[col.name]);
+                }
+            }
             await this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
         },
 
@@ -399,9 +414,8 @@ export const TableUtilsMixin = {
          * Adds a new row to the table for editing.
          */
         async addRow() {
-            await this.loadLookups();
             this.editMode = 'add';
-            this.editingRow = this.createEmptyRow(this.columns);
+            this.editingRow = await this.createEmptyRow(this.columns);
             if (this.masterKey) {
                 this.editingRow[this.masterKey] = this.masterValue;
             }
@@ -411,6 +425,7 @@ export const TableUtilsMixin = {
             if (this.asForm) {
                 this.$refs.form.$refs.inputRefs[0].focus();;
             }
+            await this.loadLookups();
         },
             
         /**

@@ -81,17 +81,19 @@ export default {
     watch: {
         "rows.length": async function (val) {
             if (val == 0) {
-                this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
-            } else {
+                this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+            } else if (this.parent.editMode != "add") {
                 if (this.editingRowIndex >= this.rows.length) this.editingRowIndex = this.rows.length - 1;
-                await this.parent.editRow(this.rows[this.editingRowIndex]);
+                await this.parent.editRow(this.rows[this.editingRowIndex]);               
             }
             this.copyObject(this.parent.editingRow, this.editingRowSaved);
+            console.log('rows.length', this.parent.editingRow, this.editingRowSaved);
+            this.$store.formChanged = false;
         },
         "parent.editingRow": {
             handler(val) {
                 if (val) {
-                    console.log('parent.editingRow', val);
+                    console.log('parent.editingRow', this.parent.editingRow, this.editingRowSaved);
                     this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.editingRowSaved);
                 }
             },
@@ -114,7 +116,7 @@ export default {
                 await this.parent.editRow(this.parent.rows[0]);
             } else {
                 await this.parent.loadLookups();
-                this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
+                this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
             }
         }
         this.copyObject(this.parent.editingRow, this.editingRowSaved);
@@ -141,9 +143,12 @@ export default {
         async save() {
             if (await this.parent.validateForm(this.$refs.form)) {
                 await this.parent.saveRow();
+                if (this.parent.editMode == "add") {
+                    //this.editingRowIndex = this.rows.length;
+                    await this.parent.addRow();
+                }
                 this.copyObject(this.parent.editingRow, this.editingRowSaved);
-                if (this.parent.editMode == "add") this.editingRowIndex = this.rows.length;
-                this.parent.editMode = 'edit';
+                //this.parent.editMode = 'edit';
                 this.$store.formChanged = false;
             }
         },
@@ -173,7 +178,7 @@ export default {
         async deleteRow() {
             if (await this.parent.deleteRow(this.rows[this.editingRowIndex])) {
                 if (this.rows.length == 0) {
-                    this.parent.editingRow = this.parent.createEmptyRow(this.parent.columns);
+                    this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
                 } else if (this.editingRowIndex >= this.rows.length) {
                     this.editingRowIndex--;
                     await this.parent.editRow(this.rows[this.editingRowIndex]);
