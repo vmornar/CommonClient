@@ -35,6 +35,14 @@
     </p>
 </template>
 <script>
+/**
+ * Common 3rd party licenses component
+ * 
+ * @component
+ * @name Common3rdPartyLicenses
+ * @example
+ * <Common3rdPartyLicenses />
+ */
 export default {
     name: "Common3rdPartyLicenses",
 };

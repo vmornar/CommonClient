@@ -8,8 +8,8 @@
             <q-circular-progress v-if="$store.working" size="24px" indeterminate color="primary" class="nomy"
                 :thickness="0.3" />
         </div>
-        <q-dialog v-if="inEdit" :model-value="true">
-            <table-row-editor v-if="inEdit" :parent="this" @save="saveRow" @cancel="inEdit = false" />
+        <q-dialog v-if="inEdit" :model-value="true"  @keydown="handleSaveCancelKeydown">
+            <table-row-editor v-if="inEdit" :parent="this" @save="saveRow" @cancel="inEdit = false"/>
         </q-dialog>
         <div class="q-pa-xs q-ma-none right row">
             <q-btn dense flat icon="route" @click="getRouteParameters" v-if="isAdmin">
@@ -45,6 +45,8 @@ export default {
         return {
             inEdit: false,
             editingRow: {},
+            editingRowSaved: {},
+            editingRowIndex: 0,
             lookups: {},
             columns: [],
         };
@@ -70,6 +72,12 @@ export default {
             this.$store.level--;
             this.$router.go(-1);
 
+        },
+        cancel() {
+            this.inEdit = false;
+        },  
+        save () {
+            this.saveRow();
         },
         /**
          * Saves the changes made to route parameters. Admins only.

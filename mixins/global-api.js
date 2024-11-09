@@ -295,10 +295,18 @@ export const GlobalApiMixin = {
             return response?.error == undefined;
         },
         
+        /**
+         * Gets routes available to the user
+         * @returns {Promise<void>}
+         */
         async getRoutes() {
             this.$store.routes = await this.get("Auth/GetRoutes", null, true);
         },
 
+        /**
+         * Gets icons
+         * @returns {Promise<void>}
+         */
         async getIcons() {
             if (this.$store.icons.length == 0) this.$store.icons = await this.get("CommonUser/GetIcons");
         },

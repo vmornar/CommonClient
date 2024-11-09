@@ -1,5 +1,5 @@
 /**
- * @desc A global mixin object containing methods for table editing and saving.
+ * @desc A mixin object containing methods for table editing and saving.
  * @module TableUtilsMixin
  */
 export const TableUtilsMixin = {
@@ -22,8 +22,8 @@ export const TableUtilsMixin = {
     },
     methods: {
         /**
- * Clear the filter
- */
+        * Clears the filter
+         */
         clearFilter() {
             this.filter = {}; this.filter2 = {}; this.filterExp = {};
             for (let col of this.columns) {
@@ -420,12 +420,8 @@ export const TableUtilsMixin = {
                 this.editingRow[this.masterKey] = this.masterValue;
             }
             this.editingRowIndex = this.rows.length;
-            if (this.asForm && this.$refs.form) {
-                this.$refs.form.focus();
-            }
-            this.inEdit = true;
             await this.loadLookups();
-
+            this.inEdit = true;
         },
             
         /**
@@ -433,6 +429,7 @@ export const TableUtilsMixin = {
          * @param {Object} row - The row to be edited.
          */
         async editRow(row) {
+            console.log("Edit row", row);
             this.editMode = 'edit';
             this.editingRowIndex = this.rows.indexOf(row);
             this.editingRow = this.rowToObject(row);

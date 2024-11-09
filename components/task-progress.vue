@@ -23,6 +23,15 @@
     </q-dialog>
 </template>
 <script>
+
+/**
+ * Task progress component
+ * 
+ * @component
+ * @name TaskProgress
+ * @example
+ * <TaskProgress />
+ */
 export default {
     data() {
         return {
@@ -44,6 +53,10 @@ export default {
             return this.progressValue + "/" + this.max + " (" + Math.round(this.percentage * 100) + "%)";
         },
     },
+
+    /**
+     * Mounted lifecycle method
+     */
     async mounted() {
 
         this.copyObject(this.$store.progress.props, this.$data, true);
@@ -90,13 +103,25 @@ export default {
         };
     },
     methods: {
+        
+        /**
+         * Close the dialog
+         */
         close() {
             this.$emit("finished");
             this.$store.progress.show = false;
         },
+
+        /**
+         * Abort the task
+         */
         abort() {
             this.ws.send("abort");
         },
+
+        /**
+         * Stop the task
+         */
         stop() {
             if (this.ws) {
                 this.ws.close();

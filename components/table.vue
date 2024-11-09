@@ -15,7 +15,7 @@
             :iconPicker="false" />
         <!-- <span v-if="overlays.overlaySelect" ref="overlaySelect" @focus="$refs.innerSelect.focus"> -->
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
-            :options="activeLookup.options" :option-label="activeLookup.labelField"
+            :option-label="activeLookup.labelField"
             :option-value="activeLookup.valueField" @blur="closeOverlay" :lookup="activeLookup"
             @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
         <!-- </span> -->
@@ -415,14 +415,13 @@ export default {
         },
 
         async saveChanges() {
-            console.log('saveChanges', this.asForm);
             let formToValidate = this.$refs.form ?? this.$refs.popupForm;
-            if (formToValidate && await this.validateForm(formToValidate.form)) {
-                if (this.asForm) {
+            if (formToValidate) {
+                if (await this.validateForm(formToValidate.form)) {
                     await this.saveForm();
-                } else {
-                    await this.saveRows();
-                }
+                } 
+            } else {
+                await this.saveRows();
             }
             this.$store.formChanged = false;
         },

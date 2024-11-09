@@ -18,6 +18,15 @@
 
 </template>
 <script>
+
+/**
+ * Row info component
+ * 
+ * @component
+ * @name RowInfo
+ * @example
+ * <RowInfo />
+ */
 export default {
     name: "RowInfo",
     props: ['parentPopup'],

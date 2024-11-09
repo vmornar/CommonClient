@@ -68,14 +68,15 @@ export default {
          * @returns {Array} The filtered options.
          */
         filteredOptions() {
+            let options = this.lookup ? this.lookup.options : this.options;
             if (!this.filter) {
-                return this.options;
+                return options;
             }
-            let f = this.options.filter(option =>
+            let f = options.filter(option =>
                 option[this.optionLabel].toLowerCase().includes(this.filter.toLowerCase())
             );
             if (f.length == 0) {
-                return this.options;
+                return options;
             } else {
                 return f;
             }
@@ -94,11 +95,20 @@ export default {
                 });
             }
         },
+
+        /**
+         * Focuses the input field.
+         */
         focus() {
             this.$refs.select.focus();
             this.$refs.select.showPopup();
             this.$refs.select.setOptionIndex(-1);
         },
+
+        /**
+         * Handles the focus event - sets the focusedChildren array.
+         * @param key 
+         */
         handleFocus(key) {
             //return;
             if (key == 0) {
@@ -106,6 +116,11 @@ export default {
             }
             this.focusedChildren[key] = true;
         },
+
+        /**
+         * Handles the blur event - sets the focusedChildren array.
+         * @param key 
+         */
         handleBlur(key) {
             //return;
             this.focusedChildren[key] = false;
@@ -114,12 +129,21 @@ export default {
                 this.$emit('blur');
             }
         },
+
+        /**
+         * Opens the edit lookup popup.
+         */
         editLookup() {
             this.$refs.select.hidePopup();
             this.$store.popups.editLookup.props.tableAPI = this.lookup.refTable;
             this.$store.popups.editLookup.component = 'table';
             this.$store.popups.editLookup.show = true;
         },
+
+        /**
+         * Handles the key down event (arrow down - shows the popup and focuses the first option).
+         * @param {Event} e - The key down event.
+         */
         keyDown(e) {
             if (e.key == 'ArrowDown') {
                 this.$refs.select.showPopup();
@@ -134,6 +158,11 @@ export default {
             //     }
             // }
         },
+
+        /**
+         * Handles the key down event (arrowUp - sets focust to input if necessary).
+         * @param {Event} e - The key down event.
+         */
         keyDownSel(e) {
             if (e.key == 'ArrowUp') {
                 console.log("oi", this.$refs.select.getOptionIndex());
@@ -143,6 +172,10 @@ export default {
             }
         }
     },
+
+    /**
+     * Mounted lifecycle method - initializes the component and creates an event listener.
+     */
     async mounted() {
         eventBus.on('popupClosed', async (payload) => {
             if (payload == 'editLookup') {
@@ -153,6 +186,10 @@ export default {
         });
         await this.$nextTick();
     },
+
+    /**
+     * Before unmount lifecycle method - removes the event listener.
+     */
     beforeUnmount() {
         eventBus.off('popupClosed');
     }

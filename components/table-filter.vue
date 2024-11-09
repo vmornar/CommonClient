@@ -56,6 +56,14 @@
     </q-dialog>
 </template>
 <script>
+/**
+ * Table filter component
+ * 
+ * @component
+ * @name TableFilter
+ * @example
+ * <TableFilter :parent="this" />
+ */
 export default {
     name: "TableFilter",
     computed: {

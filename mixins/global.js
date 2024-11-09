@@ -374,6 +374,11 @@ export const GlobalMixin = {
             return clonedObj;
         },
 
+        /**
+         * Deep copies an object.
+         * @param {Object} obj - The object to copy.
+         * @returns {Object} - The copied object.
+         */
         deepCopyObject(obj) {
             if (typeof obj !== 'object' || obj === null) {
                 return obj; // Return primitive values as is
@@ -403,6 +408,12 @@ export const GlobalMixin = {
             return Object.keys(a).every(field => a[field] == b[field]);
         },
 
+        /**
+         * Checks if two objects are equal by comparing their properties.
+         * @param {Object} a - The first object to compare.
+         * @param {Object} b - The second object to compare.
+         * @returns {boolean} - Returns true if the objects are equal, false otherwise.
+         */
         deepEqualObjects(a, b) {
             
             if (a == null && b == null) return true;
@@ -644,6 +655,11 @@ export const GlobalMixin = {
             };
         },
 
+        /**
+         * Initializes the component with the given popup name. If no popup name is provided, the component is initialized with the props for the current route.
+         * @param {string} [popupName] - The name of the popup to initialize the component with.
+         * @returns {void}
+         * /
         initializeComponent(popupName) {
             if (popupName) {
                 this.copyObject(this.$store.popups[popupName].props, this, true);
@@ -652,6 +668,12 @@ export const GlobalMixin = {
             }
         },
 
+        /**
+         * Copies the given text to the clipboard and displays a notification.
+         * @param {string} text - The text to copy to the clipboard.
+         * @returns {void}
+         * @see https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+         * /
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
             this.$q.notify({

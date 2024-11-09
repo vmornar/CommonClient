@@ -45,7 +45,11 @@ export default {
             loaded: false
         }
     },
+    /**
+     * Mounted lifecycle method
+     */
     async mounted() {
+        console.log('TableDetails mounted', this.popupName);
         this.initializeComponent(this.popupName);
         this.openDetail(this.details[0]); // open the first detail by default
     },

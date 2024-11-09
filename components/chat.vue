@@ -29,6 +29,14 @@
     </div>
 </template>
 <script>
+/**
+ * Chat component
+ * 
+ * @component
+ * @name Chat
+ * @example
+ * <Chat />
+ */
 import { loadComponent } from '@/common/component-loader';
 export default {
     name: "Chat",
@@ -47,10 +55,12 @@ export default {
             queue: [],
         }
     },
+
+    /**
+     * Mounted lifecycle method - initializes the component
+     */
     mounted() {
-
         this.copyObject(this.$store.props[this.$route.path], this, true);
-
         if (this.$q.localStorage.has(this.cv_name)) {
             this.room_id = this.$q.localStorage.getItem(this.cv_name);
         } else {
@@ -60,6 +70,9 @@ export default {
         this.reload();
     },
     methods: {
+        /**
+         * Closes the socket
+         */
         closeSocket() {
             console.log("Closing socket ", this.ws ? this.ws.readyState : "null");
             if (this.ws && this.ws.readyState != WebSocket.CLOSED) {
@@ -67,6 +80,9 @@ export default {
                 this.ws = null;
             }
         },
+        /**
+         * Checks the socket and reopens it if necessary
+         */
         async checkSocket() {
             console.log("Checking socket ", this.ws ? this.ws.readyState : "null");
             if (this.ws == null || this.ws.readyState != WebSocket.OPEN) {
@@ -101,11 +117,19 @@ export default {
 
             }
         },
+        
+        /**
+         * Reloads the chat
+         */
         reload() {
             this.$q.localStorage.set(this.cv_name, this.room_id);
             this.closeSocket();
             this.checkSocket();
         },
+
+        /**
+         * Sends a message after checking the socket
+         */
         checkSendMessage() {
             if (this.message.trim() == "") {
                 return;
@@ -118,9 +142,22 @@ export default {
             }
             this.message = "";
         },
+
+        /**
+         * Sends a message
+         * 
+         * @param {string} message - The message to send
+         */
         sendMessage(message) {
             this.ws.send(JSON.stringify({ message: message, token: this.$keycloak.token }));
         },
+
+        /**
+         * Formats a date
+         * 
+         * @param {Date} date - The date to format
+         * @returns {string} - The formatted date
+         */
         when(date) {
             return this.formatDate(this.toLocalISOString(new Date(date)));
         }

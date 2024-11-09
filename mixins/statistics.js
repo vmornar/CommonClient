@@ -1,5 +1,5 @@
 /**
- * A global mixin object containing commonly used statistical methods.
+ * A mixin object containing commonly used statistical methods.
  */
 export const StatisticsMixin = {
     methods: {

@@ -33,7 +33,7 @@
                         v-model="parent.editingRow[col.name]" :height="editStyle.height" :showIconPicker="false"
                         :label="col.label" :disable="col.disabled" ref="inputRefs" />
                     <autocomplete v-else-if="col.lookup && !col.invisible" v-model="parent.editingRow[col.name]"
-                        :label="col.label" :options="col.lookup.options" dense style="width:95%"
+                        :label="col.label" dense style="width:95%"
                         :option-label="col.lookup.labelField" :option-value="col.lookup.valueField" emit-value
                         map-options :lookup="col.lookup" @update:model-value="selectionUpdated(col)"
                         :disable="col.disabled" ref="inputRefs">
@@ -61,6 +61,15 @@
     </q-card>
 </template>
 <script>
+
+/**
+ * Generic row editor component
+ * 
+ * @component
+ * @name TableRowEditor
+ * @example
+ * <TableRowEditor :parent="this" :mutiRow="true" :rows="rows" />
+ */
 import { loadComponent } from '@/common/component-loader';
 export default {
     name: "TableRowEditor",
@@ -79,6 +88,16 @@ export default {
         },
     },
     watch: {
+        // "$refs.form": {
+        //     handler(val) {
+        //         console.log('form w', val);
+        //         if (val) {
+        //             console.log('form w1', val);
+        //             //this.$refs.form.focus();
+        //         }
+        //     },
+        //     deep: true
+        // },
         "rows.length": async function (val) {
             if (val == 0) {
                 this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
@@ -107,6 +126,10 @@ export default {
             form: null
         };
     },
+
+    /**
+     * Initialize the component
+     */
     async mounted() {
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
@@ -122,23 +145,25 @@ export default {
 
         this.loaded = true; 
 
-console.log('mounted', this.parent.editingRow);
-
         await this.$nextTick(); 
         setTimeout(() => {
             this.focus();
             this.form = this.$refs.form;
             this.$store.formChanged = false;
+            console.log('form', this.form);
         }, 200);
 
     },
+
     methods: {  
-            
+        /**
+         * focus the first input field in the form
+         */            
         focus() {
             this.$refs.form.focus();
             return;
-            if (this.$refs.inputRefs) this.$refs.inputRefs[0].focus();
         },
+
         /**
          * Determines whether a column should be shown in edit mode.
          * @param {Object} col - The column object.
@@ -149,26 +174,40 @@ console.log('mounted', this.parent.editingRow);
         },
 
         async save() {
-            await this.parent.saveForm();
+            if (this.multiRow) {
+                await this.parent.saveForm();
+            } else {
+                await this.parent.saveRow();
+            }
         },
 
         close () {
             this.$emit('cancel');
         },
 
+        /**
+         * cancel the edit operation and revert to the original values
+         */
         cancel() {
-            if (this.parent.editingRowIndex >= this.rows.length) {
+            if (this.multiRow && this.parent.editingRowIndex >= this.rows.length) {
                 this.parent.editingRowIndex = this.rows.length - 1;
             }
             this.copyObject(this.parent.editingRowSaved, this.parent.editingRow);
             this.parent.editMode = 'edit';
         },
 
+        /**
+         * dropwdown selection updated
+         * @param {Object} col - The column object.
+         */
         selectionUpdated(col) {
             let displayValue = this.parent.findLookupValue(this.parent.editingRow[col.name], col.lookup);
             this.parent.editingRow[col.name + "_val"] = displayValue;
         },
         
+        /**
+         * delete the current row and adjust the editing row
+         */
         async deleteRow() {
             if (await this.parent.deleteRow(this.rows[this.parent.editingRowIndex])) {
                 if (this.rows.length == 0) {

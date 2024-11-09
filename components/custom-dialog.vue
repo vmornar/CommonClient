@@ -13,6 +13,14 @@
 </template>
 
 <script>
+/**
+ * Custom dialog component
+ * 
+ * @component
+ * @name CustomDialog
+ * @example
+ * <CustomDialog />
+ */
 export default {
     props: {
         error: { type: Boolean, default: false },

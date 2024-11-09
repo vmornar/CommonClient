@@ -18,6 +18,14 @@
 </template>
 
 <script>
+/**
+ * Forum message component
+ * 
+ * @component
+ * @name ForumMessage
+ * @example
+ * <ForumMessage />
+ */
 import { loadComponent } from '@/common/component-loader';
 export default {
     name: "ForumMessage",

@@ -16,6 +16,14 @@
         @click="parent.moveTo(parent.rows.length - 1)" />
 </template>
 <script>
+/**
+ * Table records component
+ * 
+ * @component
+ * @name TableRecords
+ * @example
+ * <TableRecords :parent="this" />
+ */
 export default {
     name: "TableRecords",
     props: ['parent'],

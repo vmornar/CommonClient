@@ -3,6 +3,15 @@
     <div class="q-pa-lg" v-html="policy"></div>
 </template>
 <script>
+
+/**
+ * Policy component
+ * 
+ * @component
+ * @name Policy
+ * @example
+ * <Policy policyProp="privacy-policy" />
+ */
 export default {
     name: "Policy",
     props: {
@@ -24,6 +33,9 @@ export default {
     },
 
     methods: {
+        /**
+         * Initialize the component - retrieve the policy
+         */
         async init() {
             let ret = await this.get("CommonAnon/GetPolicy/" + this.policyProp);
             if (ret) {

@@ -81,6 +81,14 @@
     </li>
 </template>
 <script>
+/**
+ * Common 3rd party components component
+ * 
+ * @component
+ * @name Common3rdPartyComponents
+ * @example
+ * <Common3rdPartyComponents />
+ */
 export default {
     name: "Common3rdPartyComponents",
 };

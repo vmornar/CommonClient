@@ -3,6 +3,14 @@
 </template>
 
 <script>
+/**
+ * File viewer component
+ * 
+ * @component
+ * @name FileViewer
+ * @example
+ * <FileViewer />
+ */
 export default {
     name: "FileViewer",
     props: {
@@ -23,11 +31,17 @@ export default {
             }
         }
     },
+    /**
+     * Mounted lifecycle method
+     */
     async mounted() {
         this.copyObject(this.$store.popups.default.props, this, true);
         this.document = await this.getDocument();
     },
     methods: {
+        /**
+         * Retrieves the document
+         */
         async getDocument() {
             let response = await this.api(this.axios.API.get, this.API,
                 {
@@ -36,7 +50,6 @@ export default {
             );
             if (response && response.size) {
                 let ret = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
-
                 return ret;
             } else {
                 return null;

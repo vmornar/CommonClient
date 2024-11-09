@@ -18,6 +18,7 @@
 </template>
 
 <script>
+
 /**
  * Chart component
  * 

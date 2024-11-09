@@ -37,6 +37,14 @@
     </div>
 </template>
 <script>
+/**
+ * Forum component
+ * 
+ * @component
+ * @name Forum
+ * @example
+ * <Forum />
+ */
 import { loadComponent } from '@/common/component-loader';
 export default {
     name: "Forum",
@@ -55,6 +63,9 @@ export default {
             saved: {}
         }
     },
+    /**
+     * Mounted lifecycle method - initializes the component
+     */
     mounted() {
         if (this.$q.localStorage.has("context_value_forum_topic_id")) {
             this.forum_topic_id = this.$q.localStorage.getItem("context_forum_topic_id");
@@ -64,22 +75,40 @@ export default {
         this.reload();
     },
     methods: {
+
+        /**
+         * Reloads the forum messages
+         */
         async reload() {
             this.messages = await this.get("Forum/GetForum/" + this.forum_topic_id);
             this.$refs.scroll.setScrollPosition("vertical", 9999999);
         },
+        /**
+         * Adds a new message
+         */
         addMessage() {
             this.editMode = "add";
             this.msg = {};
             this.inEdit = true;
             this.response_forum_id = null;
         },
+
+        /**
+         * Edits a message
+         * 
+         * @param {number} id The id of the message to edit
+         */
         editMessage(id) {
             this.editMode = "edit";
             this.msg = this.messages.find(m => m.id == id);
             this.inEdit = true;
             this.copyObject(this.msg, this.saved);
         },
+
+        /**
+         * replies to a message
+         * @param id 
+         */
         replyMessage(id) {
             this.editMode = "add";
             let oldMsg = this.messages.find(m => m.id == id);
@@ -88,10 +117,20 @@ export default {
             this.msg.response_forum_id = id;
             this.inEdit = true;
         },
+
+        /**
+         * Deletes a message
+         * 
+         * @param {number} id The id of the message to delete
+         */
         deleteMessage(id) {
             this.post("Forum/DeleteForum", { id: id });
             this.reload();
         },
+
+        /**
+         * Saves a current message
+         */
         async saveMessage() {
             if (this.editMode == "add") {
                 let ret = await this.post("Forum/AddForum", { title: this.msg.title, message: this.msg.message, forum_topic_id: this.forum_topic_id, response_forum_id: this.msg.response_forum_id });
@@ -104,6 +143,10 @@ export default {
             this.inEdit = false;
 
         },
+
+        /**
+         * Cancels the edit operation
+         */
         cancelMessage() {
             this.copyObject(this.saved, this.msg);
             this.inEdit = false;
