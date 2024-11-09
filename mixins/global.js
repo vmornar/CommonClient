@@ -659,7 +659,7 @@ export const GlobalMixin = {
          * Initializes the component with the given popup name. If no popup name is provided, the component is initialized with the props for the current route.
          * @param {string} [popupName] - The name of the popup to initialize the component with.
          * @returns {void}
-         * /
+         */
         initializeComponent(popupName) {
             if (popupName) {
                 this.copyObject(this.$store.popups[popupName].props, this, true);
