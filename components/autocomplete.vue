@@ -1,6 +1,6 @@
 <template>
     <q-select v-model="value" ref="select" class="q-ma-none q-pa-none" :options="filteredOptions"
-        :option-label="optionLabel" :option-value="optionValue" :clearable="clearable" :emit-value="emitValue"
+        :option-label="localOptionLabel" :option-value="localOptionValue" :clearable="clearable" :emit-value="emitValue"
         :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
         :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html @popup-show="startEditing"
         :disable="disable" :rules="rules" :square="square" style="min-width: 100px;" @focus="handleFocus(0)"
@@ -50,7 +50,9 @@ export default {
     data() {
         return {
             filter: '',
-            focusedChildren: [false, false, false]
+            focusedChildren: [false, false, false],
+            localOptionLabel: this.optionLabel,
+            localOptionValue: this.optionValue
         }
     },
     computed: {
@@ -68,7 +70,14 @@ export default {
          * @returns {Array} The filtered options.
          */
         filteredOptions() {
-            let options = this.lookup ? this.lookup.options : this.options;
+            
+            let options = [];
+            if (this.lookup) {
+                options = this.lookup.options;  
+            } else {
+                options = this.options;
+            }
+
             if (!this.filter) {
                 return options;
             }
@@ -185,6 +194,13 @@ export default {
             }
         });
         await this.$nextTick();
+        if (this.lookup) {
+            this.localOptionLabel = this.lookup.optionLabel;
+            this.localOptionValue = this.lookup.optionValue;
+        } else {
+            this.localOptionLabel = this.optionLabel;
+            this.localOptionValue = this.optionValue;
+        }
     },
 
     /**

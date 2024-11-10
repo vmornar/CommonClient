@@ -34,7 +34,7 @@
                         :label="col.label" :disable="col.disabled" ref="inputRefs" />
                     <autocomplete v-else-if="col.lookup && !col.invisible" v-model="parent.editingRow[col.name]"
                         :label="col.label" dense style="width:95%"
-                        :option-label="col.lookup.labelField" :option-value="col.lookup.valueField" emit-value
+                        emit-value
                         map-options :lookup="col.lookup" @update:model-value="selectionUpdated(col)"
                         :disable="col.disabled" ref="inputRefs">
                         <template v-slot:label>

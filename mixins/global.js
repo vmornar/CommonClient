@@ -758,7 +758,7 @@ export const GlobalMixin = {
             if (value == null) {
                 return "";
             } else {
-                return lookup.options.find(v => v[lookup.valueField] == value)[lookup.labelField];
+                return lookup.options.find(v => v[lookup.optionValue] == value)[lookup.optionLabel];
             }
         },
 

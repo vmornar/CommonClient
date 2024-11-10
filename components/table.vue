@@ -15,8 +15,7 @@
             :iconPicker="false" />
         <!-- <span v-if="overlays.overlaySelect" ref="overlaySelect" @focus="$refs.innerSelect.focus"> -->
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
-            :option-label="activeLookup.labelField"
-            :option-value="activeLookup.valueField" @blur="closeOverlay" :lookup="activeLookup"
+            @blur="closeOverlay" :lookup="activeLookup"
             @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
         <!-- </span> -->
         <icon-picker v-if="overlays.overlayIcon" ref="overlayIcon" v-model="editedItem" @blur="closeOverlay"
@@ -171,7 +170,6 @@
 
             <!-- normal rows -->
             <template v-slot:body="props">
-                <!-- <q-tr :props="props" :class="{ 'background': (props.pageIndex % 2 == 0) }"> -->
                 <q-tr :props="props"
                     :class="(props.pageIndex % 2 == 0) ? 'background' + (this.$q.dark.isActive ? '-dark' : '') : ''">
                     <q-td v-if="selection != 'none'">
@@ -198,7 +196,7 @@
                         <div v-else class="cell-content">
                             <span v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                             :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
-                            <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(col.value)" class="q-pa-none q-ma-none right-in-cell"></q-btn>
+                            <q-btn v-if="col.url" dense flat icon="open_in_new" @click.stop="openURL(col.value)" class="q-pa-none q-ma-none right-in-cell"></q-btn>
                         </div>
                     </q-td>
                 </q-tr>

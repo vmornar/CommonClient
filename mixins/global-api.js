@@ -332,11 +332,11 @@ export const GlobalApiMixin = {
                 lookup.options = await this.get("Table/GetLookup/" + lookup.refTable);
             }
             if (lookup.options.length > 0) {
-                lookup.valueField = Object.keys(lookup.options[0])[0];
-                lookup.labelField = Object.keys(lookup.options[0])[1];
+                lookup.optionValue = Object.keys(lookup.options[0])[0];
+                lookup.optionLabel = Object.keys(lookup.options[0])[1];
             } else {
-                lookup.valueField = "id";
-                lookup.labelField = "name";
+                lookup.optionValue = "id";
+                lookup.optionLabel = "name";
             }
         }
     }

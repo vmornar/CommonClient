@@ -38,13 +38,7 @@ import eventBus from '@/common/event-bus';
 
 export default {
     name: 'Popup',
-    props: {
-        name: {
-            type: String,
-            default: 'default',
-        },
-        canCloseIfFormChanged: { type: Boolean, default: false }
-    },
+    props: ['name', 'canCloseIfFormChanged'],
     data() {
         return {
             component: null,
