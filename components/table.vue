@@ -423,6 +423,7 @@ export default {
             }
             this.$store.formChanged = false;
         },
+
         async undoChanges() {
             if (this.asForm) {
                 await this.$refs.form.cancel();
@@ -431,6 +432,7 @@ export default {
             }
             this.$store.formChanged = false;
         },
+        
         async save() {
             await this.saveRow();
             this.inEdit = false;
