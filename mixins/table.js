@@ -73,6 +73,7 @@ export const TableMixin = {
             overlays: { },
             asForm: false,
             visibleColumns: [],
+            contextValuesLoaded: false,
         }
     },
     methods: {
@@ -131,6 +132,7 @@ export const TableMixin = {
             this.asForm = false;
             this.inEdit = false;
             this.editingRowIndex = 0;
+            this.contextValuesLoaded = false;
 
             this.grid = this.$q.screen.width <= 800;
 
@@ -144,9 +146,7 @@ export const TableMixin = {
 
             if (this.parentPopup) {
                 this.parentPopup.title = this.title;
-                console.log("Parent popup: " + this.parentPopup.title);
             }
-            console.log("Table init: " + this.title);   
             
             // copy context values so that action is not changed
             if (this.contextValues) {
@@ -182,6 +182,7 @@ export const TableMixin = {
                         if (cv.value == null) cv.value = cv.options[0][cv.optionValue];
                     }
                 };
+                this.contextValuesLoaded = true;
             }
 
             // get data from the server

@@ -174,7 +174,6 @@ export default {
          */
         keyDownSel(e) {
             if (e.key == 'ArrowUp') {
-                console.log("oi", this.$refs.select.getOptionIndex());
                 if (this.$refs.select.getOptionIndex() == 0) {
                     this.$refs.inputFilter.focus();
                 }

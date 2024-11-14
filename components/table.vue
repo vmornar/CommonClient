@@ -22,7 +22,7 @@
             @update:model-value="editedItemChanged" :style="overlayStyle" />
 
         <div ref="preheader">
-            <div v-if="contextValuesLocal" class="row">
+            <div v-if="contextValuesLoaded" class="row">
                 <Autocomplete v-for="cv of contextValuesLocal" :key="cv.name" v-model="cv.value" :label="cv.label"
                     :option-label="cv.optionLabel" :option-value="cv.optionValue" dense :options="cv.options"
                     @update:model-value="reload" :style="{ width: cv.width ?? '100px' }" map-options emit-value

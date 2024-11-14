@@ -150,7 +150,6 @@ export default {
             this.focus();
             this.form = this.$refs.form;
             this.$store.formChanged = false;
-            console.log('form', this.form);
         }, 200);
 
     },

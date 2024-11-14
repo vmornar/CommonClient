@@ -144,9 +144,7 @@ export const TableUtilsMixin = {
                     obj[col.name] = this.$q.localStorage.getItem("default_" + col.name) ?? obj[col.name];
                     if (col.lookup) {
                         await this.loadLookup(col.lookup);
-                        console.log("Lookup", obj[col.name], col.lookup);
                         let displayValue = this.findLookupValue(obj[col.name], col.lookup);
-                        console.log("Lookup", displayValue);
                         obj[col.name + '_val'] = displayValue;
                     }
                 }
@@ -429,8 +427,7 @@ export const TableUtilsMixin = {
          * @param {Object} row - The row to be edited.
          */
         async editRow(row) {
-            console.log("Edit row", row);
-            this.editMode = 'edit';
+             this.editMode = 'edit';
             this.editingRowIndex = this.rows.indexOf(row);
             this.editingRow = this.rowToObject(row);
             await this.loadLookups();
@@ -442,10 +439,8 @@ export const TableUtilsMixin = {
          * @param {Object} row - The row to be deleted.
          */
         async deleteRow(row, confirmationMessage) {
-            console.log("Delete row 1");
             if (confirmationMessage ||
                 await this.confirmDialog(this.$t("Delete row?"))) {
-                console.log("Delete row", row);
                 let key = this.frugal ? row[0] : row["id"];
                 let res = await this.delete("Table/" + this.tableAPI + "/" + key.toString());
                 if (res != null) {
