@@ -77,12 +77,12 @@ export default {
             } else {
                 options = this.options;
             }
-
+console.log("options", options);
             if (!this.filter) {
                 return options;
             }
             let f = options.filter(option =>
-                option[this.optionLabel].toLowerCase().includes(this.filter.toLowerCase())
+                option[this.localOptionLabel].toLowerCase().includes(this.filter.toLowerCase())
             );
             if (f.length == 0) {
                 return options;

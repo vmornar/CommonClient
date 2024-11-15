@@ -18,7 +18,6 @@ export const GlobalMixin = {
        
     methods: {
 
-
         /**
          * Opens a URL in a new tab.
          * @param {string} url - The URL to open.
@@ -673,7 +672,7 @@ export const GlobalMixin = {
          * @param {string} text - The text to copy to the clipboard.
          * @returns {void}
          * @see https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
-         * /
+         */
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
             this.$q.notify({
@@ -730,7 +729,7 @@ export const GlobalMixin = {
             }
         },
 
-                /**
+        /**
          * Prepare row for saving : converts JSON strings to objects, blanks to nulls.
          * 
          * @param {Object} row - The row object.
