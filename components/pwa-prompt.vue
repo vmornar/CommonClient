@@ -30,18 +30,18 @@
 export default {
   data: () => ({
     shown: false,
+    installEvent: null
   }),
 
   /**
    * Initializes the prompt to install the PWA.
    */
   beforeMount() {
-    if (this.$q.localStorage.getItem('pwa-install-selected') == true) return;
+    // if (this.$q.localStorage.getItem('pwa-install-selected') == true) return;
     window.addEventListener('beforeinstallprompt', (e) => {
-    
-      e.preventDefault()
-      this.installEvent = e
-      this.shown = true
+      e.preventDefault();
+      this.installEvent = e;
+      if (!this.$q.localStorage.getItem('pwa-install-selected')) this.shown = true;
     })
   },
 
@@ -63,6 +63,15 @@ export default {
       this.installEvent.userChoice.then((choice) => {
         this.dismissPrompt() // Hide the prompt once the user's clicked
       })
+    },
+
+    /**
+     * Allows manually triggering the prompt if needed.
+     */
+    triggerPrompt() {
+      if (this.installEvent) {
+        this.shown = true;
+      }
     },
   }
 }

@@ -91,6 +91,7 @@
       <div v-for="popup in $store.additionalPopups" :key="popup.name">
         <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"/>
       </div>
+      <PWAPrompt v-if="$store.pwa" />
     </div>
   </div>
 </template>
@@ -117,7 +118,7 @@ export default {
     LangSwitcher: loadComponent("lang-switcher"),
     Accessibility: loadComponent("accessibility"),
     Popup: loadComponent("popup"),
-    //PWAPrompt: loadComponent("PWAPrompt"),
+    PWAPrompt: loadComponent("pwa-prompt"),
     HelpDialog: loadComponent("help-dialog"),
     ChartPopup: loadComponent("chart-popup"),
     TaskProgress: loadComponent("task-progress"),
@@ -207,15 +208,10 @@ export default {
     }
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        this.$q.dialog({
-          title: this.$t('Update'),
-          message: this.$t('New version available. Reload now?'),
-          cancel: true,
-          persistent: true
-        }).onOk(() => {
+      navigator.serviceWorker.addEventListener('controllerchange', async () => {
+        if (await this.confirmDialog(this.$t('New version available. Reload now?'))) {
           window.location.reload();
-        });
+        }
       });
     }
   },
