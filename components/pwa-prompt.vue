@@ -30,7 +30,6 @@
 export default {
   data: () => ({
     shown: false,
-    installEvent: null
   }),
 
   /**
@@ -41,7 +40,7 @@ export default {
     window.addEventListener('beforeinstallprompt', (e) => {
       console.log('beforeinstallprompt event fired');
       e.preventDefault();
-      this.installEvent = e;
+      this.$store.installEvent = e; // to make it available in other components
       if (!this.$q.localStorage.getItem('pwa-install-selected')) this.shown = true;
     })
   },
@@ -60,8 +59,8 @@ export default {
      * Installs the PWA.
      */
     installPWA() {
-      this.installEvent.prompt()
-      this.installEvent.userChoice.then((choice) => {
+      this.$store.installEvent.prompt()
+      this.$store.installEvent.userChoice.then((choice) => {
         this.dismissPrompt() // Hide the prompt once the user's clicked
       })
     },
@@ -70,8 +69,8 @@ export default {
      * Allows manually triggering the prompt if needed.
      */
     triggerPrompt() {
-      console.log('triggerPrompt', this.installEvent);
-      if (this.installEvent) {
+      console.log('triggerPrompt', this.$store.installEvent);
+      if (this.$store.installEvent) {
         this.shown = true;
       }
     },
