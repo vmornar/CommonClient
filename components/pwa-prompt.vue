@@ -17,6 +17,7 @@
 </template>
   
 <script>
+
 /**
  * Prompt to install the PWA.
  * 
@@ -26,7 +27,6 @@
  * <PWAPrompt />
  * 
  */
-
 export default {
   data: () => ({
     shown: false,
@@ -39,6 +39,7 @@ export default {
   beforeMount() {
     // if (this.$q.localStorage.getItem('pwa-install-selected') == true) return;
     window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('beforeinstallprompt event fired');
       e.preventDefault();
       this.installEvent = e;
       if (!this.$q.localStorage.getItem('pwa-install-selected')) this.shown = true;
@@ -69,6 +70,7 @@ export default {
      * Allows manually triggering the prompt if needed.
      */
     triggerPrompt() {
+      console.log('triggerPrompt', this.installEvent);
       if (this.installEvent) {
         this.shown = true;
       }
