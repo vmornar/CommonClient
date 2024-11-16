@@ -77,7 +77,6 @@ export default {
             } else {
                 options = this.options;
             }
-console.log("options", options);
             if (!this.filter) {
                 return options;
             }

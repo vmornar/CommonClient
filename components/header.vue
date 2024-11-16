@@ -12,10 +12,16 @@
             <table-row-editor v-if="inEdit" :parent="this" @save="saveRow" @cancel="inEdit = false"/>
         </q-dialog>
         <div class="q-pa-xs q-ma-none right row">
+            <q-btn v-if="showDownloadButton" dense flat icon="download" @click="$emit('download')">
+                <q-tooltip>{{ $t("Download") }}</q-tooltip>
+            </q-btn>
             <q-btn dense flat icon="route" @click="getRouteParameters" v-if="isAdmin">
                 <q-tooltip>{{ $t("Edit route parameters") }}</q-tooltip>
             </q-btn>
-            <help-button v-if="showHelpButton" :options="null" :name="nameForHelp" :titleToShow="titleToShow" />
+            <help-button v-if="showHelpButton" :options="null" :name="nameForHelp" :titleToShow="titleForHelp" />
+            <q-btn v-if="showCloseButton" dense flat icon="close" @click="$emit('close')" >
+                <q-tooltip>{{ $t("Close") }}</q-tooltip>
+            </q-btn>
         </div>
     </div>
 </template>
@@ -39,7 +45,10 @@ export default {
         title: { type: String, default: null },
         backButton: { type: Boolean, default: false },
         showHelpButton: { type: Boolean, default: true },
+        showCloseButton: { type: Boolean, default: false },
+        showDownloadButton: { type: Boolean, default: false },
         help: { type: String, default: null },
+        fullWidth: { type: Boolean, default: false },
     },
     data() {
         return {
@@ -52,6 +61,9 @@ export default {
         };
     },
     computed: {
+        titleForHelp() {
+            return this.help ?? this.titleToShow;
+        },
         titleToShow() {
             return this.title ?? this.$route.meta.title ?? this.$route.name;
         },
@@ -60,7 +72,7 @@ export default {
         },
         headerStyle() {
             return {
-                maxWidth: this.$store.screenWidth + 'px',
+                maxWidth: this.fullWidth ? '100%' : this.$store.screenWidth + 'px',
             };
         },
     },
