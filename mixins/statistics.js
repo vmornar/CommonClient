@@ -3,6 +3,13 @@
  */
 export const StatisticsMixin = {
     methods: {
+        movingAverage(buffer, value, windowSize) {
+            buffer.push(value); // Add the new value to the buffer
+            if (buffer.length > windowSize) {
+              buffer.shift(); // Remove the oldest value if the buffer exceeds the window size
+            }
+            return buffer.reduce((sum, val) => sum + val, 0) / buffer.length; // Return the average
+        },
         /**
          * Calculates the trendline of an array of data points.
          * 
