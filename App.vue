@@ -101,6 +101,7 @@
 import { setCssVar } from 'quasar';
 import { loadComponent } from '@/common/component-loader';
 import { markRaw } from 'vue';
+import { PWAPrompt } from '@/common/components/pwa-prompt';
 
 /**
 * The main component of the application.
@@ -118,7 +119,7 @@ export default {
     LangSwitcher: loadComponent("lang-switcher"),
     Accessibility: loadComponent("accessibility"),
     Popup: loadComponent("popup"),
-    PWAPrompt: loadComponent("pwa-prompt"),
+    PWAPrompt,
     HelpDialog: loadComponent("help-dialog"),
     ChartPopup: loadComponent("chart-popup"),
     TaskProgress: loadComponent("task-progress"),
