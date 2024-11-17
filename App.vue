@@ -91,7 +91,7 @@
       <div v-for="popup in $store.additionalPopups" :key="popup.name">
         <popup v-if="popup.renderInApp && $store.popups[popup.name].show" :name="popup.name"/>
       </div>
-      <PWAPrompt v-if="$store.pwa" />
+      <PWAPrompt ref="pwa"/>
     </div>
   </div>
 </template>
@@ -278,9 +278,7 @@ export default {
       //if (this.$store.hasLangSwitcher) {
       await this.waitForRefs(["langSwitcher"]);
       this.$refs.langSwitcher.localeChanged();
-      //} else {
-      //  this.getRoutes();
-      //}
+      this.$store.pwaComponent = this.$refs.pwa;
     },
 
     /**
