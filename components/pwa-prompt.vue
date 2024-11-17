@@ -41,7 +41,8 @@ export default {
       console.log('beforeinstallprompt event fired');
       e.preventDefault();
       this.$store.installEvent = e; // to make it available in other components
-      if (!this.$q.localStorage.getItem('pwa-install-selected')) this.shown = true;
+      //if (!this.$q.localStorage.getItem('pwa-install-selected')) this.shown = true;
+      this.shown = true;
     })
   },
 
