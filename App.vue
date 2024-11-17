@@ -101,7 +101,7 @@
 import { setCssVar } from 'quasar';
 import { loadComponent } from '@/common/component-loader';
 import { markRaw } from 'vue';
-import { PWAPrompt } from '@/common/components/pwa-prompt';
+import PWAPrompt from '@/common/components/pwa-prompt.vue';
 
 /**
 * The main component of the application.

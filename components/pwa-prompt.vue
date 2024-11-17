@@ -28,6 +28,8 @@
  * 
  */
 export default {
+  name: 'PWAPrompt',
+  
   data: () => ({
     shown: false,
   }),
