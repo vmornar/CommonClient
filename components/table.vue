@@ -64,6 +64,9 @@
                             <q-tooltip>{{ $t("Undo changes") }}
                             </q-tooltip>
                         </q-btn>
+                        <!-- <q-btn v-if="isAdmin" dense flat icon="picture_as_pdf" color="primary" @click="editPdf">
+                            <q-tooltip>{{ $t("Edit report definition") }}</q-tooltip>
+                        </q-btn> -->
                     </span>
                 </div>
                 <div v-if="!hideRecordsToolbar && !asForm">
@@ -558,6 +561,10 @@ export default {
             } else if (!isParent) {
                 this.editedItemChanged();
             }
+        },
+
+        editPdf() {
+            
         },
     },
 }
