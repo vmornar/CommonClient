@@ -7,11 +7,11 @@
                 Modified:
                 {{ time_modified }}</span>
 
-            <q-btn flat dense icon="reply" color="primary" @click="$emit('replyMessage', id)" />
+            <q-btn flat dense icon="reply" color="primary" @click="$emit('replyMessage', id)" ><q-tooltip>{{$t('Reply to message')}}</q-tooltip> </q-btn>
             <q-btn flat dense icon="edit" color="primary" @click="$emit('editMessage', id)"
-                v-if="person_id == $store.userData.id" />
+                v-if="person_id == $store.userData.id" ><q-tooltip>{{$t('Edit  message')}}</q-tooltip> </q-btn>
             <q-btn flat dense icon="delete" color="negative" @click="$emit('deleteMessage', id)"
-                v-if="person_id == $store.userData.id" />
+                v-if="person_id == $store.userData.id" ><q-tooltip>{{$t('Delete message')}}</q-tooltip> </q-btn>
         </div>
         <div v-html="message" />
     </div>

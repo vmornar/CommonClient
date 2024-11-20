@@ -8,7 +8,7 @@
         <q-card flat>
             <q-card-section class="q-pa-none">
                 <q-scroll-area ref="scroll"
-                    :style="{ height: ($q.screen.height - 75 - 65 - 65) + 'px', width: '100%' }">
+                    :style="{ height: ($q.screen.height - 75 - 65 - 65 - 30) + 'px', width: '100%' }">
                     <div class="q-pa-md row justify-center">
                         <div style="width: 100%; max-width: 600px">
                             <q-chat-message v-for="msg in messages" :key="msg.id" :name="msg.name" :text="msg.text"
