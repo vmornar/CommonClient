@@ -274,7 +274,6 @@ export const GlobalApiMixin = {
          * @returns {Promise<string|null>} A Promise that resolves to the URL of the retrieved image, or null if the retrieval fails.
          */
         async getImage(url) {
-            this.$store.working = true;
             let response = await this.axios.API.get(url, { responseType: 'blob' });
             if (response) {            
                 const blob = new Blob([response.data], { type: response.headers['content-type'] });
@@ -282,7 +281,6 @@ export const GlobalApiMixin = {
                 this.$store.working = false;
                 return o;               
             }
-            this.$store.working = false;
             return null;
         },
 
