@@ -36,7 +36,7 @@
           </q-toolbar>
         </q-header>
 
-        <q-drawer style="top: 40px" v-model="$store.drawer" :width="$store.drawerWidth" bordered behavior="desktop"
+        <q-drawer style="top: 40px" v-model="$store.drawer" :width="$store.drawerWidth" bordered 
           :breakpoint="breakpoint" :overlay="false">
           <q-scroll-area :style="{ height: screenHeight }">
             <!-- <q-scroll-area style="height: 100vh;" :bar-style="{ width: '10px' }"> -->
@@ -130,7 +130,7 @@ export default {
     selected: null,
     fullscreen: false,
     canInstall: false,
-    breakpoint: 1024,
+    breakpoint: 800,
     treeFilter: '',
     draggedItem: null,
     hoveredItem: null,
