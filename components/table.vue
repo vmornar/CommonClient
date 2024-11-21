@@ -109,7 +109,8 @@
                     </q-th>
                     <q-th v-if="hasRowToolbar">
                     </q-th>
-                    <q-th v-for="(col, index) in props.cols " :key="col.name" :props="props" :ref="'col-' + col.name">
+                    <q-th v-for="(col, index) in props.cols " :key="col.name" :props="props" :ref="'col-' + col.name"
+                    :style="{ textAlign: col.align }" >
                         <span class="text-bold" v-html="col.label" :style="{ display: 'inline-block' }"></span>
                     </q-th>
                 </q-tr>
@@ -123,7 +124,7 @@
                             toggle-indeterminate />
                         <q-input v-else type="search" placeholder="Search" clearable dense v-model="filter[col.name]"
                             class="q-my-none q-py-none">
-                            <template v-slot:after>
+                            <template v-slot:before>
                                 <q-icon size="xs" name="search"></q-icon>
                             </template>
                         </q-input>
@@ -183,7 +184,7 @@
                     </q-td>
                     <q-td v-for="   col in props.cols   " :key="col.name" :props="props"
                         :ref="props.key + '-' + col.index"
-                        :style="{ maxWidth: col.width + ' !important', verticalAlign: 'middle' }"
+                        :style="{ maxWidth: col.width + ' !important', verticalAlign: 'middle', textAlign: col.align }"  
                         @click="showOverlay(col, props)" class="q-pa-none q-ma-none">
                         <q-checkbox dense v-if="col.type == 'boolean'" v-model="props.row[col.index]"
                             :disable="!col.enabled && (!allowEdit || col.disabled || noInlineEditing)"
@@ -196,11 +197,13 @@
                                 @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                             {{ props.row[col.index] }}
                         </span>
-                        <div v-else class="cell-content">
+                        <div v-else-if="col.url" class="cell-content">
                             <span v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                             :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
                             <q-btn v-if="col.url" dense flat icon="open_in_new" @click.stop="openURL(col.value)" class="q-pa-none q-ma-none right-in-cell"></q-btn>
                         </div>
+                        <span v-else v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
+                            :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />                       
                     </q-td>
                 </q-tr>
             </template>

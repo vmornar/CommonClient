@@ -141,6 +141,7 @@ export const TableUtilsMixin = {
                     obj[col.name] = null;
                 } 
                 if (col.defaultPrevious) {
+                    console.log("default previous", col.name);
                     obj[col.name] = this.$q.localStorage.getItem("default_" + col.name) ?? obj[col.name];
                     if (col.lookup) {
                         await this.loadLookup(col.lookup);
@@ -255,6 +256,8 @@ export const TableUtilsMixin = {
             }
 
             // set up the columns
+
+
             this.columns = attributes.map((attribute, index) => {
                 let format = this.format[attribute.type] ?? (val => val);
                 if (attribute.decimals) format = val => val != null ? Number(val).toFixed(attribute.decimals) : null;
@@ -271,6 +274,8 @@ export const TableUtilsMixin = {
                     //width: this.calcWidth(attribute.type),
                 }
             });
+
+            console.log("columns", this.columns);
 
             let lookups = {};
             for (let col of this.columns) {

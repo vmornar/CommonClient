@@ -128,7 +128,7 @@ a {
   justify-content: space-between;
 }
 
-.cell-content {
+.url-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
