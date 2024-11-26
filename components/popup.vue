@@ -11,8 +11,7 @@
                     :label="button.label" :icon="button.icon" @click="button.action">
                     <q-tooltip>{{ button.tooltip }}</q-tooltip>
                 </q-btn>
-                <help-button v-if="$store.popups[name].props.help" :name="$t($store.popups[name].props.help)"
-                    :titleToShow="$store.popups[name].props.titleToShow ? $t($store.popups[name].props.titleToShow) : $t($store.popups[name].props.help)" />
+                <help-button v-if="help" :name="$t(help)" :titleToShow="titleToShow" />
                 <q-btn dense size="sm" flat round icon="close" @click="closeDialog" />
             </q-card-section>
             <q-card-section class="max-width q-pa-none">
@@ -38,20 +37,34 @@ import eventBus from '@/common/event-bus';
 
 export default {
     name: 'Popup',
-    props: ['name', 'canCloseIfFormChanged'],
+    props: {
+        name: {
+            type: String,
+            default: 'default'
+        },
+        canCloseIfFormChanged : {
+            type: Boolean,
+            default: false
+        }
+    },
     data() {
         return {
             component: null,
-            title: null
+            title: null,
+            help: null,
+            titleToShow: null
         }
     },
     async mounted() {
         this.component = markRaw(loadComponent(this.$store.popups[this.name].component));
-        this.title = this.$store.popups[this.name].props.title
+        this.title = this.$store.popups[this.name].props.title;
+        this.help = this.$store.popups[this.name].props.help != undefined ? this.$store.popups[this.name].props.help : this.$store.popups[this.name].component;
+        this.titleToShow = this.$store.popups[this.name].props.titleToShow;
+        this.titleToShow = this.titleToShow != undefined ? this.$t(this.titleToShow) : this.$t(this.help);
+        console.log('Popup mounted', this.name, this.component);
     },
     methods: {
         closeDialog() {
-            console.log('popupClosed', this.name);
             eventBus.emit('popupClosed', this.name);
             if (this.$store.popups[this.name].canCloseIfFormChanged || !this.$store.formChanged) this.$store.popups[this.name].show = false;
         }

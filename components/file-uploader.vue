@@ -20,6 +20,7 @@
 
 export default {
   name: "FileUploader",
+  props: ["parentPopup"],
   data() {
     return {
       uploadURL: null,
@@ -30,6 +31,7 @@ export default {
   mounted() {
     this.copyObject(this.$store.popups.default.props, this, true);
     this.uploadURL = this.axios.API.defaults.baseURL + this.uploadURL;
+    console.log("uploadURL", this.uploadURL);
   },
 
   methods: {

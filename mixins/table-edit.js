@@ -44,8 +44,9 @@ export const TableEditMixin = {
          * @param {*} props 
          */
         async showOverlay(col, props) {
-            this.currentOverlay = {col : col, props : props};
-            if (!this.tableAPI || col.disabled || this.noInlineEditing) return;
+            this.currentOverlay = { col: col, props: props };
+            
+            if (!col.enabled && (!this.tableAPI || col.disabled || this.noInlineEditing)) return;
 
             let el = this.$refs[props.key + '-' + col.index]?.[0];
             el = el && el.$el ? el.$el : el;

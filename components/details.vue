@@ -49,7 +49,6 @@ export default {
      * Mounted lifecycle method
      */
     async mounted() {
-        console.log('TableDetails mounted', this.popupName);
         this.initializeComponent(this.popupName);
         this.openDetail(this.details[0]); // open the first detail by default
     },
@@ -67,11 +66,16 @@ export default {
             console.log('openDetail', this.localOptions);
             if (this.parentPopup) {
                 this.parentPopup.title = this.localOptions.title;
+                if (this.localOptions.help) this.parentPopup.help = this.localOptions.help;
+                if (this.localOptions.titleToShow) this.parentPopup.titleToShow = this.localOptions.titleToShow;
             }   
-            await this.$nextTick();
-            setTimeout(() => {
+            if (this.loaded) {
                 this.$refs.detailTable.init();
-            }, 10);
+            }
+            // await this.$nextTick();
+            // setTimeout(() => {
+                //this.$refs.detailTable.init();
+            // }, 10);
         },
     }
 }
