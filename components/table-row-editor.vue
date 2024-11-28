@@ -177,6 +177,8 @@ export default {
                 await this.parent.saveForm();
             } else {
                 await this.parent.saveRow();
+                this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                this.copyObject(this.parent.editingRow, this.parent.editingRowSaved);
             }
         },
 

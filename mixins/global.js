@@ -18,6 +18,26 @@ export const GlobalMixin = {
     methods: {
 
         /**
+         * Creates a between rule for a required field.
+         * @param {number} min - The minimum value.
+         * @param {number} max - The maximum value.
+         * @returns {Array<Function>} - An array containing the between rule function.
+         */
+        createBetweenRule(min, max) {
+            if (min == null || max == null) return [];
+            return [ val => val >= min && val <= max || this.$t("Value must be between") + " " + min + " " + this.$t("and") + " " + max ];
+        },
+
+        /**
+         * Creates a mask string for the given number of decimal places.
+         * @param {*} decimals 
+         * @returns {string} - The mask string.
+         */
+        createMask(decimals) {
+            return "#" + (decimals > 0 ? "." : "") + "0".repeat(decimals);
+        },
+
+        /**
          * Opens a URL in a new tab.
          * @param {string} url - The URL to open.
          * @returns {void}
