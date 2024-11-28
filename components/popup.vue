@@ -61,7 +61,6 @@ export default {
         this.help = this.$store.popups[this.name].props.help != undefined ? this.$store.popups[this.name].props.help : this.$store.popups[this.name].component;
         this.titleToShow = this.$store.popups[this.name].props.titleToShow;
         this.titleToShow = this.titleToShow != undefined ? this.$t(this.titleToShow) : this.$t(this.help);
-        console.log('Popup mounted', this.name, this.component);
     },
     methods: {
         closeDialog() {

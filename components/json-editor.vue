@@ -100,6 +100,7 @@ export default {
             { key: "invisible", value: '"invisible" : true&' },
             { key: "json", value: '"json" :true&' },
                 { key: "label" },
+                            { key: "maximized", value: '"maximized" : true&' },
             { key: "method" },
             { key: "mustSelectRows", value: '"mustSelectRows" : true&"' },
             { key: "name" },
