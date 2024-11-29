@@ -64,9 +64,9 @@
                             <q-tooltip>{{ $t("Undo changes") }}
                             </q-tooltip>
                         </q-btn>
-                        <!-- <q-btn v-if="isAdmin" dense flat icon="picture_as_pdf" color="primary" @click="editPdf">
+                        <q-btn v-if="isAdmin" dense flat icon="picture_as_pdf" color="primary" @click="editPdf">
                             <q-tooltip>{{ $t("Edit report definition") }}</q-tooltip>
-                        </q-btn> -->
+                        </q-btn>
                     </span>
                 </div>
                 <div v-if="!hideRecordsToolbar && !asForm">
@@ -566,8 +566,54 @@ export default {
             }
         },
 
+        getApiAndOptions() {
+            if (this.dbFunction) {
+                return {
+                    api: 'Table/GetTable',
+                    apiOptions: {
+                        dbFunction: this.dbFunction,
+                        frugal: this.frugal.toString(),
+                        json: this.json.toString(),
+                        pars: JSON.stringify(this.params) ?? '{}',
+                        preprocess: this.preprocess ?? null,
+                    },
+                };
+            }
+            if (this.restAPI) {
+                let api = this.restAPI;
+                for (const key in this.params) {
+                    api = api + '/' + this.params[key];
+                }
+                return { api };
+            }
+            if (this.tableAPI) {
+                this.frugal = true;
+                if (this.params) {
+                    return {
+                        api: 'Table/' + this.tableAPI,
+                        apiOptions: { pars: JSON.stringify(this.params) },
+                    };
+                }
+                if (this.tableAPIKey) {
+                    return {
+                        api: 'Table/' + this.tableAPI + '/' + this.tableAPIKey,
+                    };
+                }
+                return { api: 'Table/' + this.tableAPI };
+            }
+        },
+
         editPdf() {
-            
+            this.$store.popups.default.component = 'pdf-report-editor';
+            const { api, apiOptions } = this.getApiAndOptions();
+            this.$store.popups.default.props = {
+                title: 'PDF Report Editor',
+                apiUrl: api,
+                apiOptions: apiOptions ?? null,
+                reportName: this.name,
+            };
+            this.$store.popups.default.canCloseIfFormChanged = true;
+            this.$store.popups.default.show = true;
         },
     },
 }
