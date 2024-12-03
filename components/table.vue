@@ -165,7 +165,7 @@
                                         v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                                         :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
                                 </span>
-                                <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(col.value)" class="q-pa-none q-ma-none" ></q-btn>
+                                <q-btn v-if="col.url && props.row[col.index]" dense flat icon="open_in_new" @click="openURL(col.value)" class="q-pa-none q-ma-none" ></q-btn>
                             </q-item>
                         </q-list>
                     </q-card>
@@ -197,7 +197,7 @@
                                 @update:model-value="changedRows[props.row[0]] = [...props.row]; $store.formChanged = true;" />
                             {{ props.row[col.index] }}
                         </span>
-                        <div v-else-if="col.url" class="cell-content">
+                        <div v-else-if="col.url && props.row[col.index]" class="cell-content">
                             <span v-html="col.password ? '********' : col.value" class="q-pa-none q-ma-none"
                             :style="{ display: 'inline-block', overflow: 'hidden', maxWidth: col.width + '!important', maxHeight: col.height + '!important', verticalAlign: 'middle' }" />
                             <q-btn v-if="col.url" dense flat icon="open_in_new" @click.stop="openURL(col.value)" class="q-pa-none q-ma-none right-in-cell"></q-btn>

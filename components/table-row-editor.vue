@@ -14,8 +14,14 @@
             </div>
         </q-card-actions>
         <q-card-section style="flex-grow: 1; overflow-y: auto;">
-            <q-form class="q-mt-none" ref="form" autofocus>
-                <div :class="{ 'q-mt-sm': true, row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
+            <!-- <q-form class="q-mt-none" ref="form" autofocus> -->
+            <q-form ref="form" autofocus>
+                <div :class="{ 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}">
+                    <table-row-editor-part :row="parent.editingRow" :editColumns="editColumns"  @selectionUpdated="selectionUpdated"/>
+                    <table-row-editor-part v-if="isARow" :row="isARow" :editColumns="isAColumns" />
+                </div>
+                <!-- <table-row-editor-part :parent="parent" :multiRow="multiRow" :rows="rows" /> -->
+                <!-- <div :class="{ 'q-mt-sm': true, row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
                     <span v-if="col.type == 'boolean' && !col.invisible" style="width:90%">
                         <q-checkbox v-model="parent.editingRow[col.name]" dense :label="col.label"
                             :disable="col.disabled">
@@ -54,7 +60,7 @@
                         </template>
                     </q-input>
                     <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(parent.editingRow[col.name])" class="q-pa-none q-ma-none" ></q-btn>
-                </div>
+                </div> -->
             </q-form>
         </q-card-section>
 
@@ -74,9 +80,10 @@ import { loadComponent } from '@/common/component-loader';
 export default {
     name: "TableRowEditor",
     components: {
-        jsonEditor: loadComponent('json-editor'),
-        autocomplete: loadComponent('autocomplete'),
-        htmlEditor: loadComponent('html-editor')
+        tableRowEditorPart : loadComponent('table-row-editor-part'),
+        // jsonEditor: loadComponent('json-editor'),
+        // autocomplete: loadComponent('autocomplete'),
+        // htmlEditor: loadComponent('html-editor')
     },
     props: ['parent', 'multiRow', 'rows'],
 
@@ -88,17 +95,8 @@ export default {
         },
     },
     watch: {
-        // "$refs.form": {
-        //     handler(val) {
-        //         console.log('form w', val);
-        //         if (val) {
-        //             console.log('form w1', val);
-        //             //this.$refs.form.focus();
-        //         }
-        //     },
-        //     deep: true
-        // },
         "rows.length": async function (val) {
+            console.log("rows changed", val);
             if (val == 0) {
                 this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
             } else if (this.parent.editMode != "add") {
@@ -111,7 +109,18 @@ export default {
         "parent.editingRow": {
             handler(val) {
                 if (val) {
-                    this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.parent.editingRowSaved);
+                    this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.parent.editingRowSaved)
+                        || (this.isARow && !this.equalObjects(this.isARow, this.isARowSaved));
+                }
+            },
+            deep: true,
+            immediate: true
+        },
+        "isARow": {
+            handler(val) {
+                if (val) {
+                    this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.parent.editingRowSaved)
+                    || (this.isARow && !this.equalObjects(this.isARow, this.isARowSaved));
                 }
             },
             deep: true,
@@ -123,7 +132,12 @@ export default {
             editColumns: [],
             loaded: false,
             x: {},
-            form: null
+            form: null, 
+            oldIsAKey: null,
+            isARow: {},
+            isARowSaved: {},
+            isAColumns: [],
+            specialization: null
         };
     },
 
@@ -131,6 +145,7 @@ export default {
      * Initialize the component
      */
     async mounted() {
+
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
                 await this.parent.editRow(this.parent.rows[0]);
@@ -138,13 +153,18 @@ export default {
                 await this.parent.addRow();
             }
         }
+
         this.copyObject(this.parent.editingRow, this.parent.editingRowSaved);
+
         let ec = [...this.parent.columns];
         this.swapIdAndValColumns(ec);
-        this.editColumns = ec.filter(col => this.showColInEdit(col, this.parent.masterKey));
+
+        this.editColumns = ec.filter(col => this.showColInEdit(col));
+        await this.handleIsA();
+
+        this.copyObject(this.isARow, this.isARowSaved);
 
         this.loaded = true; 
-
         await this.$nextTick(); 
         setTimeout(() => {
             this.focus();
@@ -168,42 +188,106 @@ export default {
          * @param {Object} col - The column object.
          * @returns {boolean} - True if the column should be shown in edit mode, false otherwise.
          */
-        showColInEdit(col, masterKey) {
-            return !col.invisible && !col.name.endsWith('_val') && col.name != masterKey;
+        showColInEdit(col) {
+            if (this.parent.isA) {
+                if (col.name == this.parent.isA.masterKey) return false;
+            }
+            return !col.invisible && !col.name.endsWith('_val') && col.name != this.parent.masterKey ;
         },
+
+        /**
+         * Save the current row and adjust the editing row
+         * if this is a isA row, save the isA row as well
+         * @returns {Promise<void>}
+         */
 
         async save() {
             if (this.multiRow) {
                 await this.parent.saveForm();
             } else {
                 await this.parent.saveRow();
-                this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                if (this.parent.isA && JSON.stringify(this.isARow) != "{}") {
+                    console.log("save - isARow", this.isARow);
+                    this.isARow[this.parent.isA.masterKey] = this.parent.editingRow["id"];
+                    let ret = await this.put("Table/" + this.specialization, this.isARow);
+                    if (ret != null) {
+                        this.isARow["id"] = ret; 
+                    }
+                }
+                if (this.parent.editMode == "add") {
+                    this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                }
                 this.copyObject(this.parent.editingRow, this.parent.editingRowSaved);
+                this.copyObject(this.isARow, this.isARowSaved);
             }
         },
 
-        close () {
+        /**
+         * Close the form
+         */
+        close() {
             this.$emit('cancel');
         },
 
         /**
-         * cancel the edit operation and revert to the original values
+         * Cancel the edit operation and revert to the original values
          */
         cancel() {
             if (this.multiRow && this.parent.editingRowIndex >= this.rows.length) {
                 this.parent.editingRowIndex = this.rows.length - 1;
             }
+            this.handleIsA();
             this.copyObject(this.parent.editingRowSaved, this.parent.editingRow);
+            this.copyObject(this.isARowSaved, this.isARow);
             this.parent.editMode = 'edit';
+
+        },
+
+
+        /**
+         * Dropwdown selection updated
+         * @param {Object} col - The column object.
+         */
+        async selectionUpdated(col) {
+            let value = this.parent.editingRow[col.name];
+            let displayValue = this.parent.findLookupValue(value, col.lookup);
+            this.parent.editingRow[col.name + "_val"] = displayValue;
+            await this.handleIsA(col);
         },
 
         /**
-         * dropwdown selection updated
-         * @param {Object} col - The column object.
+         * Handle the isA column
+         *
          */
-        selectionUpdated(col) {
-            let displayValue = this.parent.findLookupValue(this.parent.editingRow[col.name], col.lookup);
-            this.parent.editingRow[col.name + "_val"] = displayValue;
+        async handleIsA() {
+            if (this.parent.isA) {
+                let value = this.parent.editingRow[this.parent.isA.column];	
+                if (value != this.oldIsAKey) {
+                    this.isARow = {};
+                    this.isAColumns = [];
+                    console.log("isA changed", value);
+                    this.specialization = this.parent.isA.specializations[value];
+                    if (this.specialization) {
+                        let ret = await this.get("Table/" + this.specialization + "/" + this.parent.editingRow["id"]);
+
+                        this.isAColumns = this.parent.setupColumns(ret.attributes);
+
+                        let ec = [...this.isAColumns];
+                        this.swapIdAndValColumns(ec);
+
+                        if (ret.data.length > 0) {
+                            this.isARow = this.parent.rowToObject(ret.data[0], this.isAColumns);
+                        } else {
+                            this.isARow = await this.parent.createEmptyRow(this.isAColumns);
+                        }
+
+                        console.log("isAColumns", this.isAColumns);
+                        console.log("isARow", this.isARow); 
+                        this.isAColumns = ec.filter(col => this.showColInEdit(col));
+                    }
+                    this.oldIsAKey = this.parent.editingRow[this.parent.isA.column];
+                }
+            }
         },
         
         /**

@@ -73,7 +73,7 @@ export const TableMixin = {
             overlays: { },
             asForm: false,
             visibleColumns: [],
-            contextValuesLoaded: false,
+            contextValuesLoaded: false
         }
     },
     methods: {
@@ -365,7 +365,7 @@ export const TableMixin = {
          
             let rowToPass = {};
             if (this.frugal) {
-                rowToPass = this.rowToObject(row);
+                rowToPass = this.rowToObject(row, this.columns);
             } else {
                 rowToPass = row;
             }
@@ -506,7 +506,7 @@ export const TableMixin = {
                 if (action.chart.preprocess) {
                     this.$store.popups.chart.props.data = this[action.chart.preprocess].call(this, rowsToChart);
                 } else if (this.frugal && !actionRetrievesData || actionRetrievesData && action.chart.frugal) {
-                    this.$store.popups.chart.props.data = rowsToChart.map(row => this.rowToObject(row));
+                    this.$store.popups.chart.props.data = rowsToChart.map(row => this.rowToObject(row, this.columns));
                 } else {
                     this.$store.popups.chart.props.data = rowsToChart;
                 }
@@ -530,7 +530,7 @@ export const TableMixin = {
         showRowInfo(row) {
             let rowToShow = row;
             if (this.frugal) {
-                rowToShow = this.rowToObject(row);
+                rowToShow = this.rowToObject(row, this.columns);
             }
             this.$store.popups.default.props = {
                 columns: this.columns,

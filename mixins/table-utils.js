@@ -141,7 +141,6 @@ export const TableUtilsMixin = {
                     obj[col.name] = null;
                 } 
                 if (col.defaultPrevious) {
-                    console.log("default previous", col.name);
                     obj[col.name] = this.$q.localStorage.getItem("default_" + col.name) ?? obj[col.name];
                     if (col.lookup) {
                         await this.loadLookup(col.lookup);
@@ -179,6 +178,8 @@ export const TableUtilsMixin = {
         */
         async reload() {
             
+            this.columns = [];
+
             let routerRoute = this.$store.routes.filter((item) => item.path == this.$route.path)[0];
             let offline = false;
 
@@ -222,7 +223,7 @@ export const TableUtilsMixin = {
 
             if (!this.data) {
                 this.rows = [];
-                this.columns = [];
+                //this.columns = [];
                 return;
             }
             
@@ -255,10 +256,22 @@ export const TableUtilsMixin = {
                 this.key = attributes[0].name;
             }
 
-            // set up the columns
+            this.columns = this.setupColumns(attributes);
+            
+            this.visibleColumns = [];
+            for (let col of this.columns) {
+                if (col.pushToVisible) {
+                    this.visibleColumns.push(col.name);
+                }
+            };
+            
+            this.clearFilter();
+            this.rows = this.frugal ? this.data.data : this.data;
+            this.rowsFiltered = this.rows;
+        },
 
-
-            this.columns = attributes.map((attribute, index) => {
+        setupColumns(attributes) {
+            let columns = attributes.map((attribute, index) => {
                 let format = this.format[attribute.type] ?? (val => val);
                 if (attribute.decimals) format = val => val != null ? Number(val).toFixed(attribute.decimals) : null;
                 return {
@@ -275,10 +288,8 @@ export const TableUtilsMixin = {
                 }
             });
 
-            console.log("columns", this.columns);
-
             let lookups = {};
-            for (let col of this.columns) {
+            for (let col of columns) {
                 let pos = col.name.indexOf('__');
                 if (pos > 0) {
                     let refTable = col.name.substring(0, pos);
@@ -295,13 +306,11 @@ export const TableUtilsMixin = {
                 col.label = col.name;
             }
 
-            
-            this.visibleColumns = [];
             // chemistry for lookup fields (id in popup, id_val in table)
             if (this.tableAPI) {
 
-                this.swapIdAndValColumns(this.columns);
-                for (let col of this.columns) {
+                this.swapIdAndValColumns(columns);
+                for (let col of columns) {
                     if (this.masterKey && (col.name == this.masterKey || col.name == this.masterKey + '_val')) {
                         col.lookup = null;
                         continue;
@@ -314,10 +323,8 @@ export const TableUtilsMixin = {
                 }
             }
 
-            for (let col of this.columns) {
-
+            for (let col of columns) {
                 col.label = this.snakeToSentence(col.label);
-
                 if (this.colAtts[col.name]) {
                     this.copyObject(this.colAtts[col.name], col, true);
                     if (this.format[col.type]) {
@@ -341,7 +348,7 @@ export const TableUtilsMixin = {
                 }
 
                 if (col.disabled) {
-                    let valCol = this.columns.find(c => c.name == col.name + '_val');
+                    let valCol = columns.find(c => c.name == col.name + '_val');
                     if (valCol) valCol.disabled = true;
                 }
 
@@ -351,7 +358,12 @@ export const TableUtilsMixin = {
 
                 if (col.name.endsWith("_id")
                     || col.invisible
-                    || (this.masterKey != null && (col.name == this.masterKey || col.name == this.masterKey + '_val'))) continue;
+                    || (this.masterKey != null && (col.name == this.masterKey || col.name == this.masterKey + '_val'))
+                    || (this.isA != null && (col.name == this.isA.masterKey || col.name == this.isA.masterKey + '_val'))
+                ) {
+                    console.log("Hiding column", col.name);
+                     continue;
+                }
                 
                 if (col.name == 'id' || col.name == 'time_created' || col.name == 'time_modified' || col.name == 'user_modified') col.disabled = true;
                 if (col.name == 'id') col.invisible = true;
@@ -372,15 +384,11 @@ export const TableUtilsMixin = {
                     col.disabled = false;
                 }
 
-
                 if (!col.invisible) {
-                    this.visibleColumns.push(col.name);
+                    col.pushToVisible = true;   
                 }
             }
-           
-            this.clearFilter();
-            this.rows = this.frugal ? this.data.data : this.data;
-            this.rowsFiltered = this.rows;
+            return columns;
         },
 
         /**
@@ -399,13 +407,13 @@ export const TableUtilsMixin = {
         },
 
         /**
-     * Converts a row from the table to an object.
-     * @param {Array} row - The row to convert.
-     * @returns {Object} - The converted object.
-     */
-        rowToObject(row) {
+         * Converts a row from the table to an object.
+         * @param {Array} row - The row to convert.
+         * @returns {Object} - The converted object.
+         */
+        rowToObject(row, columns) {
             let obj = {};
-            for (let col of this.columns) {
+            for (let col of columns) {
                 obj[col.name] = row[col.index];
             }
             return obj;
@@ -430,9 +438,9 @@ export const TableUtilsMixin = {
          * @param {Object} row - The row to be edited.
          */
         async editRow(row) {
-             this.editMode = 'edit';
+            this.editMode = 'edit';
             this.editingRowIndex = this.rows.indexOf(row);
-            this.editingRow = this.rowToObject(row);
+            this.editingRow = this.rowToObject(row, this.columns);
             await this.loadLookups();
             this.inEdit = true;
         },
@@ -459,7 +467,7 @@ export const TableUtilsMixin = {
          * @returns {Promise<void>} A promise that resolves when the lookup values are loaded.
          */
         async loadLookups() {
-            if (!this.lookupsLoaded) {
+            //if (!this.lookupsLoaded) {
                 for (let col of this.columns) {
                     if (col.lookup && !col.lookup.loaded) {
                         if (!col.lookup.options) {
@@ -468,8 +476,8 @@ export const TableUtilsMixin = {
                         }
                     }
                 }
-                this.lookupsLoaded = true;
-            }
+            //    this.lookupsLoaded = true;
+            //}
         },
 
         /**
