@@ -3,7 +3,7 @@
         :option-label="localOptionLabel" :option-value="localOptionValue" :clearable="clearable" :emit-value="emitValue"
         :map-options="mapOptions" :dense="dense" :options-dense="optionsDense" :outlined="outlined" input-debounce="0"
         :filled="filled" :label="label" :bg-color="bgColor" options-html display-value-html @popup-show="startEditing"
-        :disable="disable" :rules="rules" :square="square" style="min-width: 100px;" @focus="handleFocus(0)"
+        :disable="disable" :rules="rules" :square="square" style="min-width: 100px;" @focus="handleFocus(0)" :multiple="multiple" 
         @blur="handleBlur(0)" @keydown="keyDownSel">
         <template v-slot:before-options v-if="searchable">
             <q-icon name="search" />
@@ -44,7 +44,8 @@ export default {
         rules: { type: Array, default: () => [] },
         square: { type: Boolean, default: true },
         lookup: { type: Object, default: () => null },
-        refTable: { type: String, default: null }
+        refTable: { type: String, default: null },
+        multiple : { type: Boolean, default: false }
     },
     emits: ["update:modelValue", "blur"],
     data() {
