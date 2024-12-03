@@ -182,7 +182,7 @@ export default {
             let i = 0;
             for (let s of Object.keys(series).sort()) {
                 this.chartData.datasets.push({
-                    label: s,
+                    label: this.snakeToSentence(s),
                     data: series[s],
                     pointRadius: series[s].length > 1 ? 1 : 5,
                     backgroundColor: this.chartColors[i % this.chartColors.length],
@@ -193,7 +193,7 @@ export default {
                     let d = this.derivative(series[s]);
                     let sd = this.derivative(d);
                     this.chartData.datasets.push({
-                        label: s + '"',
+                        label: this.snakeToSentence(s) + '"',
                         data: sd,
                         pointRadius: series[s].length > 1 ? 1 : 5,
                         backgroundColor: this.chartColors[i % this.chartColors.length],
@@ -227,6 +227,10 @@ export default {
                 dataLabelsAlign: this.dataLabelsAlign,
                 scales: {
                     x: {
+                        title : {
+                            display: true,
+                            text: this.snakeToSentence(this.labelField)
+                        },
                         type: this.xScale,
                         stacked: this.stacked,
                         time: {

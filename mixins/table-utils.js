@@ -316,9 +316,7 @@ export const TableUtilsMixin = {
 
             for (let col of this.columns) {
 
-                // snake case to readable label
-                col.label = col.label.replaceAll(/_/g, ' ');
-                col.label = col.label.charAt(0).toUpperCase() + col.label.slice(1);
+                col.label = this.snakeToSentence(col.label);
 
                 if (this.colAtts[col.name]) {
                     this.copyObject(this.colAtts[col.name], col, true);

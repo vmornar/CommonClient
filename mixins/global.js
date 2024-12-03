@@ -18,6 +18,17 @@ export const GlobalMixin = {
     methods: {
 
         /**
+         * returns sentence from snake case string
+         * @param {string} str - The snake case string.
+         * @returns {string} - The sentence.
+         */
+        snakeToSentence(str) {
+            let ret = str.replaceAll(/_/g, ' ');
+            ret = ret.charAt(0).toUpperCase() + ret.slice(1);
+            return ret;
+        },
+
+        /**
          * Creates a between rule for a required field.
          * @param {number} min - The minimum value.
          * @param {number} max - The maximum value.
