@@ -505,12 +505,12 @@ export const TableMixin = {
             if (rowsToChart) {
                 if (action.chart.preprocess) {
                     this.$store.popups.chart.props.data = this[action.chart.preprocess].call(this, rowsToChart);
-                } else if (this.frugal && !popup || actionRetrievesData && action.chart.frugal) {
+                } else if (this.frugal && !actionRetrievesData || actionRetrievesData && action.chart.frugal) {
                     this.$store.popups.chart.props.data = rowsToChart.map(row => this.rowToObject(row));
                 } else {
                     this.$store.popups.chart.props.data = rowsToChart;
                 }
-                this.$store.popups.chart.show = true;
+                 this.$store.popups.chart.show = true;
             }
         },
 
