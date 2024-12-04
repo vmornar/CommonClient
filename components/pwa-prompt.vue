@@ -40,7 +40,6 @@ export default {
   beforeMount() {
     // if (this.$q.localStorage.getItem('pwa-install-selected') == true) return;
     window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('beforeinstallprompt event fired');
       e.preventDefault();
       this.$store.installEvent = e; // to make it available in other components
       if (!this.$q.localStorage.getItem('pwa-install-selected')) this.shown = true;
@@ -72,7 +71,6 @@ export default {
      * Allows manually triggering the prompt if needed.
      */
     triggerPrompt() {
-      console.log('triggerPrompt', this.$q.localStorage.getItem('pwa-install-selected'));
       if (!this.$q.localStorage.getItem('pwa-install-selected')) {
         this.shown = true;
       }

@@ -11,7 +11,7 @@ export const GlobalMixin = {
          * @returns {boolean} True if the user is an admin, false otherwise.
          */
         isAdmin() {
-            return this.$store.userData && this.$store.userData.is_admin;
+            return this.$store.userData && this.$store.userData.is_admin && this.$store.EU == null;
         },
     },
        

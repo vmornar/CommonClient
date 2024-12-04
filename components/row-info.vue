@@ -39,7 +39,6 @@ export default {
     created() {
         this.columns = this.$store.popups.default.props.columns;
         this.rowToShow = this.$store.popups.default.props.rowToShow;
-        console.log('columns', this.rowToShow);
     },
     methods: {
         v(colName) {

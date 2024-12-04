@@ -355,24 +355,27 @@ export const TableUtilsMixin = {
                 if (col.noLookup) {
                     col.lookup = null;
                 }
-
+                
+                if (!this.isAdmin && ['time_created', 'time_modified', 'user_modified', 'person_id', 'person_id_val'].includes(col.name)) col.disabled = true;
+                
                 if (col.name.endsWith("_id")
                     || col.invisible
                     || (this.masterKey != null && (col.name == this.masterKey || col.name == this.masterKey + '_val'))
                     || (this.isA != null && (col.name == this.isA.masterKey || col.name == this.isA.masterKey + '_val'))
                 ) {
                     console.log("Hiding column", col.name);
-                     continue;
+                    continue;
                 }
                 
-                if (col.name == 'id' || col.name == 'time_created' || col.name == 'time_modified' || col.name == 'user_modified') col.disabled = true;
-                if (col.name == 'id') col.invisible = true;
-
                 if (col.name.endsWith('_disabled_')) {
                     col.name = col.name.replace('_disabled_', '');
                     col.label = col.label.replace(' disabled', '');
                     col.disabled = true;
                 }
+
+                if (col.name == 'id') col.invisible = true;
+
+                       console.log(col);
 
                 // override deefault invisible
                 if (col.visible) {
@@ -388,6 +391,7 @@ export const TableUtilsMixin = {
                     col.pushToVisible = true;   
                 }
             }
+            console.log(columns);
             return columns;
         },
 
@@ -403,7 +407,7 @@ export const TableUtilsMixin = {
                     this.$q.localStorage.setItem("default_" + col.name, this.editingRow[col.name]);
                 }
             }
-            await this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
+            return await this.saveRowToDb(this.editMode, this.tableAPI, this.columns, this.editingRow, this.editingRowIndex, this.rows);
         },
 
         /**

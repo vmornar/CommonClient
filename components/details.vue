@@ -63,7 +63,6 @@ export default {
             detail.masterValue = this.masterValue;
             this.localOptions = detail;
             this.title = this.localOptions.title;
-            console.log('openDetail', this.localOptions);
             if (this.parentPopup) {
                 this.parentPopup.title = this.localOptions.title;
                 if (this.localOptions.help) this.parentPopup.help = this.localOptions.help;

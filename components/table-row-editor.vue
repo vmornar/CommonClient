@@ -4,7 +4,7 @@
         <q-card-actions v-if="!parent.asForm">
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; min-width: 600px;">
                 <div>
-                    {{ parent.editMode == "add" ? $t('Add row') : $t('Edit row') }}
+                    {{ parent.editMode == "add" ? $t('Adding new row') : $t('Editing row') }}
                 </div>	
                 <div>
                     <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
@@ -13,7 +13,7 @@
                 </div>
             </div>
         </q-card-actions>
-        <q-card-section style="flex-grow: 1; overflow-y: auto;">
+        <q-card-section style="flex-grow: 1; overflow-y: auto;" class="q-pt-none">
             <!-- <q-form class="q-mt-none" ref="form" autofocus> -->
             <q-form ref="form" autofocus>
                 <div :class="{ 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}">
@@ -96,7 +96,6 @@ export default {
     },
     watch: {
         "rows.length": async function (val) {
-            console.log("rows changed", val);
             if (val == 0) {
                 this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
             } else if (this.parent.editMode != "add") {
@@ -137,7 +136,8 @@ export default {
             isARow: {},
             isARowSaved: {},
             isAColumns: [],
-            specialization: null
+            specialization: null,
+            specializationSaved: null
         };
     },
 
@@ -163,6 +163,7 @@ export default {
         await this.handleIsA();
 
         this.copyObject(this.isARow, this.isARowSaved);
+        this.specializationSaved = this.specialization;
 
         this.loaded = true; 
         await this.$nextTick(); 
@@ -205,20 +206,39 @@ export default {
             if (this.multiRow) {
                 await this.parent.saveForm();
             } else {
-                await this.parent.saveRow();
-                if (this.parent.isA && JSON.stringify(this.isARow) != "{}") {
-                    console.log("save - isARow", this.isARow);
-                    this.isARow[this.parent.isA.masterKey] = this.parent.editingRow["id"];
-                    let ret = await this.put("Table/" + this.specialization, this.isARow);
-                    if (ret != null) {
-                        this.isARow["id"] = ret; 
+                if (await this.parent.saveRow()) {
+                    if (this.parent.isA) {
+
+                        if (this.parent.editingRow[this.parent.isA.column] != this.parent.editingRowSaved[this.parent.isA.column] && this.isARowSaved["id"]) {
+                            // specializations changed, delete the old row
+                            if (await this.delete("Table/" + this.specializationSaved + "/" + this.isARowSaved["id"]) == null) {
+                                // delete failed, return;
+                                return;
+                            }
+                            this.isARow["id"] = null;
+                        }
+                        if (this.specialization) {
+                            this.isARow[this.parent.isA.masterKey] = this.parent.editingRow["id"];
+                            let ret = await this.put("Table/" + this.specialization, this.isARow);
+                            if (ret != null) {
+                                this.isARow["id"] = ret;
+                            } else {
+                                return;
+                            }
+                        }
+                    }
+                    if (this.parent.editMode == "add") {
+                        this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                    }
+
+                    if (this.parent.editMode == "edit") {
+                        this.close();
+                    } else {
+                        this.copyObject(this.parent.editingRow, this.parent.editingRowSaved);
+                        this.copyObject(this.isARow, this.isARowSaved);
+                        this.specializationSaved = this.specialization;
                     }
                 }
-                if (this.parent.editMode == "add") {
-                    this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
-                }
-                this.copyObject(this.parent.editingRow, this.parent.editingRowSaved);
-                this.copyObject(this.isARow, this.isARowSaved);
             }
         },
 
@@ -240,7 +260,6 @@ export default {
             this.copyObject(this.parent.editingRowSaved, this.parent.editingRow);
             this.copyObject(this.isARowSaved, this.isARow);
             this.parent.editMode = 'edit';
-
         },
 
 
@@ -265,7 +284,6 @@ export default {
                 if (value != this.oldIsAKey) {
                     this.isARow = {};
                     this.isAColumns = [];
-                    console.log("isA changed", value);
                     this.specialization = this.parent.isA.specializations[value];
                     if (this.specialization) {
                         let ret = await this.get("Table/" + this.specialization + "/" + this.parent.editingRow["id"]);
@@ -281,8 +299,6 @@ export default {
                             this.isARow = await this.parent.createEmptyRow(this.isAColumns);
                         }
 
-                        console.log("isAColumns", this.isAColumns);
-                        console.log("isARow", this.isARow); 
                         this.isAColumns = ec.filter(col => this.showColInEdit(col));
                     }
                     this.oldIsAKey = this.parent.editingRow[this.parent.isA.column];

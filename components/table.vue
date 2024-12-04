@@ -4,7 +4,7 @@
         <Header v-if="!detailTable && !popupName" :name="name ?? $route.name" :title="title ?? $t(name ?? $route.name)"
             :backButton="!popupName && $store.level > 1" />
     </div>
-    <div @keydown="handleKeyDown($event, true)">
+     <div @keydown="handleKeyDown($event, true)">
         <!-- Overlays for inline editing -->
         <q-input v-if="overlays.overlayInput" dense outlined class="input-box" ref="overlayInput" v-model="editedItem"
             type="text" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
@@ -274,6 +274,12 @@ export default {
         TableRecords: loadComponent("table-records"),
     },
     watch: {
+        editedItem: {
+            handler(val) {
+                this.editedItemChanged();
+            },
+            immediate: true
+        },
         '$route.query.timestamp': {
             handler(val) {
                 this.init();
@@ -561,8 +567,8 @@ export default {
                     }
                 }
                 //this.closeOverlay();
-            } else if (!isParent) {
-                this.editedItemChanged();
+            //} else if (!isParent) {
+            //    this.editedItemChanged();
             }
         },
 
