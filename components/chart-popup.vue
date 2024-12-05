@@ -2,7 +2,7 @@
     <q-dialog v-model="$store.popups.chart.show" class="max-width" :persistent="persistent" full-width fullHeight
         @hide="closeDialog" @keyup.esc="closeDialog" :maximized="maximized">
         <q-card flat>
-            <q-card-section dense class="row items-center text-bold q-pa-sm">
+            <q-card-section dense class="row text-bold q-pa-sm">
                 <span v-html="title" />
                 <q-space />
                 <q-btn class="copy" dense flat size="sm" icon="content_copy" @click="copyToClipboard" />
@@ -12,6 +12,9 @@
             </q-card-section>
             <q-card-section class="q-pa-none">
                 <chart ref="chart" :chartData="chartData" :chartOptions="chartOptions" :type="chartType" />
+                <!-- <div id="x-axis-title" style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);">
+                    <span style="color: red;">Custom HTML X-Axis Title</span>
+                </div> -->
             </q-card-section>
         </q-card>
     </q-dialog>
@@ -143,7 +146,7 @@ export default {
             if (this.xyChart) {
                 this.chartData.labels = this.data.x;
                 if (this.data.y) { // single series
-                    series["none"] = this.data.y;
+                    series[this.seriesName ?? "none"] = this.data.y;
                 } else { // multiple series
                     series = this.data.series;
                 };
@@ -229,7 +232,7 @@ export default {
                     x: {
                         title : {
                             display: true,
-                            text: this.snakeToSentence(this.labelField)
+                            text: this.labelField ? this.snakeToSentence(this.labelField) : this.$t('Value')
                         },
                         type: this.xScale,
                         stacked: this.stacked,
@@ -261,7 +264,7 @@ export default {
                     legend: {
                         position: 'top',
                         labels: {
-                            filter: item => item.text != "none" && item.text != "null"
+                            filter: item => item.text != "None" && item.text != "null"
                         }
                     }
                 }
