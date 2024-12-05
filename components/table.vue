@@ -7,12 +7,12 @@
      <div @keydown="handleKeyDown($event, true)">
         <!-- Overlays for inline editing -->
         <q-input v-if="overlays.overlayInput" dense outlined class="input-box" ref="overlayInput" v-model="editedItem"
-            type="text" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
+            type="text" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" @update:model-value="editedItemChanged" />
         <JsonEditor v-if="overlays.overlayJson" ref="overlayJson" v-model="editedItem" @blur="closeOverlay"
             @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
         <q-input v-if="overlays.overlayText" class="textarea" type="textarea" rows=8 ref="overlayText"
             v-model="editedItem" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle"
-            :iconPicker="false" />
+            :iconPicker="false" @update:model-value="editedItemChanged"/>
         <!-- <span v-if="overlays.overlaySelect" ref="overlaySelect" @focus="$refs.innerSelect.focus"> -->
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
             @blur="closeOverlay" :lookup="activeLookup"
@@ -274,12 +274,12 @@ export default {
         TableRecords: loadComponent("table-records"),
     },
     watch: {
-        editedItem: {
-            handler(val) {
-                this.editedItemChanged();
-            },
-            immediate: true
-        },
+        // editedItem: {
+        //     handler(val) {
+        //         this.editedItemChanged();
+        //     },
+        //     immediate: true
+        // },
         '$route.query.timestamp': {
             handler(val) {
                 this.init();

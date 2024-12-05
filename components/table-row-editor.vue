@@ -141,11 +141,15 @@ export default {
         };
     },
 
+    created() {
+        console.log(0)
+    },  
     /**
      * Initialize the component
      */
     async mounted() {
 
+        console.log(1)
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
                 await this.parent.editRow(this.parent.rows[0]);

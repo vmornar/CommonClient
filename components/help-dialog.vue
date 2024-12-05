@@ -1,5 +1,5 @@
 <template>
-    <q-dialog @keydown.native="closeDialog($event)" @hide="closeDialog(null)" v-model="$store.popups.help.show"
+    <q-dialog  v-model="$store.popups.help.show" transition-duration="0"
         :max-width="computedOptions.width" :style="{ zIndex: computedOptions.zIndex }">
         <q-card class="max-width" v-if="edit">
             <html-editor v-model="helpTextEdit" saveCancel @save="saveHelp" @cancel="edit = false" />
@@ -56,6 +56,7 @@ export default {
     }),
     mounted() {
         Object.assign(this.computedOptions, this.options);
+        window.showSubHelp = this.showSubHelp;
     },
     methods: {
 
@@ -80,6 +81,18 @@ export default {
                 if (event) event.stopPropagation();
                 this.$store.popups.help.show = false;
                 this.edit = false;
+            }
+        },
+
+        async showSubHelp(name) {
+            // example (embed in help): <a onclick="showSubHelp('OtherHelp')">Some other help</a>
+            // hyperlink is substituted with the other help text
+            // do not edit after the substitution
+            let response = await this.get("CommonAnon/GetHelp/" + name);
+            if (response && response.help) {
+                response.help = this.replaceIcons(response.help);
+                const reg = new RegExp(`<a .*?${name}.*?a>`);
+                this.$store.popups.help.text = this.$store.popups.help.text.replace(reg, response.help);
             }
         },
     },

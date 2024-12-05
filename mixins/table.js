@@ -187,9 +187,10 @@ export const TableMixin = {
 
             // get data from the server
             await this.reload();
-
+            await this.$nextTick();
+            
             this.loaded = true; 
-              await this.$nextTick();
+
         },
 
  

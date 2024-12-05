@@ -16,7 +16,6 @@
               style="width: 100px" clearable filled :options="$store.users" dense options-dense
               :display-value="$store.EU ? $store.EU.short_display_value : null"
               @update:model-value="emulatedUserChanged" />
-{{ isAdmin  }}
             <q-btn flat dense class="nomy" v-if="!$store.isOnline" icon="wifi_off" />
             &nbsp;{{ $store.userData && $store.userData.first_name > '' && $store.userData.last_name > '' ?
               ($store.isWide ? `${$store.userData.first_name} ${$store.userData.last_name}` :

@@ -79,7 +79,8 @@ export default {
             // & denotes the cursor position after the suggestion is inserted
             // keys without values by default have value of "key" : "&"
             suggestions: [{ key: "allowDelete", value: '"allowDelete" : false&' },
-            { key: "allowEdit", value: '"allowEdit" : false&' },
+                { key: "allowEdit", value: '"allowEdit" : false&' },
+                        { key: "asForm", value: '"asForm" : true&' },
             { key: "colAtts", value: '"colAtts" : { "&" : { "" : ""} } ' },
             { key: "component" },
             { key: "conditionalConfirmationMessage", value: '"conditionalConfirmationMessage" : { "condition" : "return exp(row,columns)&", "message" : "" }}' },

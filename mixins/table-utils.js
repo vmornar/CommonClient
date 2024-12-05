@@ -363,8 +363,7 @@ export const TableUtilsMixin = {
                     || (this.masterKey != null && (col.name == this.masterKey || col.name == this.masterKey + '_val'))
                     || (this.isA != null && (col.name == this.isA.masterKey || col.name == this.isA.masterKey + '_val'))
                 ) {
-                    console.log("Hiding column", col.name);
-                    continue;
+                    if (!col.visible) continue;
                 }
                 
                 if (col.name.endsWith('_disabled_')) {
@@ -374,8 +373,6 @@ export const TableUtilsMixin = {
                 }
 
                 if (col.name == 'id') col.invisible = true;
-
-                       console.log(col);
 
                 // override deefault invisible
                 if (col.visible) {

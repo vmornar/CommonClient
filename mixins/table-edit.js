@@ -130,6 +130,7 @@ export const TableEditMixin = {
          * The edited item has changed
          */
         editedItemChanged() {
+            console.log('editedItemChanged');   
             if (this.activeLookup) {
                 let displayValue = this.findLookupValue(this.editedItem, this.activeLookup);
                 this.props.row[this.lookupDisplayIndex] = displayValue;
