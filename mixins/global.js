@@ -109,7 +109,7 @@ export const GlobalMixin = {
             if (await o.validate()) {
                 return true;
             } else {
-                await this.showError(this.$t("Please correct all errors before saving"));
+                await this.showError(this.$t("Please correct all errors on the form."));
                 return false;
             }
         },

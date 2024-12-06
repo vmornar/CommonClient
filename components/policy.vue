@@ -32,6 +32,10 @@ export default {
         next();
     },
 
+    mounted() {
+        window.contactUs = this.contactUs;
+    },
+
     methods: {
         /**
          * Initialize the component - retrieve the policy
@@ -43,6 +47,15 @@ export default {
             }
             this.policy = ret;
         },
+
+        /**
+         * Contact us
+         */
+        contactUs() {
+            console.log("Contact us");
+                        // example (embed in help): <a onclick="contactUs()">Contact us</a>
+            this.$router.push({ name: "Contact us" });
+        }
     },
 };
 </script>
