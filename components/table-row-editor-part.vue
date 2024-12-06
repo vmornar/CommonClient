@@ -61,6 +61,8 @@ export default {
         htmlEditor: loadComponent('html-editor')
     },
     props: ['row', 'editColumns'],
-
+    created() {
+        //console.log('TableRowEditorPart created');
+    },
 }
 </script>
