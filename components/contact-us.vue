@@ -49,6 +49,8 @@ export default {
                 if (response !== null) {
                     this.showMessage(this.$t('Message sent successfully'));
                     this.$refs.form.reset();
+                    this.subject = null;
+                    this.message = null;
                 } else {
                     this.showMessage(this.$t('Send failed'));
                 }

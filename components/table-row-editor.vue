@@ -87,13 +87,6 @@ export default {
     },
     props: ['parent', 'multiRow', 'rows'],
 
-    computed: {
-        editStyle() {
-            return {
-                maxHeight: (this.$q.screen.height - 100) + 'px', overflow: 'auto', minWidth: "600px"
-            };
-        },
-    },
     watch: {
         "rows.length": async function (val) {
             if (val == 0) {

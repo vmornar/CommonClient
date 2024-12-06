@@ -15,7 +15,7 @@
                     :disable="col.disabled" />
             </span>
             <html-editor v-else-if="col.type == 'html' && !col.invisible" style="width:90%"
-                v-model="row[col.name]" :height="editStyle.height" :showIconPicker="false"
+                v-model="row[col.name]" :height="col.height ?? '300px'" :showIconPicker="false"
                 :label="col.label" :disable="col.disabled" ref="inputRefs" />
             <autocomplete v-else-if="col.lookup && !col.invisible" v-model="row[col.name]"
                 :label="col.label" dense style="width:95%"

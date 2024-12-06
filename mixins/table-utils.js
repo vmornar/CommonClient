@@ -147,6 +147,8 @@ export const TableUtilsMixin = {
                         let displayValue = this.findLookupValue(obj[col.name], col.lookup);
                         obj[col.name + '_val'] = displayValue;
                     }
+                } else if (col.default) {
+                    obj[col.name] = col.default;
                 }
             }
             return obj;
