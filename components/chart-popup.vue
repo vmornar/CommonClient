@@ -248,7 +248,7 @@ export default {
                                 enabled: true,
                                 fontStyle: 'bold'
                             },
-                            autoSkip: false, // Ensures that ticks are not skipped
+                            autoSkip: true, // Ensures that ticks are not skipped
                             maxTicksLimit: 100, // Maximum number of ticks to show
                         },
                     },
