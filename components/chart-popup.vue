@@ -285,13 +285,19 @@ export default {
             if (this.stat != null && this.numerical) {
                 this.chartOptions.annotations = [
                     {
+                        axis: null,
+                        n: this.stat.n,
+                        sigma: this.stat.stdev,
+                        color: 'darkblue'
+                    },
+                    {
                         axis: this.annotationAxis,
                         label: {
                             text: this.$t('Average') + ': ' + this.stat.avg.toFixed(2) + unitSuffix,
                             color: 'red',
                         },
                         color: 'red',
-                        value: this.stat.avg,
+                        value: this.stat.avg
                     },
                     {
                         axis: this.annotationAxis,
@@ -312,7 +318,7 @@ export default {
                         value: this.stat.avg - this.stat.stdev,
                         color: 'gray',
                         lineDash: [5, 5],
-                        offset: this.annotationAxis == 'y' ? 0 : 80,
+                        offset: this.annotationAxis == 'y' ? 0 : 50,
                     },
                     {
                         axis: this.annotationAxis,
@@ -323,7 +329,7 @@ export default {
                         value: this.stat.avg + this.stat.stdev,
                         color: 'gray',
                         lineDash: [5, 5],
-                        offset: this.annotationAxis == 'y' ? 0 : 80,
+                        offset: this.annotationAxis == 'y' ? 0 : 50,
                     }
                 ];
             }

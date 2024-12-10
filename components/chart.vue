@@ -82,41 +82,50 @@ export default {
                     const xAxis = chart.scales['x'];
                     const yAxis = chart.scales['y'];
                     for (let a of chart.config.options.annotations) {
-                        ctx.save();
                         let xPos, yPos;
-                        if (a.axis == 'x') {
-                            yPos = yAxis.top;
-                            //xPos =  (xAxis.getPixelForValue(a.indexLE) + xAxis.getPixelForValue(a.indexGE)) / 2;
-                            let x1 = xAxis.getPixelForValue(a.indexLE);
-                            let x2 = xAxis.getPixelForValue(a.indexGE);
-                            let v1 = chart.data.labels[a.indexLE];
-                            let v2 = chart.data.labels[a.indexGE];
-                            xPos = x1 + (x2 - x1) * (a.value - v1) / (v2 - v1);
+                        if (!a.axis) {
+                            xPos = 40;
+                            yPos = yAxis.top + 12;
+                            ctx.fillStyle = a.color ?? 'black'; 
+                            ctx.font = '14px Arial';
+                            ctx.fillText("n = " + a.n, xPos, yPos);
+                            ctx.fillText("σ = " + a.sigma.toFixed(2), xPos, yPos + 20);
                         } else {
-                            xPos = xAxis.left;
-                            yPos = yAxis.getPixelForValue(a.value);
-                        }
+                            ctx.save();
+                            if (a.axis == 'x') {
+                                yPos = yAxis.top;
+                                //xPos =  (xAxis.getPixelForValue(a.indexLE) + xAxis.getPixelForValue(a.indexGE)) / 2;
+                                let x1 = xAxis.getPixelForValue(a.indexLE);
+                                let x2 = xAxis.getPixelForValue(a.indexGE);
+                                let v1 = chart.data.labels[a.indexLE];
+                                let v2 = chart.data.labels[a.indexGE];
+                                xPos = x1 + (x2 - x1) * (a.value - v1) / (v2 - v1);
+                            } else if (a.axis == 'y') {
+                                xPos = xAxis.left;
+                                yPos = yAxis.getPixelForValue(a.value);
+                            }
 
-                        ctx.strokeStyle = a.color ?? 'red'; // Line color
-                        ctx.setLineDash(a.lineDash ?? []);
-                        ctx.lineWidth = 2; // Line width
-                        ctx.beginPath();
-                        ctx.moveTo(xPos, yPos);
-                        if (a.axis == 'x') {
-                            ctx.lineTo(xPos, yPos + yAxis.height);
-                        } else {
-                            ctx.lineTo(xPos + xAxis.width, yPos);
-                        }
-                        ctx.stroke();
-                        ctx.restore();
+                            ctx.strokeStyle = a.color ?? 'red'; // Line color
+                            ctx.setLineDash(a.lineDash ?? []);
+                            ctx.lineWidth = 2; // Line width
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, yPos);
+                            if (a.axis == 'x') {
+                                ctx.lineTo(xPos, yPos + yAxis.height);
+                            } else {
+                                ctx.lineTo(xPos + xAxis.width, yPos);
+                            }
+                            ctx.stroke();
+                            ctx.restore();
 
-                        // Draw the label
-                        ctx.fillStyle = a.label.color ?? 'black'; // Label color
-                        ctx.font = '14px Arial'; // Label font
-                        if (a.axis == 'x') {
-                            ctx.fillText(a.label.text, xPos + 3, yPos + (a.offset ?? 10)); // Adjust 
-                        } else {
-                            ctx.fillText(a.label.text, xPos + (a.offset ?? 10), yPos + 9); // Adjust 
+                            // Draw the label
+                            ctx.fillStyle = a.label.color ?? 'black'; // Label color
+                            ctx.font = '14px Arial'; // Label font
+                            if (a.axis == 'x') {
+                                ctx.fillText(a.label.text, xPos + 3, yPos + (a.offset ?? 10)); // Adjust 
+                            } else {
+                                ctx.fillText(a.label.text, xPos + (a.offset ?? 10), yPos + 9); // Adjust 
+                            }
                         }
                     }
                 },

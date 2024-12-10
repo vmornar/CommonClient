@@ -90,6 +90,7 @@ export const StatisticsMixin = {
             result.avg = result.sum / numbers.length;
             result.stdev = this.standardDeviation(numbers, result.avg);
             result.median = this.median(numbers);
+            result.n = numbers.length;
             return result;
         },
 
