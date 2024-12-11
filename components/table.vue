@@ -648,23 +648,27 @@ export default {
             this.$store.popups.editPdf = {
                 component: 'pdf-report-editor',
                 props: {
-                    title: 'PDF Report Editor',
+                    title: `PDF Report Editor\u00A0\u00A0·\u00A0\u00A0${this.name}`,
                     apiUrl: api,
                     apiOptions: apiOptions ?? null,
                     data: { columns: this.visibleColumns, rows, isFrugal },
                     tableName: this.name,
                     contextValuesName,
+                    // TODO: added persistent because @hide event is not
+                    // called on q-dialog in popup.vue 
+                    // when click is made outside of dialog to close it
+                    persistent: true,
                 },
-                canCloseIfFormChanged: true,
                 show: true,
             };
             // maybe event bus should be moved to mounted and beforeUnmount
-            eventBus.on('popupClosed', async (popupName) => {
-                if (popupName == 'editPdf') {
+            const onPopupClosed = async (popupName) => {
+                if (popupName == 'editPdf' && !this.$store.formChanged) {
                     this.hasPdfReport = await this.getHasPdfReport();
-                    eventBus.off('popupClosed');
+                    eventBus.off('popupClosed', onPopupClosed);
                 }
-            });
+            };
+            eventBus.on('popupClosed', onPopupClosed);
         },
         async getPdfReportRow() {
             const requestApi = 'Table/data_pdf_template';
@@ -727,7 +731,7 @@ export default {
             this.$store.popups.viewPdf = {
                 component: 'pdf-report-preview',
                 props: {
-                    title: 'PDF Report Preview',
+                    title: `PDF Report Preview\u00A0\u00A0·\u00A0\u00A0${row.name}`,
                     state: JSON.parse(row.state),
                 },
                 canCloseIfFormChanged: true,
