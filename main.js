@@ -16,7 +16,6 @@ import {
   Notify
 } from 'quasar'
 
-import '@quasar/extras/material-icons-outlined/material-icons-outlined.css'
 import '@quasar/extras/material-icons/material-icons.css'
 
 import 'quasar/src/css/index.sass'
@@ -247,7 +246,7 @@ app.use(Quasar, {
   }, 
   lang: {}, 
   config: store.config, 
-  extras: ['material-icons-outlined']
+  // extras: ['material-icons-outlined']
 })
 
 // Tell app to use the I18n instance

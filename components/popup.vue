@@ -62,6 +62,7 @@ export default {
         this.titleToShow = this.$store.popups[this.name].props.titleToShow;
         this.titleToShow = this.titleToShow != undefined ? this.$t(this.titleToShow) : this.$t(this.help);
     },
+    
     methods: {
         closeDialog() {
             eventBus.emit('popupClosed', this.name);
