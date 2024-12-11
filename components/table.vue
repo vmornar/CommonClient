@@ -82,6 +82,9 @@
                         @click="$refs.table.scrollTo(nRows - 1)">
                         <q-tooltip>{{ $t("Last record") }}</q-tooltip>
                     </q-btn>
+                    <q-btn v-if="hasPdfReport" dense flat icon="preview" color="primary" @click="previewPdf">
+                        <q-tooltip>{{ $t("View PDF report") }}</q-tooltip>
+                    </q-btn>
                     <q-btn v-if="nRows > 0" dense flat icon="download" color="primary" @click="exportTable">
                         <q-tooltip>{{ $t("Download table") }}</q-tooltip>
                     </q-btn>
@@ -260,6 +263,7 @@ import { TableMixin } from '../mixins/table.js';
 import { TableUtilsMixin } from '../mixins/table-utils.js';
 import { TableCustomMixin } from '@/specific/mixins/table-custom.js';
 import { loadComponent } from '@/common/component-loader';
+import eventBus from '@/common/event-bus';
 
 export default {
     name: "Table",
@@ -289,6 +293,7 @@ export default {
     },
     data: () => ({
         rowsFiltered: [],
+        hasPdfReport: null,
     }),
     computed: {
 
@@ -608,18 +613,126 @@ export default {
                 return { api: 'Table/' + this.tableAPI };
             }
         },
-
         editPdf() {
-            this.$store.popups.default.component = 'pdf-report-editor';
             const { api, apiOptions } = this.getApiAndOptions();
-            this.$store.popups.default.props = {
-                title: 'PDF Report Editor',
-                apiUrl: api,
-                apiOptions: apiOptions ?? null,
-                reportName: this.name,
+            let rows = this.filterSet ? this.rowsFiltered : this.rows;
+            const isFrugal = this.frugal === true;
+            if (isFrugal) {
+                const visibleColumnIndexes = new Set(
+                    this.visibleColumns.map((columnName) =>
+                        this.columns.findIndex(
+                            (column) => column.name === columnName,
+                        ),
+                    ),
+                );
+                rows = rows.map((row) =>
+                    row.filter((_, index) => visibleColumnIndexes.has(index)),
+                );
+            }
+            const contextValuesName = this.contextValuesLoaded
+                ? this.contextValuesLocal
+                      .map(
+                          (contextValue) =>
+                              contextValue.options.find(
+                                  (option) => option.id === contextValue.value,
+                              ).name,
+                      )
+                      .join('__')
+                : null;
+
+            this.$store.additionalPopups.editPdf = {
+                name: 'editPdf',
+                show: false,
+                renderInApp: true,
             };
-            this.$store.popups.default.canCloseIfFormChanged = true;
-            this.$store.popups.default.show = true;
+            this.$store.popups.editPdf = {
+                component: 'pdf-report-editor',
+                props: {
+                    title: 'PDF Report Editor',
+                    apiUrl: api,
+                    apiOptions: apiOptions ?? null,
+                    data: { columns: this.visibleColumns, rows, isFrugal },
+                    tableName: this.name,
+                    contextValuesName,
+                },
+                canCloseIfFormChanged: true,
+                show: true,
+            };
+            // maybe event bus should be moved to mounted and beforeUnmount
+            eventBus.on('popupClosed', async (popupName) => {
+                if (popupName == 'editPdf') {
+                    this.hasPdfReport = await this.getHasPdfReport();
+                    eventBus.off('popupClosed');
+                }
+            });
+        },
+        async getPdfReportRow() {
+            const requestApi = 'Table/data_pdf_template';
+            // optimize this get request(s)
+            const pdfReportTemplates = await this.get(requestApi);
+            if (pdfReportTemplates) {
+                const nameIndexInData = pdfReportTemplates.attributes.findIndex(
+                    (attribute) => attribute.name === 'name',
+                );
+                const contextValuesName = this.contextValuesLoaded
+                    ? this.contextValuesLocal
+                          .map(
+                              (contextValue) =>
+                                  contextValue.options.find(
+                                      (option) =>
+                                          option.id === contextValue.value,
+                                  ).name,
+                          )
+                          .join('__')
+                    : null;
+                    let savedRow;
+                if (contextValuesName !== null) {
+                    const name = this.name + ' - ' + contextValuesName;
+                    savedRow = pdfReportTemplates.data.find(
+                        (row) => row[nameIndexInData] === name,
+                    );
+                }
+                if (savedRow === undefined) {
+                    savedRow = pdfReportTemplates.data.find(
+                        (row) => row[nameIndexInData] === this.name,
+                    );
+                }
+                if (savedRow !== undefined) {
+                    return Object.fromEntries(
+                        pdfReportTemplates.attributes.map(
+                            (attribute, index) => [
+                                attribute.name,
+                                savedRow[index],
+                            ],
+                        ),
+                    );
+                }
+            }
+            return null;
+        },
+        async getHasPdfReport() {
+            const row = await this.getPdfReportRow();
+            return row !== null
+        },
+        async previewPdf() {
+            const row = await this.getPdfReportRow();
+            if (row === null) {
+                return;
+            }
+            this.$store.additionalPopups.viewPdf = {
+                name: 'viewPdf',
+                show: false,
+                renderInApp: true,
+            };
+            this.$store.popups.viewPdf = {
+                component: 'pdf-report-preview',
+                props: {
+                    title: 'PDF Report Preview',
+                    state: JSON.parse(row.state),
+                },
+                canCloseIfFormChanged: true,
+                show: true,
+            };
         },
     },
 }

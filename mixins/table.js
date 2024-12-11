@@ -191,6 +191,7 @@ export const TableMixin = {
             
             this.loaded = true; 
 
+            this.hasPdfReport = await this.getHasPdfReport();
         },
 
  
