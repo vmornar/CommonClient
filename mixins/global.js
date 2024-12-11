@@ -4,6 +4,7 @@
 import { getComponent } from '../component-loader.js';
 import CustomDialog from '../components/custom-dialog.vue';
 import { loadComponent } from '../component-loader.js';
+import html2canvas from 'html2canvas';
 export const GlobalMixin = {
     computed: {
         /**
@@ -17,6 +18,40 @@ export const GlobalMixin = {
        
     methods: {
 
+        async export(download, id, filename) {
+            let el = document.getElementById(id);
+            let c = await html2canvas(el, {
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: "white",
+                logging: false,
+                width: el.clientWidth,
+                height: el.clientHeight,
+            });
+
+            if (download) {
+                var link = document.createElement('a');
+                link.href = c.toDataURL();
+                link.download = filename;
+                link.click();
+            } else {
+                c.toBlob((blob) => {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    navigator.clipboard.write([item])
+                        .then(() => {
+                            this.$q.notify({
+                                message: this.$t("Image copied to clipboard"),
+                                color: "positive",
+                                timeout: 1000,
+                                position: "bottom"
+                            });
+                        })
+                        .catch((err) => {
+                            this.showError("Copy failed: ", err);
+                        });
+                }, 'image/png');
+            }
+        },
         /**
          * returns sentence from snake case string
          * @param {string} str - The snake case string.

@@ -84,7 +84,7 @@ export default {
                     for (let a of chart.config.options.annotations) {
                         let xPos, yPos;
                         if (!a.axis) {
-                            xPos = 40;
+                            xPos = xAxis.right - 100;
                             yPos = yAxis.top + 12;
                             ctx.fillStyle = a.color ?? 'black'; 
                             ctx.font = '14px Arial';
@@ -141,40 +141,6 @@ export default {
         }
     },
     methods: {
-
-        /**
-         * Downloads the chart image.
-         */
-        download() {
-            const canvas = this.$refs.chart;
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = 'chart.png';
-            link.click();
-        },
-
-        /**
-         * Copies the chart image to the clipboard.
-         */
-        copyToClipboard() {
-            const canvas = this.$refs.chart;
-            canvas.toBlob((blob) => {
-                const item = new ClipboardItem({ 'image/png': blob });
-                navigator.clipboard.write([item])
-                    .then(() => {
-                        this.$q.notify({
-                            message: this.$t("Image copied to clipboard"),
-                            color: "positive",
-                            timeout: 1000,
-                            position: "bottom"
-                        });
-                    })
-                    .catch((err) => {
-                        this.showError("Copy failed: ", err);
-                    });
-            }, 'image/png');
-        },
-
         /**
          * Renders the chart.
          */

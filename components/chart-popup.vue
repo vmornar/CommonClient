@@ -11,10 +11,9 @@
                 <q-btn dense size="sm" flat round icon="close" @click="closeDialog" />
             </q-card-section>
             <q-card-section class="q-pa-none">
-                <chart ref="chart" :chartData="chartData" :chartOptions="chartOptions" :type="chartType" />
-                <!-- <div id="x-axis-title" style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);">
-                    <span style="color: red;">Custom HTML X-Axis Title</span>
-                </div> -->
+                <div id="chart-container">
+                    <chart ref="chart" :chartData="chartData" :chartOptions="chartOptions" :type="chartType" />
+                </div>
             </q-card-section>
         </q-card>
     </q-dialog>
@@ -83,13 +82,15 @@ export default {
          * Downloads the chart as an image.
          */
         download() {
-            this.$refs.chart.download();
+            this.export(true, "chart-container", "chart.png");
+            //this.$refs.chart.download();
         },
         /**
          * Copies the chart as an image to clipboard.
          */
         copyToClipboard() {
-            this.$refs.chart.copyToClipboard();
+            this.export(false, "chart-container");
+            //this.$refs.chart.copyToClipboard();
         },
 
         /**
