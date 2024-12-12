@@ -4,7 +4,7 @@
         <q-card-section v-if="details && details.length > 1" class="row items-center q-py-xs">
             <q-btn dense flat no-caps
                 :class="{ active: detail.name != localOptions.name, bold: detail.name == localOptions.name }"
-                v-for="detail in details" :label="detail.name" :key="detail.name" @click="openDetail(detail)" />
+                v-for="detail in details" :label="detail.name" :key="detail.name" @click="openDetail(detail, true)" />
             <q-space />
         </q-card-section>
         <q-card-section class="q-pa-none">
@@ -50,7 +50,7 @@ export default {
      */
     async mounted() {
         this.initializeComponent(this.popupName);
-        this.openDetail(this.details[0]); // open the first detail by default
+        this.openDetail(this.details[0], false); // open the first detail by default
     },
     methods: {
         /**
@@ -58,7 +58,8 @@ export default {
          * 
          * @param {Object} detail - The detail to be opened.
          */
-        async openDetail(detail) {
+        async openDetail(detail, isLoaded) {
+            this.loaded = isLoaded;
             detail.masterKey = this.masterKey;
             detail.masterValue = this.masterValue;
             this.localOptions = detail;
@@ -69,12 +70,9 @@ export default {
                 if (this.localOptions.titleToShow) this.parentPopup.titleToShow = this.localOptions.titleToShow;
             }   
             if (this.loaded) {
-                this.$refs.detailTable.init();
+                await this.$nextTick();
+                await this.$refs.detailTable.init();
             }
-            // await this.$nextTick();
-            // setTimeout(() => {
-                //this.$refs.detailTable.init();
-            // }, 10);
         },
     }
 }
