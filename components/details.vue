@@ -8,7 +8,7 @@
             <q-space />
         </q-card-section>
         <q-card-section class="q-pa-none">
-            <Table ref="detailTable" :detailTable="true" :options="localOptions" />
+            <Table ref="detailTable" :detailTable="true" :options="localOptions" @close="close"/>
         </q-card-section>
     </q-card>
 </template>
@@ -74,6 +74,10 @@ export default {
                 await this.$refs.detailTable.init();
             }
         },
+
+        close() {
+            this.$store.popups[this.popupName].show = false;
+        }
     }
 }
 </script>

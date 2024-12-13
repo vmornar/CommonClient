@@ -56,6 +56,9 @@
                         <q-btn v-if="allowNew" class="text-bold" dense flat icon="add" color="primary"
                             @click="addRow()" :disable="$store.formChanged">
                             <q-tooltip>{{ $t("Add new row") }}</q-tooltip></q-btn>
+                        <q-btn v-if="isAdmin" dense flat icon="picture_as_pdf" color="primary" @click="editPdf">
+                            <q-tooltip>{{ $t("Edit report definition") }}</q-tooltip>
+                        </q-btn>
                         <q-btn v-if="$store.formChanged" dense flat icon="save" color="positive" @click="saveChanges">
                             <q-tooltip>{{ $t("Save changes") }}
                             </q-tooltip>
@@ -64,10 +67,8 @@
                             <q-tooltip>{{ $t("Undo changes") }}
                             </q-tooltip>
                         </q-btn>
-                        <q-btn v-if="isAdmin" dense flat icon="picture_as_pdf" color="primary" @click="editPdf">
-                            <q-tooltip>{{ $t("Edit report definition") }}</q-tooltip>
-                        </q-btn>
                     </span>
+
                 </div>
                 <div v-if="!hideRecordsToolbar && !asForm">
                     <span v-if="nRows > 0">
@@ -237,7 +238,7 @@
         <table-filter v-if="showFilter" :parent="this" @cancel="showFilter = false" />
 
         <!-- Form view -->
-        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" @cancel="cancel" :multiRow="true" :parent="this" :rows="filterSet ? rowsFiltered : rows"/>
+        <table-row-editor v-if="loaded && asForm" ref="form" @save="save" :multiRow="true" :parent="this" :rows="filterSet ? rowsFiltered : rows" @cancel="cancel"/>
 
         <!-- Dialog for editing a single row -->
         <q-dialog v-if="inEdit && !asForm" :model-value="true" ref="popupForm" @keydown="handleSaveCancelKeydown" persistent>
@@ -452,10 +453,12 @@ export default {
         
         async save() {
             await this.saveRow();
+            this.$emit('close');
             this.inEdit = false;
         },
-        cancel () {
-          //  this.inEdit = false;
+
+        cancel() {
+            this.$emit('close');
         },
 
         /**

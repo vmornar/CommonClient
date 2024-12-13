@@ -1,6 +1,6 @@
 <template>
     <div>
-        <q-btn round margin="xs" padding="xs" size="sm" color="primary" @click.stop="onClick" icon="question_mark">
+        <q-btn class="q-ml-lg" round padding="xs" size="sm" color="primary" @click.stop="onClick" icon="question_mark">
             <q-tooltip>{{ $t("Help") }}</q-tooltip>
         </q-btn>
     </div>

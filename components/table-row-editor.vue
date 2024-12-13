@@ -1,69 +1,32 @@
 <template>
 
     <q-card flat style="display: flex; flex-direction: column" v-if="loaded" class="max-width">
-        <q-card-actions v-if="!parent.asForm">
+        <q-card-actions class="q-pb-none">
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; min-width: 600px;">
                 <div>
-                    {{ parent.editMode == "add" ? $t('Adding new row') : $t('Editing row') }}
+                    {{ parent.editMode == "add" ? $t('Adding new row') : '' }}
                 </div>	
-                <div>
+                <!-- <div v-if="false">
                     <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
                     <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
-                    <q-btn dense v-if="!$store.formChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
+                    <q-btn dense v-if="!$store.formChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" 
+                    @click="close" />
+                </div> -->
+                <div>
+                    <q-btn dense v-if="$store.formChanged" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
+                    <q-btn dense v-if="$store.formChanged" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
+                    <q-btn dense v-if="!$store.formChanged" flat icon="close" color="negative" :label="$t('Close')" @click="close" />
                 </div>
             </div>
         </q-card-actions>
         <q-card-section style="flex-grow: 1; overflow-y: auto;" class="q-pt-none">
-            <!-- <q-form class="q-mt-none" ref="form" autofocus> -->
-            <q-form ref="form" autofocus>
+            <q-form v-if="loaded" ref="form" autofocus>
                 <div :class="{ 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}">
                     <table-row-editor-part :row="parent.editingRow" :editColumns="editColumns"  @selectionUpdated="selectionUpdated"/>
                     <table-row-editor-part v-if="isARow" :row="isARow" :editColumns="isAColumns" />
                 </div>
-                <!-- <table-row-editor-part :parent="parent" :multiRow="multiRow" :rows="rows" /> -->
-                <!-- <div :class="{ 'q-mt-sm': true, row: true, 'form-disabled': rows && rows.length == 0 && parent.editMode != 'add'}" v-for="col in editColumns" :key="col.name">
-                    <span v-if="col.type == 'boolean' && !col.invisible" style="width:90%">
-                        <q-checkbox v-model="parent.editingRow[col.name]" dense :label="col.label"
-                            :disable="col.disabled">
-                            <template v-slot:label>
-                                <label for="my-checkbox" v-html="col.label"></label>
-                            </template>
-                        </q-checkbox>
-                    </span>
-                    <span v-else-if="col.type == 'json' && !col.invisible" style="width:90%">
-                        <label for="my-jsoneditor" v-html="col.label"></label>
-                        <json-editor v-model="parent.editingRow[col.name]" :rows="15" iconPicker
-                            :disable="col.disabled" />
-                    </span>
-                    <html-editor v-else-if="col.type == 'html' && !col.invisible" style="width:90%"
-                        v-model="parent.editingRow[col.name]" :height="editStyle.height" :showIconPicker="false"
-                        :label="col.label" :disable="col.disabled" ref="inputRefs" />
-                    <autocomplete v-else-if="col.lookup && !col.invisible" v-model="parent.editingRow[col.name]"
-                        :label="col.label" dense style="width:95%"
-                        emit-value
-                        map-options :lookup="col.lookup" @update:model-value="selectionUpdated(col)"
-                        :disable="col.disabled" ref="inputRefs">
-                        <template v-slot:label>
-                            <label for="my-autocomplete" v-html="col.label"></label>
-                        </template>
-                    </autocomplete>
-                    <q-input class="q-pl-sm" v-else-if="!col.invisible" id="my-input"
-                        v-model="parent.editingRow[col.name]" dense style="width:95%" :label="col.label"
-                        :disable="col.disabled" :rules="col.rules"
-                        :type="col.password && !col.passwordShown ? 'password' : 'text'" ref="inputRefs">
-                        <template v-slot:label>
-                            <label for="my-input" v-html="col.label" style="font-size: smaller;"></label>
-                        </template>
-                        <template v-slot:append v-if="col.password">
-                            <q-icon :name="col.passwordShown ? 'visibility_off' : 'visibility'" class="cursor-pointer"
-                                @click="col.passwordShown = !col.passwordShown"></q-icon>
-                        </template>
-                    </q-input>
-                    <q-btn v-if="col.url" dense flat icon="open_in_new" @click="openURL(parent.editingRow[col.name])" class="q-pa-none q-ma-none" ></q-btn>
-                </div> -->
             </q-form>
         </q-card-section>
-
     </q-card>
 </template>
 <script>
@@ -81,14 +44,13 @@ export default {
     name: "TableRowEditor",
     components: {
         tableRowEditorPart : loadComponent('table-row-editor-part'),
-        // jsonEditor: loadComponent('json-editor'),
-        // autocomplete: loadComponent('autocomplete'),
-        // htmlEditor: loadComponent('html-editor')
     },
-    props: ['parent', 'multiRow', 'rows'],
 
+    props: ['parent', 'multiRow', 'rows'],
+    emits: ['cancel', 'save'],
     watch: {
         "rows.length": async function (val) {
+                                            console.log("length watcher", val);
             if (val == 0) {
                 this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
             } else if (this.parent.editMode != "add") {
@@ -102,7 +64,7 @@ export default {
             handler(val) {
                 if (val) {
                     this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.parent.editingRowSaved)
-                        || (this.isARow && !this.equalObjects(this.isARow, this.isARowSaved));
+                        || (this.parent.isA && !this.equalObjects(this.isARow, this.isARowSaved));
                 }
             },
             deep: true,
@@ -110,9 +72,10 @@ export default {
         },
         "isARow": {
             handler(val) {
+                if (!this.parent.isA) return;
                 if (val) {
                     this.$store.formChanged = !this.equalObjects(this.parent.editingRow, this.parent.editingRowSaved)
-                    || (this.isARow && !this.equalObjects(this.isARow, this.isARowSaved));
+                    || !this.equalObjects(this.isARow, this.isARowSaved);
                 }
             },
             deep: true,
@@ -122,7 +85,6 @@ export default {
     data() {
         return {
             editColumns: [],
-            loaded: false,
             x: {},
             form: null, 
             oldIsAKey: null,
@@ -130,15 +92,18 @@ export default {
             isARowSaved: {},
             isAColumns: [],
             specialization: null,
-            specializationSaved: null
+            specializationSaved: null,
+            loaded: false
         };
     },
     created() {
+        console.log("form created"); 
     },
     /**
      * Initialize the component
      */
     async mounted() {
+        console.log("form mounted"); 
 
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
@@ -159,8 +124,9 @@ export default {
         this.copyObject(this.isARow, this.isARowSaved);
         this.specializationSaved = this.specialization;
 
-        this.loaded = true; 
         await this.$nextTick(); 
+        console.log("form", this.loaded, this.parent.editingRow, this.editColumns);   
+        this.loaded = true; 
         setTimeout(() => {
             this.focus();
             this.form = this.$refs.form;
@@ -199,6 +165,9 @@ export default {
         async save() {
             if (this.multiRow) {
                 await this.parent.saveForm();
+                if (this.parent.singleRow) {
+                    this.close();
+                }
             } else {
                 if (await this.parent.saveRow()) {
                     if (this.parent.isA) {
@@ -221,6 +190,7 @@ export default {
                             }
                         }
                     }
+
                     if (this.parent.editMode == "add") {
                         this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
                     }
