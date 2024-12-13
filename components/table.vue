@@ -581,40 +581,35 @@ export default {
         },
 
         getApiAndOptions() {
+            let api = null,
+                apiOptions = {};
+            let frugal = this.frugal;
             if (this.dbFunction) {
-                return {
-                    api: 'Table/GetTable',
-                    apiOptions: {
-                        dbFunction: this.dbFunction,
-                        frugal: this.frugal.toString(),
-                        json: this.json.toString(),
-                        pars: JSON.stringify(this.params) ?? '{}',
-                        preprocess: this.preprocess ?? null,
-                    },
+                api = ' Table/GetTable';
+                apiOptions = {
+                    dbFunction: this.dbFunction,
+                    json: this.json.toString(),
+                    pars: JSON.stringify(this.params) ?? '{}',
+                    preprocess: this.preprocess ?? null,
                 };
-            }
-            if (this.restAPI) {
-                let api = this.restAPI;
+            } else if (this.restAPI) {
+                api = this.restAPI;
                 for (const key in this.params) {
-                    api = api + '/' + this.params[key];
+                    api += '/' + this.params[key];
                 }
-                return { api };
-            }
-            if (this.tableAPI) {
-                this.frugal = true;
+            } else if (this.tableAPI) {
+                frugal = true;
                 if (this.params) {
-                    return {
-                        api: 'Table/' + this.tableAPI,
-                        apiOptions: { pars: JSON.stringify(this.params) },
-                    };
+                    api = 'Table/' + this.tableAPI;
+                    apiOptions = { pars: JSON.stringify(this.params) };
+                } else if (this.tableAPIKey) {
+                    api = 'Table/' + this.tableAPI + '/' + this.tableAPIKey;
+                } else {
+                    api = 'Table/' + this.tableAPI;
                 }
-                if (this.tableAPIKey) {
-                    return {
-                        api: 'Table/' + this.tableAPI + '/' + this.tableAPIKey,
-                    };
-                }
-                return { api: 'Table/' + this.tableAPI };
             }
+            apiOptions.frugal = frugal.toString();
+            return { api, apiOptions };
         },
         editPdf() {
             const { api, apiOptions } = this.getApiAndOptions();
@@ -685,10 +680,10 @@ export default {
                     ? this.contextValuesLocal
                           .map(
                               (contextValue) =>
-                                  contextValue.options.find(
+                                  contextValue.options?.find(
                                       (option) =>
                                           option.id === contextValue.value,
-                                  ).name,
+                                  )?.name,
                           )
                           .join('__')
                     : null;
