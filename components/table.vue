@@ -637,7 +637,26 @@ export default {
                       )
                       .join('__')
                 : null;
-
+            const maximumElementWidth = 500;
+            const columnWidths = this.visibleColumns.map((columnName) => {
+                const column = this.columns.find(
+                    (column) => column.name === columnName,
+                );
+                if (Number.isFinite(column.width)) {
+                    return column.width;
+                }
+                let widthBasedOnType = Number(
+                    (this.colWidths?.[this.columns[0].type] ?? '').replace(
+                        'px',
+                        '',
+                    ),
+                );
+                if (Number.isNaN(widthBasedOnType)) {
+                    return maximumElementWidth;
+                }
+                return widthBasedOnType;
+                // return Math.min(column.width, widthBasedOnType);
+            });
             this.$store.additionalPopups.editPdf = {
                 name: 'editPdf',
                 show: false,
@@ -649,11 +668,16 @@ export default {
                     title: `PDF Report Editor\u00A0\u00A0·\u00A0\u00A0${this.name}`,
                     apiUrl: api,
                     apiOptions: apiOptions ?? null,
-                    data: { columns: this.visibleColumns, rows, isFrugal },
+                    data: {
+                        columns: this.visibleColumns,
+                        rows,
+                        isFrugal,
+                        columnWidths,
+                    },
                     tableName: this.name,
                     contextValuesName,
                     // TODO: added persistent because @hide event is not
-                    // called on q-dialog in popup.vue 
+                    // called on q-dialog in popup.vue
                     // when click is made outside of dialog to close it
                     persistent: true,
                 },
