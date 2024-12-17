@@ -60,9 +60,11 @@
                       :color="props.node.iconColor" />
                     <span v-html="props.node.label" />
                     <ContextMenu v-if="$store.userData && $store.userData.is_admin" ref="clickMenu" :options="[
-  { label: $t('CRUD'), callback: crud, options: props.node, visible: !props.node.locked },
-  { label: $t('Lock'), callback: setLocked, options: props.node, visible: !props.node.locked  },
-  { label: $t('Unlock'), callback: setLocked, options: props.node, visible: props.node.locked } ]" />
+                      { label: $t('CRUD'), callback: crud, options: props.node, visible: !props.node.locked },
+                      { label: $t('Lock'), callback: setLocked, options: props.node, visible: !props.node.locked  },
+                      { label: $t('Unlock'), callback: setLocked, options: props.node, visible: props.node.locked },
+                      { label: $t('Delete'), callback: deleteRoute, options: props.node, visible: !props.node.locked },
+                      ]" />
                   </span>
                   <span class="drop-zone" v-if="draggedItem" @drop="onDrop($event, props, 'after')" @dragover.prevent>
                   </span>
@@ -335,6 +337,9 @@ export default {
       this.getRoutes();
     },
 
+    /*
+     * Starts the drag operation of a menu item
+     */
     onDragStart(event, props) {
       //event.dataTransfer.setData('text/plain', props.node.id)
       event.dataTransfer.effectAllowed = 'move';
@@ -344,10 +349,16 @@ export default {
       }, 10);
     },
 
+    /*
+     * Ends the drag operation of a menu item
+     */
     onDragEnd(event) {
       this.draggedItem = null;
     },
 
+    /*
+     * Handles the drop event of a menu item
+     */
     async onDrop(event, props, where) {
       await this.post(`Dev/ReorderMenu/${this.draggedItem.id}/${props.node.id}/${where}`);
       this.draggedItem = null;
@@ -355,7 +366,14 @@ export default {
       await this.getRoutes();
     },
 
+    /*
+      * Creates a CRUD for the selected route
+      * @param {Object} options - The options object.
+    */
     async crud(options) {
+      if (!await this.confirmDialog(this.$t('This will overwrite the existing CRUD. Continue?'))) {
+        return;
+      }
       if (!options.props.tableAPI) {
         await this.showError(this.$t('Table API not defined'));
         return;
@@ -365,12 +383,34 @@ export default {
       }
     },
 
+    /*
+      * Locks or unlocks the selected route
+      * @param {Object} options - The options object.
+      */
     async setLocked(options) {
       await this.put("Dev/SetLocked/" + options.id + "/" + !options.locked);
       await this.delete("Dev/ClearCache");
       await this.getRoutes();
     },
 
+    /*
+      * Deletes the selected route
+      * @param {Object} options - The options object.
+      */
+    async deleteRoute(options) {
+      if (!await this.confirmDialog(this.$t('This will delete this route. Continue?'))) {
+        return;
+      }
+      await this.delete("Dev/DeleteRoute/" + options.id);
+      await this.delete("Dev/ClearCache");
+      await this.getRoutes();
+    },
+
+    /**
+     * Creates an object with the attributes of a route.
+     * @param {Object} route - The route object.
+     * @returns {Object} - The route attributes.
+     */
     routeAtts(route) {
       return {
         label: route.title,

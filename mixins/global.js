@@ -18,6 +18,12 @@ export const GlobalMixin = {
        
     methods: {
 
+        /**
+         * Exports the content of an element to an image file or the clipboard.
+         * @param {boolean} download - Indicates whether to download the image file.
+         * @param {string} id - The ID of the element to export.
+         * @param {string} filename - The name of the image file to download.
+         */
         async export(download, id, filename) {
             let el = document.getElementById(id);
             let c = await html2canvas(el, {
@@ -52,6 +58,29 @@ export const GlobalMixin = {
                 }, 'image/png');
             }
         },
+
+        /**
+         * Determines the type of the input field
+         * 
+         * @param {Object} col - Column object
+         * @returns {String} - Type of the input field
+         */
+        inputType(col) {
+            if (col.password) {
+                return col.passwordShown ? 'password' : 'text';
+            } else if (col.type == 'textarea') {
+                return 'textarea';
+            } else if (col.type == 'date') {
+                return 'date';
+            } else if (col.type == 'time') {
+                return 'time';
+            } else if (col.type == 'timestamp with time zone') {
+                return 'datetime';
+            } else {
+                return 'text';
+            }
+        },
+
         /**
          * returns sentence from snake case string
          * @param {string} str - The snake case string.

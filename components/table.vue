@@ -6,18 +6,17 @@
     </div>
      <div @keydown="handleKeyDown($event, true)">
         <!-- Overlays for inline editing -->
+
         <q-input v-if="overlays.overlayInput" dense outlined class="input-box" ref="overlayInput" v-model="editedItem"
-            type="text" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" @update:model-value="editedItemChanged" />
+            :type="inputType(currentOverlay.col)" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle" @update:model-value="editedItemChanged" />
         <JsonEditor v-if="overlays.overlayJson" ref="overlayJson" v-model="editedItem" @blur="closeOverlay"
             @keydown="handleKeyDown($event, false)" :style="overlayStyle" />
-        <q-input v-if="overlays.overlayText" class="textarea" type="textarea" rows=8 ref="overlayText"
+        <!-- <q-input v-if="overlays.overlayText" type="textarea" rows=8 ref="overlayText"
             v-model="editedItem" @blur="closeOverlay" @keydown="handleKeyDown($event, false)" :style="overlayStyle"
-            :iconPicker="false" @update:model-value="editedItemChanged"/>
-        <!-- <span v-if="overlays.overlaySelect" ref="overlaySelect" @focus="$refs.innerSelect.focus"> -->
+            :iconPicker="false" @update:model-value="editedItemChanged"/> -->
         <autocomplete v-if="overlays.overlaySelect" ref="overlaySelect" class="input-box" v-model="editedItem"
             @blur="closeOverlay" :lookup="activeLookup"
             @update:model-value="editedItemChanged" emit-value map-options :style="overlayStyle" />
-        <!-- </span> -->
         <icon-picker v-if="overlays.overlayIcon" ref="overlayIcon" v-model="editedItem" @blur="closeOverlay"
             @update:model-value="editedItemChanged" :style="overlayStyle" />
 
@@ -787,8 +786,4 @@ export default {
     /* background-color: white; */
 }
 
-.textarea {
-    outline: 1px solid #ccc;
-    /* background-color: white; */
-}
 </style>

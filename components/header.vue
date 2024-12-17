@@ -105,12 +105,14 @@ export default {
 
             this.prepareRow(saveRow, this.columns);
 
-            await this.put("Table/meta_route", saveRow);
+            let ret = await this.put("Table/meta_route", saveRow);
+            if (ret != null) {
+                this.$store.formChanged = false;
+                await this.getRoutes();
+                let route = this.$store.routes.find((r) => r.path === this.$route.path);
 
-            await this.getRoutes();
-            let route = this.$store.routes.find((r) => r.path === this.$route.path);
-    
-            this.activateRoute(route);
+                this.activateRoute(route);
+            }
 
         },
 

@@ -88,6 +88,8 @@ export default {
                 { key: "conditionalConfirmationMessage", value: '"conditionalConfirmationMessage" : { "condition" : "return exp(row,columns)&", "message" : "" }}' },
                 { key: "confirmationMessage" },
                 { key: "contextValues", value: '"contextValues" : [ {"label" : "", "name" : "", "lookup" : "", "width" : "" } ]' },
+                { key: "crosshair", value: '"crosshair" : true&'},
+                { key: "customAction", value: '"customAction" : { "label" : "&", "icon" : "", "action" : "" }' },
                 { key: "customFunction" },
                 { key: "dbFunction" },
                 { key: "details", value: '{ "popup" : "default",  "icon": "keyboard_arrow_down", "component" : "details", "masterKey": "&", "masterValue": "{{id}}", "asForm": false, "details": [ { "title": "", "name": "", "tableAPI": "", "tableAPIKey": "{{id}}"}]}' },
@@ -126,6 +128,8 @@ export default {
                 { key: "toolbar" },
                 { key: "toolbarCloseable", value: '"toolbarCloseable" : true&' },
                 { key: "tooltip" },
+                { key: "updateFeatureAPI", value: '"updateFeatureAPI" : ""&' },
+                { key: "updateFeatureAPIParams", value: '"updateFeatureAPIParams" : {"&" : ""}' },
                 { key: "upload", value: '"icon": "upload", "tooltip": "Upload...", "component": "file-uploader", "title": "Upload...", "uploadURL": "", "params": { }' },
                 { key: "visible", value: '"visible" : true&' },
                 { key: "width" }

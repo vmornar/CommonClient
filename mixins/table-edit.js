@@ -59,8 +59,6 @@ export const TableEditMixin = {
                 this.overlayShown = 'overlayJson';
             } else if (col.type == 'icon') {
                 this.overlayShown = 'overlayIcon';
-            } else if (col.type == 'text') {
-                this.overlayShown = 'overlayText';
             } else if (col.lookup) {
                 await this.loadLookups();
                 this.overlayShown = 'overlaySelect';

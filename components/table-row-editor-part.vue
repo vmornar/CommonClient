@@ -29,7 +29,7 @@
             <q-input class="q-pl-sm" v-else-if="!col.invisible" id="my-input"
                 v-model="row[col.name]" dense style="width:95%" :label="col.label"
                 :disable="col.disabled" :rules="col.rules"
-                :type="col.password && !col.passwordShown ? 'password' : 'text'" ref="inputRefs">
+                :type="inputType(col)" ref="inputRefs">
                 <template v-slot:label>
                     <label for="my-input" v-html="col.label" style="font-size: smaller;"></label>
                 </template>
@@ -61,8 +61,16 @@ export default {
         htmlEditor: loadComponent('html-editor')
     },
     props: ['row', 'editColumns'],
-    created() {
-        //console.log('TableRowEditorPart created');
-    },
+    methods: {
+
+        /**
+         * Open the URL in a new tab
+         * 
+         * @param {String} url - URL to open
+         */
+        openURL(url) {
+            window.open(url, '_blank');
+        }
+    }   
 }
 </script>
