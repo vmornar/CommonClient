@@ -6,12 +6,6 @@
                 <div>
                     {{ parent.editMode == "add" ? $t('Adding new row') : '' }}
                 </div>	
-                <!-- <div v-if="false">
-                    <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
-                    <q-btn dense v-if="$store.formChanged && !parent.asForm" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
-                    <q-btn dense v-if="!$store.formChanged && (parent.popupName || !parent.asForm)" flat icon="close" color="negative" :label="$t('Close')" 
-                    @click="close" />
-                </div> -->
                 <div>
                     <q-btn dense v-if="$store.formChanged" flat icon="save" color="positive" :label="$t('Save')" @click="save" />
                     <q-btn dense v-if="$store.formChanged" flat icon="undo" color="negative" :label="$t('Undo')" @click="cancel" />
@@ -47,12 +41,11 @@ export default {
     },
 
     props: ['parent', 'multiRow', 'rows'],
-    emits: ['cancel', 'save'],
+    emits: ['cancel'],
     watch: {
         "rows.length": async function (val) {
-                                            console.log("length watcher", val);
             if (val == 0) {
-                this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                this.parent.editingRow = await this.createEmptyRow(this.parent.columns);
             } else if (this.parent.editMode != "add") {
                 if (this.parent.editingRowIndex >= this.rows.length) this.parent.editingRowIndex = this.rows.length - 1;
                 await this.parent.editRow(this.rows[this.parent.editingRowIndex]);               
@@ -97,13 +90,11 @@ export default {
         };
     },
     created() {
-        console.log("form created"); 
     },
     /**
      * Initialize the component
      */
     async mounted() {
-        console.log("form mounted"); 
 
         if (this.multiRow) {
             if (this.parent.rows.length > 0) {
@@ -125,7 +116,7 @@ export default {
         this.specializationSaved = this.specialization;
 
         await this.$nextTick(); 
-        console.log("form", this.loaded, this.parent.editingRow, this.editColumns);   
+
         this.loaded = true; 
         setTimeout(() => {
             this.focus();
@@ -192,7 +183,7 @@ export default {
                     }
 
                     if (this.parent.editMode == "add") {
-                        this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                        this.parent.editingRow = await this.createEmptyRow(this.parent.columns);
                     }
 
                     if (this.parent.editMode == "edit") {
@@ -260,7 +251,7 @@ export default {
                         if (ret.data.length > 0) {
                             this.isARow = this.parent.rowToObject(ret.data[0], this.isAColumns);
                         } else {
-                            this.isARow = await this.parent.createEmptyRow(this.isAColumns);
+                            this.isARow = await this.createEmptyRow(this.isAColumns);
                         }
 
                         this.isAColumns = ec.filter(col => this.showColInEdit(col));
@@ -276,7 +267,7 @@ export default {
         async deleteRow() {
             if (await this.parent.deleteRow(this.rows[this.parent.editingRowIndex])) {
                 if (this.rows.length == 0) {
-                    this.parent.editingRow = await this.parent.createEmptyRow(this.parent.columns);
+                    this.parent.editingRow = await this.createEmptyRow(this.parent.columns);
                 } else if (this.parent.editingRowIndex >= this.rows.length) {
                     this.parent.editingRowIndex--;
                     await this.parent.editRow(this.rows[this.parent.editingRowIndex]);

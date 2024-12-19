@@ -125,36 +125,6 @@ export const TableUtilsMixin = {
         },
 
         /**
-         * Creates an empty row object with default values based on the given columns.
-         *
-         * @param {Array} columns - An array of column objects.
-         * @returns {Object} - An empty row object with default values.
-         */
-        async createEmptyRow(columns) {
-            let obj = {};
-            for (let col of columns) {
-                if (col.type == 'json') {
-                    obj[col.name] = "{}";
-                } else if (col.type == 'boolean') {
-                    obj[col.name] = false;
-                } else {
-                    obj[col.name] = null;
-                } 
-                if (col.defaultPrevious) {
-                    obj[col.name] = this.$q.localStorage.getItem("default_" + col.name) ?? obj[col.name];
-                    if (col.lookup) {
-                        await this.loadLookup(col.lookup);
-                        let displayValue = this.findLookupValue(obj[col.name], col.lookup);
-                        obj[col.name + '_val'] = displayValue;
-                    }
-                } else if (col.default) {
-                    obj[col.name] = col.default;
-                }
-            }
-            return obj;
-        },
-
-        /**
          * Converts a frugal JSON object to an array of objects.
          *
          * @param {Object} data - The frugal JSON object containing data and attributes.
@@ -217,7 +187,7 @@ export const TableUtilsMixin = {
                 if (this.params) {
                     this.data = await this.get("Table/" + this.tableAPI, { pars: JSON.stringify(this.params) });
                 } else if (this.tableAPIKey) {
-                    this.data = await this.get("Table/" + this.tableAPI + "/" + this.tableAPIKey);
+                    this.data = await this.get("Table/" + this.tableAPI + "/" + this.tableAPIKey + "/false/" + this.singleRow);
                 } else {
                     this.data = await this.get("Table/" + this.tableAPI);
                 }

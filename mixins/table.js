@@ -73,7 +73,8 @@ export const TableMixin = {
             overlays: { },
             asForm: false,
             visibleColumns: [],
-            contextValuesLoaded: false
+            contextValuesLoaded: false,
+            singleRow: false,
         }
     },
     methods: {
@@ -133,11 +134,11 @@ export const TableMixin = {
             this.inEdit = false;
             this.editingRowIndex = 0;
             this.contextValuesLoaded = false;
+            this.singleRow = false;
 
             this.grid = this.$q.screen.width <= 800;
 
             if (this.options) { // embedded with options
-                                console.log("in init", this.options)
                 this.copyObject(this.options, this, true);
             } else if (this.popupName) { // called in popup
                 this.copyObject(this.$store.popups[this.popupName].props, this, true);
